@@ -1,0 +1,8 @@
+vendor/
+.*
+
+
+# whitelist
+!.gitignore
+!.editorconfig
+wordpress/
