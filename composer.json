@@ -1,5 +1,5 @@
 {
-    "name": "towa/gbw-woocommerce-plugin",
+    "name": "towa/gebrueder-weiss-woocommerce",
     "description": "Gebrüder Weiss Woocommerce Plugin",
     "type": "wordpress-plugin",
     "require": {
@@ -19,8 +19,8 @@
         }
     ],
     "support": {
-      "issues": "https://github.com/towa-digital/gbw-woocommerce-plugin/issues",
-      "source": "https://github.com/towa-digital/gbw-woocommerce-plugin",
+      "issues": "https://github.com/towa-digital/gebrueder-weiss-woocommerce/issues",
+      "source": "https://github.com/towa-digital/gebrueder-weiss-woocommerce",
       "docs": "https://timber.github.io/docs/"
     },
     "minimum-stability": "stable",
