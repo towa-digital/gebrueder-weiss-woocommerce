@@ -33,3 +33,11 @@ function GbWeiss()
 {
     return GbWeiss\includes\GbWeiss::instance();
 }
+
+add_action("init", function () {
+    if (!GbWeiss\includes\GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
+        return;
+    };
+
+    // initialize the plugin here
+});
