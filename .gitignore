@@ -6,4 +6,5 @@ node_modules/
 !.gitignore
 !.editorconfig
 !.phpcs.xml
+!.husky/
 wordpress/
