@@ -52,7 +52,7 @@ jobs:
         run: composer install
 
       - name: Setup Wordpress Test Database
-        run: bash ./bin/install-wp-tests.sh wordpress_test root secret localhost
+        run: bash ./bin/install-wp-tests.sh wordpress_test root secret 127.0.0.1
 
       - name: Execute PHPUnit
         run: vendor/bin/phpunit
