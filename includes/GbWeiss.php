@@ -1,7 +1,12 @@
 <?php
 /**
  * GbWeiss Setup
+ *
+ * @package GbWeiss
+ * @author Towa Digital <developer@towa.at>
+ * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  */
+
 namespace GbWeiss\includes;
 
 defined('ABSPATH') || exit;
@@ -23,39 +28,56 @@ final class GbWeiss
      */
     public function __construct()
     {
-        $this->init_hooks();
+        $this->initHooks();
     }
 
-    public static function instance()
+    /**
+     * Returns the singleton instance for the GbWeiss class.
+     */
+    public static function instance(): GbWeiss
     {
-        if (is_null(self::$instance) ) {
+        if (is_null(self::$instance)) {
             self::$instance = new self();
         }
         return self::$instance;
     }
 
-    public function init_hooks()
+    /**
+     * Initializes the plugin
+     *
+     * @return void
+     */
+    public function initHooks(): void
     {
-
     }
 
+    /**
+     * Checks whether the plugin is compatible with the current
+     *  WordPress installation and shows error messages
+     * for compatibility issues in the admin panel.
+     */
     public static function checkPluginCompatabilityAndPrintErrorMessages(): bool
     {
         if (!self::pluginIsCompatibleWithCurrentPhpVersion()) {
-            $errorMessage = "Gebrüder Weiss WooCommerce is not compatible with PHP ".phpversion().".";
-            self::showWordpressAdminErrorMessage($errorMessage);
+            self::showWordpressAdminErrorMessage(
+                "Gebrüder Weiss WooCommerce is not compatible with PHP " . phpversion() . "."
+            );
             return false;
         }
 
         if (!self::isWooCommerceActive()) {
-            $errorMessage = "Gebrüder Weiss WooCommerce requires WooCommerce to be installed.";
-            self::showWordpressAdminErrorMessage($errorMessage);
+            self::showWordpressAdminErrorMessage(
+                "Gebrüder Weiss WooCommerce requires WooCommerce to be installed."
+            );
             return false;
         }
 
         return true;
     }
 
+    /**
+     * Checks if the plugin is compatible with the current PHP version.
+     */
     private static function pluginIsCompatibleWithCurrentPhpVersion(): bool
     {
         if (PHP_MAJOR_VERSION === 8) {
@@ -68,16 +90,32 @@ final class GbWeiss
         return false;
     }
 
+    /**
+     * Checks if the WooCommerce plugin is active.
+     */
     private static function isWooCommerceActive(): bool
     {
-        // as recommended by WooCommerce https://docs.woocommerce.com/document/create-a-plugin/
-        return in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')));
+        // As recommended by WooCommerce, see https://docs.woocommerce.com/document/create-a-plugin/ for reference.
+        return in_array(
+            'woocommerce/woocommerce.php',
+            apply_filters(
+                'active_plugins',
+                get_option('active_plugins')
+            )
+        );
     }
 
+
+    /**
+     * Shows the passed message as an error in the admin panel
+     *
+     * @param string $message The message to be shown in the admin panel.
+     */
     private static function showWordpressAdminErrorMessage(string $message): void
     {
         add_action(
-            "admin_notices", function () use ($message) {
+            "admin_notices",
+            function () use ($message) {
                 ?>
                     <div class="notice notice-error is-dismissible">
                         <p><?php echo $message ?></p>
