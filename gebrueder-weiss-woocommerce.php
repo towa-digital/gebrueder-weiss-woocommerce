@@ -8,7 +8,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: Gebrüder Weiss Woocommerce
- * Plugin URI: https://www.github.com/towa-digital/gbw-woocommerce-plugin.git
+ * Plugin URI: https://github.com/towa-digital/gebrueder-weiss-woocommerce
  * Description: Plugin for connecting Woocommerce to Gebrüder Weiss Transport Api
  * Requires PHP: ^7.3
  * Author: Towa Digital <developer@towa.at>

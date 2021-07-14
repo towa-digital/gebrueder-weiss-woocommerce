@@ -1,5 +1,5 @@
 {
-    "name": "towa/gbw-woocommerce-plugin",
+    "name": "towa/gebrueder-weiss-woocommerce",
     "description": "Gebrüder Weiss Woocommerce Plugin",
     "type": "wordpress-plugin",
     "require": {
@@ -7,6 +7,7 @@
     },
     "homepage": "https://www.towa-digital.com",
     "require-dev": {
+        "php": "^7.3|^8.0",
         "phpunit/phpunit": "^7",
         "squizlabs/php_codesniffer": "^3.6",
         "wp-coding-standards/wpcs": "^2.3"
@@ -19,8 +20,8 @@
         }
     ],
     "support": {
-      "issues": "https://github.com/towa-digital/gbw-woocommerce-plugin/issues",
-      "source": "https://github.com/towa-digital/gbw-woocommerce-plugin",
+      "issues": "https://github.com/towa-digital/gebrueder-weiss-woocommerce/issues",
+      "source": "https://github.com/towa-digital/gebrueder-weiss-woocommerce",
       "docs": "https://timber.github.io/docs/"
     },
     "minimum-stability": "stable",
@@ -34,5 +35,9 @@
       "psr-4": {
         "Tests\\" :"tests/"
       }
+    },
+    "scripts": {
+      "fix-cs": "phpcbf --standard=PSR12 ./includes/",
+      "lint": "phpcs --standard=PSR12 ./includes/"
     }
 }
