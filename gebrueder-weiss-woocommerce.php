@@ -1,12 +1,10 @@
 <?php
-
 /**
  * Gebrüder Weiss Woocommere
  *
  * @package GbWeiss
- * @author towa-digital
- * @license GPL-3.0-or-later
- *
+ * @author Towa Digital <developer@towa.at>
+ * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  *
  * @wordpress-plugin
  * Plugin Name: Gebrüder Weiss Woocommerce
@@ -29,7 +27,18 @@ if (!class_exists('GbWeiss', false)) {
     include_once dirname(__FILE__) . '/includes/GbWeiss.php';
 }
 
+/**
+ * Retrieve an instance of the plugin.
+ */
 function GbWeiss()
 {
     return GbWeiss\includes\GbWeiss::instance();
 }
+
+add_action("init", function () {
+    if (!GbWeiss\includes\GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
+        return;
+    };
+
+    // Initialize the plugin here.
+});
