@@ -4,6 +4,9 @@
  */
 namespace GbWeiss\includes;
 
+use Towa\GebruederWeissSDK\{Configuration, Api\ReadApi};
+
+
 defined('ABSPATH') || exit;
 
 /**
@@ -36,6 +39,10 @@ final class GbWeiss
         if (is_null(self::$instance) ) {
             self::$instance = new self();
         }
+
+        $config = new Configuration();
+
+        
         return self::$instance;
     }
 }

@@ -3,7 +3,8 @@
     "description": "Gebrüder Weiss Woocommerce Plugin",
     "type": "wordpress-plugin",
     "require": {
-        "guzzlehttp/guzzle": "^7.3"
+        "guzzlehttp/guzzle": "*",
+        "towa/gbw-sdk": "^1.0"
     },
     "homepage": "https://www.towa-digital.com",
     "require-dev": {
