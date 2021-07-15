@@ -23,7 +23,7 @@ jobs:
         run: composer install
 
       - name: Setup SSH
-        uses: shimataro/ssh-key-action@2
+        uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.DEPLOYMENT_SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.STAGING_KNOWN_HOSTS }}
