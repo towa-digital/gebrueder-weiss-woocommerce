@@ -27,4 +27,4 @@ jobs:
           HOST: ${{ secrets.STAGING_HOST }}
           USER: ${{ secrets.STAGING_USER }}
           RSYNC_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
-        run: rsync -vzrS --exclude=".*" . ${{ USER }}@${{ HOST }}:/var/www/vhosts/towa-online.at/gebrueder-weiss-woocommerce.towa-online.at/wp-content/plugins/gebrueder-weiss-woocommerce
+        run: rsync -vzrS --exclude=".*" . $USER@$HOST:/var/www/vhosts/towa-online.at/gebrueder-weiss-woocommerce.towa-online.at/wp-content/plugins/gebrueder-weiss-woocommerce
