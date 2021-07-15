@@ -24,7 +24,7 @@ if (! file_exists("{$_tests_dir}/includes/functions.php")) {
 // Give access to tests_add_filter() function.
 require_once "{$_tests_dir}/includes/functions.php";
 
-// start the auth mock server
+// Start the auth mock server.
 $mockServer = shell_exec('npx oauth2-mock-server --jwk "mockserver/mocked-keys.json" -p 8887 2>&1 | tee -a /tmp/mylog 2>/dev/null >/dev/null &');
 echo "Auth-mockserver started";
 
