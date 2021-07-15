@@ -25,7 +25,7 @@ if (! file_exists("{$_tests_dir}/includes/functions.php")) {
 require_once "{$_tests_dir}/includes/functions.php";
 
 // start the auth mock server
-$mockServer = shell_exec('npx oauth2-mock-server --jwk "tests/mocked-keys.json" -p 8887 2>&1 | tee -a /tmp/mylog 2>/dev/null >/dev/null &');
+$mockServer = shell_exec('npx oauth2-mock-server --jwk "mockserver/mocked-keys.json" -p 8887 2>&1 | tee -a /tmp/mylog 2>/dev/null >/dev/null &');
 echo "Auth-mockserver started";
 
 /**
