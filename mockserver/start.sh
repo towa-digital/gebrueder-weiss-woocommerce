@@ -1,0 +1,1 @@
+npx oauth2-mock-server --jwk "mocked-keys.json" -p 8887
