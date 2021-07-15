@@ -1,9 +1,9 @@
 # Development
 
-## TL;DR
+## TLDR;
 
 - Gitflow is used
-- phpunit for testing
+- PHPUnit for testing
   - install script has to be run first
 - PR Templates are used if you want to make a Pull Request
 
@@ -18,7 +18,8 @@ The Project contains automated tests which can be run locally with `phpunit` fro
 ### Setup
 
 - install composer dependencies
-- run `/bin/install-wp-test.sh` like so: [Initialize local testing in wordpress](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/#3-initialize-the-testing-environment-locally)
+- run `/bin/install-wp-test.sh` like so: [Initialize local testing in wordpress](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/#3-initialize-the-testing-environment-locally) for example:
+`./bin/install-wp-tests.sh wordpress_test root root mysql latest`
 
 ## Wp cli
 
