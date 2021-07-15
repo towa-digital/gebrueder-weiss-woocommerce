@@ -11,7 +11,6 @@ namespace GbWeiss\includes;
 
 use Towa\GebruederWeissSDK\{Configuration, Api\ReadApi};
 
-
 defined('ABSPATH') || exit;
 
 /**
