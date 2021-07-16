@@ -39,6 +39,6 @@ add_action("init", function () {
     if (!GbWeiss\includes\GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
         return;
     };
-
     // Initialize the plugin here.
+    GbWeiss();
 });
