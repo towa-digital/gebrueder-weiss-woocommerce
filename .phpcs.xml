@@ -6,6 +6,8 @@
     <file>includes/</file>
     <file>tests</file>
 
+    <exclude-pattern>*/tests/*</exclude-pattern>
+
     <arg name="basepath" value="."/>
     <arg name="colors"/>
     <arg name="parallel" value="75"/>
