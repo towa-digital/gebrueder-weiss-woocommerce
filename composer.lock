@@ -2214,6 +2214,78 @@
             "time": "2021-03-09T10:59:23+00:00"
         },
         {
+            "name": "wordpress/wordpress",
+            "version": "5.7.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/wordpress-develop.git",
+                "reference": "3873eb2690e85c5fd9fdd634843acc1d83c0c54a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/wordpress-develop/zipball/3873eb2690e85c5fd9fdd634843acc1d83c0c54a",
+                "reference": "3873eb2690e85c5fd9fdd634843acc1d83c0c54a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.6.2 || ^0.7.0",
+                "phpcompatibility/phpcompatibility-wp": "^2.1.0",
+                "phpunit/phpunit": "^7.5",
+                "wp-coding-standards/wpcs": "~2.3.0"
+            },
+            "type": "library",
+            "autoload-dev": {
+                "files": [
+                    "tests/phpunit/includes/phpunit7/MockObject/Builder/NamespaceMatch.php",
+                    "tests/phpunit/includes/phpunit7/MockObject/Builder/ParametersMatch.php",
+                    "tests/phpunit/includes/phpunit7/MockObject/InvocationMocker.php",
+                    "tests/phpunit/includes/phpunit7/MockObject/MockMethod.php"
+                ],
+                "exclude-from-classmap": [
+                    "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/NamespaceMatch.php",
+                    "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/ParametersMatch.php",
+                    "vendor/phpunit/phpunit/src/Framework/MockObject/InvocationMocker.php",
+                    "vendor/phpunit/phpunit/src/Framework/MockObject/MockMethod.php"
+                ]
+            },
+            "scripts": {
+                "compat": [
+                    "@php ./vendor/squizlabs/php_codesniffer/bin/phpcs --standard=phpcompat.xml.dist --report=summary,source"
+                ],
+                "format": [
+                    "@php ./vendor/squizlabs/php_codesniffer/bin/phpcbf --report=summary,source"
+                ],
+                "lint": [
+                    "@php ./vendor/squizlabs/php_codesniffer/bin/phpcs --report=summary,source"
+                ],
+                "lint:errors": [
+                    "@lint -n"
+                ],
+                "test": [
+                    "@php ./vendor/phpunit/phpunit/phpunit"
+                ]
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "WordPress is open source software you can use to create a beautiful website, blog, or app.",
+            "homepage": "https://wordpress.org",
+            "keywords": [
+                "blog",
+                "cms",
+                "wordpress",
+                "wp"
+            ],
+            "support": {
+                "issues": "https://core.trac.wordpress.org/",
+                "source": "https://github.com/WordPress/wordpress-develop/tree/5.7.2"
+            },
+            "time": "2021-05-12T23:48:08+00:00"
+        },
+        {
             "name": "wp-coding-standards/wpcs",
             "version": "2.3.0",
             "source": {
