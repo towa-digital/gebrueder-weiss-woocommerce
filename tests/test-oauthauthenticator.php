@@ -48,7 +48,7 @@ class OAuthAuthenticatorTest extends TestCase
         $authenticator = new OAuthAuthenticator($client);
         $authenticator->setAuthenticationEndpoint('');
         $authenticationToken = $authenticator->authenticate('1234', '4567');
-        $this->assertEquals('MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3', $authenticationToken['access_token']);
+        $this->assertEquals('MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3', $authenticationToken);
     }
 
     /**
