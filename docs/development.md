@@ -9,11 +9,15 @@
 
 ## Installation
 
-If you want to develop with this plugin, you would want to clone the repo and run `composer install` in the root directory, to install all dependencies and dev dependencies. 
+If you want to develop with this plugin, you would want to clone the repo and run `composer install` in the root directory, to install all dependencies and dev dependencies.
 
 ## Testing
 
 The Project contains automated tests which can be run locally with `phpunit` from the commandline and the root of the plugin
+
+### Important Note
+
+- if you want to use intellisense in your tests, make sure the tests folder of `vendor/wordpress/wordpress/tests/includes` is added to your intellisense language server includes, AND that its not ignored by a pattern.
 
 ### Setup
 
@@ -23,4 +27,4 @@ The Project contains automated tests which can be run locally with `phpunit` fro
 
 ## Wp cli
 
-We rely heavily on wp-cli in our daily work. We do recommend you use it as well. 
+We rely heavily on wp-cli in our daily work. We do recommend you use it as well.
