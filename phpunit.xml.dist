@@ -12,5 +12,8 @@
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 			<exclude>./tests/test-sample.php</exclude>
 		</testsuite>
+		<testsuite name="integration">
+			<directory prefix="test-" suffix=".php">./tests/integration/</directory>
+		</testsuite>
 	</testsuites>
 </phpunit>
