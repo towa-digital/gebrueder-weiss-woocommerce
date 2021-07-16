@@ -1,9 +1,9 @@
 # Development
 
-## TL;DR
+## TLDR;
 
 - Gitflow is used
-- phpunit for testing
+- PHPUnit for testing
   - install script has to be run first
 - PR Templates are used if you want to make a Pull Request
 
