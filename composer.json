@@ -3,14 +3,15 @@
     "description": "Gebrüder Weiss Woocommerce Plugin",
     "type": "wordpress-plugin",
     "require": {
-        "guzzlehttp/guzzle": "^7.3"
+        "twig/twig": "^3.3"
     },
     "homepage": "https://www.towa-digital.com",
     "require-dev": {
         "php": "^7.3|^8.0",
         "phpunit/phpunit": "^7",
         "squizlabs/php_codesniffer": "^3.6",
-        "wp-coding-standards/wpcs": "^2.3"
+        "wp-coding-standards/wpcs": "^2.3",
+        "wordpress/wordpress": "^5.7"
     },
     "license": "GPL-3.0-only",
     "authors": [
@@ -31,13 +32,19 @@
         "GbWeiss\\includes\\": "includes/"
       }
     },
+    "repositories": [
+      {
+        "type": "vcs",
+        "url": "git@github.com:WordPress/wordpress-develop.git"
+      }
+    ],
     "autoload-dev": {
       "psr-4": {
         "Tests\\" :"tests/"
       }
     },
     "scripts": {
-      "fix-cs": "phpcbf --standard=PSR12 ./includes/",
-      "lint": "phpcs --standard=PSR12 ./includes/"
+      "fix-cs": "phpcbf",
+      "lint": "phpcs"
     }
 }

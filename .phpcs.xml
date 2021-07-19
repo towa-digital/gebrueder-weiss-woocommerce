@@ -4,7 +4,7 @@
 
     <file>gebrueder-weiss-woocommerce.php</file>
     <file>includes/</file>
-    <file>tests</file>
+    <file>tests/</file>
 
     <arg name="basepath" value="."/>
     <arg name="colors"/>
@@ -24,7 +24,7 @@
     <rule ref="PSR1.Methods.CamelCapsMethodName">
         <exclude-pattern>/tests/*.php</exclude-pattern>
     </rule>
-    
-
-
+    <rule ref="Squiz.Commenting">
+        <exclude-pattern>/tests/*.php</exclude-pattern>
+    </rule>
 </ruleset>

@@ -24,15 +24,38 @@ final class GbWeiss
     protected static $instance = null;
 
     /**
+     * Plugin Language Domain
+     *
+     * @var string
+     */
+    public static $languageDomain = 'gbw-woocommerce';
+
+    /**
+     * Options Page
+     *
+     * @var OptionPage
+     */
+    private $optionsPage;
+
+    /**
+     * Option Page Slug
+     */
+    const OPTIONPAGESLUG = 'gbw-woocommerce';
+
+    /**
      * Initialize GbWeiss Plugin
      */
     public function __construct()
     {
-        $this->initHooks();
+        $this->initActions();
+        $this->initOptionPage();
+        $this->registerUninstallHook();
     }
 
     /**
      * Returns the singleton instance for the GbWeiss class.
+     *
+     * @return GbWeiss
      */
     public static function instance(): GbWeiss
     {
@@ -43,12 +66,32 @@ final class GbWeiss
     }
 
     /**
-     * Initializes the plugin
+     * Initializes the option page
      *
      * @return void
      */
-    public function initHooks(): void
+    public function initOptionPage(): void
     {
+        $optionsPage = new OptionPage('options', self::OPTIONPAGESLUG);
+        $accountTab = new Tab(__('Account', self::$languageDomain), 'account');
+        $accountTab
+            ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::$languageDomain), 'account', 'integer'))
+            ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::$languageDomain), 'account', 'string'))
+            ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::$languageDomain), 'account', 'string'));
+
+        $optionsPage->addTab($accountTab);
+
+        $this->setOptionPage($optionsPage);
+    }
+
+    /**
+     * Initializes Wordpress Actions
+     *
+     * @return void
+     */
+    public function initActions(): void
+    {
+        \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
     }
 
     /**
@@ -113,7 +156,7 @@ final class GbWeiss
      */
     private static function showWordpressAdminErrorMessage(string $message): void
     {
-        add_action(
+        \add_action(
             "admin_notices",
             function () use ($message) {
                 ?>
@@ -123,5 +166,78 @@ final class GbWeiss
                 <?php
             }
         );
+    }
+
+    /**
+     * Set Option Page of Plugin
+     *
+     * @param OptionPage $optionPage Options Page to be registered.
+     * @return void
+     */
+    public function setOptionPage(OptionPage $optionPage): void
+    {
+        $this->optionsPage = $optionPage;
+    }
+
+    /**
+     * Render Option Page
+     *
+     * @return void
+     */
+    public function renderOptionPage(): void
+    {
+        $this->optionsPage->render();
+    }
+
+    /**
+     * Adds Options Page for Plugin under Settings
+     *
+     * @return void
+     */
+    public function addPluginPageToMenu(): void
+    {
+        \add_options_page(
+            __('options', 'gbw-woocommerce'),
+            __('Gebrüder Weiss Woocommerce', 'gbw-woocommerce'),
+            'manage_options',
+            self::OPTIONPAGESLUG,
+            [$this, 'renderOptionPage']
+        );
+    }
+
+    /**
+     * Register uninstall hook
+     *
+     * @return void
+     */
+    public function registerUninstallHook(): void
+    {
+        \register_uninstall_hook(__FILE__, 'uninstall');
+    }
+
+    /**
+     * Uninstall Plugin
+     *
+     * @return void
+     */
+    public static function uninstall(): void
+    {
+        $plugin = self::instance();
+
+        foreach ($plugin->optionsPage->getTabs() as $tab) {
+            foreach ($tab->options as $option) {
+                delete_option($option->slug);
+            }
+        }
+    }
+
+    /**
+     * Gets Plugins Option Page
+     *
+     * @return OptionPage
+     */
+    public function getOptionsPage(): OptionPage
+    {
+        return $this->optionsPage;
     }
 }
