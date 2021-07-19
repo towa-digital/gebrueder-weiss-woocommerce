@@ -19,7 +19,7 @@ class Option implements CanRender
     /**
      * Prefix used for Option
      */
-    public const OPTIONSPREFIX = 'gbw_';
+    public const OPTIONS_PREFIX = 'gbw_';
 
     /**
      * Value of the Option
@@ -106,7 +106,7 @@ class Option implements CanRender
         $this->name = $name;
 
         // prefix all options with gbw.
-        $this->slug = self::OPTIONSPREFIX . $slug;
+        $this->slug = self::OPTIONS_PREFIX . $slug;
 
         $this->type = $type;
         $this->group = $group;
@@ -138,14 +138,14 @@ class Option implements CanRender
             $this->group,
             $this->slug,
             [
-            'type' => $this->type,
-            'description' => $this->description,
-            'sanitize_callback' => $this->sanitizeCallback ??
-            function ($text) {
-                return sanitize_text_field($text);
-            },
-            'show_in_rest' => false,
-            'default' => $this->default
+                'type' => $this->type,
+                'description' => $this->description,
+                'sanitize_callback' => $this->sanitizeCallback ??
+                function ($text) {
+                    return sanitize_text_field($text);
+                },
+                'show_in_rest' => false,
+                'default' => $this->default
             ]
         );
 

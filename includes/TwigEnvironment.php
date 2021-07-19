@@ -41,7 +41,7 @@ class TwigEnvironment extends Singleton
     {
         $this->loader = new FilesystemLoader(__DIR__ . '/../templates/');
         $this->twig = new Environment($this->loader, [
-        'debug' => true
+          'debug' => true
         ]);
         $this->addTwigExtensions();
     }
@@ -103,11 +103,11 @@ class TwigEnvironment extends Singleton
      */
     public static function render(string $file, array $data = null): string
     {
-      /**
-       * Twig Environment
-       *
-       * @var TwigEnvironment
-       */
+        /**
+         * Twig Environment
+         *
+         * @var TwigEnvironment
+         */
         $environment = static::getInstance();
         return $environment->twig->render($file, $data);
     }

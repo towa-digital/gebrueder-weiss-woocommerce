@@ -19,13 +19,12 @@ class TestPluginPage extends \WP_UnitTestCase
         $this->assertArrayHasKey("gbw-woocommerce", $wp_settings_fields);
         $this->assertArrayHasKey("testgroup", $wp_settings_fields['gbw-woocommerce']);
 
-      // all options will be prefixed with 'gbw_'
+        // all options will be prefixed with 'gbw_'
         $this->assertArrayHasKey("gbw_testslug", $wp_settings_fields['gbw-woocommerce']["testgroup"]);
 
         $setOption = $wp_settings_fields['gbw-woocommerce']["testgroup"]["gbw_testslug"];
         $this->assertEquals("gbw_testslug", $setOption["id"]);
         $this->assertEquals("testname", $setOption["title"]);
-        $this->tearDown();
     }
 
     public function test_if_settings_can_be_set()
@@ -33,15 +32,14 @@ class TestPluginPage extends \WP_UnitTestCase
         $slug = 'customer_id';
         $slug2 = 'client_secret';
 
-        update_option(Option::OPTIONSPREFIX . $slug, 12345);
-        update_option(Option::OPTIONSPREFIX . $slug2, 'test');
+        update_option(Option::OPTIONS_PREFIX . $slug, 12345);
+        update_option(Option::OPTIONS_PREFIX . $slug2, 'test');
 
         $option = new Option('client Secret', $slug, 'testdescription', 'testgroup', 'number');
         $option2 = new Option('client Secret', $slug2, 'testdescription', 'testgroup', 'string');
 
         $this->assertEquals(12345, $option->getValue());
         $this->assertEquals('test', $option2->getValue());
-        $this->tearDown();
     }
 
     public function test_if_page_renders()
@@ -54,7 +52,6 @@ class TestPluginPage extends \WP_UnitTestCase
 
         $this->assertStringContainsString('<form method="post" action="options.php"', $html);
         $this->assertStringContainsString('<input type="submit"', $html);
-        $this->tearDown();
     }
 
     public function test_if_option_renders()
@@ -62,8 +59,8 @@ class TestPluginPage extends \WP_UnitTestCase
         $slug = 'testslug';
         $valueToTest = '12345';
 
-      // set testvalue
-        update_option(Option::OPTIONSPREFIX . $slug, $valueToTest);
+        // set testvalue
+        update_option(Option::OPTIONS_PREFIX . $slug, $valueToTest);
 
         $option = new Option('testname', $slug, 'description', 'testgroup', 'string');
 
@@ -72,7 +69,7 @@ class TestPluginPage extends \WP_UnitTestCase
         $html = \ob_get_clean();
 
         $this->assertStringContainsString('<input type="text"', $html);
-        $this->assertStringContainsString('name="' . Option::OPTIONSPREFIX . $slug . '"', $html);
+        $this->assertStringContainsString('name="' . Option::OPTIONS_PREFIX . $slug . '"', $html);
         $this->assertStringContainsString('value="' . $valueToTest . '"', $html);
     }
 }
