@@ -46,3 +46,9 @@ add_action("init", function () {
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->initialize();
 });
+
+add_action("admin_init", function () {
+    $plugin = GbWeiss();
+
+    $plugin->showErrorMessageIfSelectedOrderStatesDoNotExist();
+});

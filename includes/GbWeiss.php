@@ -137,6 +137,51 @@ final class GbWeiss
     }
 
     /**
+     * Checks if the selected order states in the settings exist and shows error messages
+     * in the admin backend if that is not the case.
+     *
+     * @return void
+     */
+    public function showErrorMessageIfSelectedOrderStatesDoNotExist(): void
+    {
+        $this->validateFulfilmentSetting("gbw_fulfilmentState", "Fulfilment State");
+        $this->validateFulfilmentSetting("gbw_fulfilledState", "Fulfilled State");
+        $this->validateFulfilmentSetting("gbw_fulfilmentErrorState", "Fulfilment Error State");
+    }
+
+    /**
+     * Checks if the configured value for the given fulfilment setting is valid.
+     *
+     * @param string $optionName The name of the WordPress option.
+     * @param string $displayName The name of the setting to be shown in error messages.
+     * @return void
+     */
+    private function validateFulfilmentSetting(string $optionName, string $displayName): void
+    {
+        $optionValue = \get_option($optionName);
+
+        if (!$optionValue) {
+            $this->showWordpressAdminErrorMessage("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".");
+            return;
+        }
+
+        if (!$this->checkIfWooCommerceOrderStateExists($optionValue)) {
+            $this->showWordpressAdminErrorMessage("The selected order state for " . $displayName . " in the options for the Gebrüder Weiss WooCommerce Plugin does not exist in WooCommerce.");
+        }
+    }
+
+    /**
+     * Checks if there is an order state registered with WooCommerce for the given slug.
+     *
+     * @param string $slug The slug for the order state.
+     * @return boolean
+     */
+    private function checkIfWooCommerceOrderStateExists(string $slug): bool
+    {
+        return !!$this->orderStateRepository->getOrderStateBySlug($slug);
+    }
+
+    /**
      * Checks if the plugin is compatible with the current PHP version.
      */
     private static function pluginIsCompatibleWithCurrentPhpVersion(): bool
