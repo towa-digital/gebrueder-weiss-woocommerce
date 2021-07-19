@@ -10,8 +10,6 @@
 
 namespace GbWeiss\includes\OAuth;
 
-use stdClass;
-
 /**
  * OAuthAuthenticator Class
  */
@@ -62,15 +60,20 @@ class OAuthAuthenticator
      */
     public function authenticate(string $clientId, string $clientSecret): object
     {
-        $response = $this->client->post($this->authenticationEndpoint, [
-            "form_params" => [
-                "grant_type" => "client_credentials",
-                "client_id" => $clientId,
-                "client_secret" => $clientSecret
-            ]
-        ]);
-
+        $timestampCreated = time();
+        try {
+            $response = $this->client->post($this->authenticationEndpoint, [
+                "form_params" => [
+                    "grant_type" => "client_credentials",
+                    "client_id" => $clientId,
+                    "client_secret" => $clientSecret
+                ]
+            ]);
+        } catch (\Exception $e) {
+            throw new \Exception('Authentication failed: could not connect to the authentication host.');
+        }
         if ($response->getStatusCode() === 400) {
+            echo "400er";
             throw new \Exception('Authentication failed. ' . json_decode($response->getBody(), true)['error_description']);
         }
         if ($response->getStatusCode() !== 200) {
@@ -82,6 +85,9 @@ class OAuthAuthenticator
             $rawToken->access_token ?? null,
             $rawToken->token_type ?? null,
             $rawToken->expires_in ?? null,
+            null,
+            null,
+            $timestampCreated,
         );
     }
 }

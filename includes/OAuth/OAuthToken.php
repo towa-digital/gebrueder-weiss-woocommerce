@@ -50,6 +50,13 @@ class OAuthToken
     private $scope = null;
 
     /**
+     * Timestamp Created
+     *
+     * @var string $timestampCreated timestamp.
+     */
+    private $timestampCreated = null;
+
+    /**
      * Constructor.
      *
      * @param string $access_token access_token.
@@ -57,14 +64,16 @@ class OAuthToken
      * @param string $expires_in expires_in.
      * @param string $refresh_token refresh_token.
      * @param string $scope scope.
+     * @param int    $timestampCreated timestamp created.
      */
-    public function __construct(string $access_token, string $token_type, string $expires_in, string $refresh_token = null, string $scope = null)
+    public function __construct(string $access_token, string $token_type, string $expires_in, string $refresh_token = null, string $scope = null, int $timestampCreated)
     {
         $this->access_token = $access_token;
         $this->token_type = $token_type;
         $this->expires_in = (int) $expires_in;
         $this->refresh_token = $refresh_token;
         $this->scope = $scope;
+        $this->timestampCreated = $timestampCreated;
     }
 
     /**
@@ -124,6 +133,6 @@ class OAuthToken
      */
     public function isValid(): bool
     {
-        return $this->access_token && $this->expires_in > 10000;
+        return $this->access_token && (($this->timestampCreated + $this->expires_in) < time());
     }
 }

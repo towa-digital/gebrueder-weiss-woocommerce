@@ -74,7 +74,7 @@ class OAuthAuthenticatorTest extends TestCase
             $authenticator->authenticate('1234', '4567');
             $this->assertEquals(true, false);
         } catch (\Exception $e) {
-            $this->assertEquals(true, true);
+            $this->assertStringContainsString('Authentication failed', $e->getMessage());
         }
     }
 }
