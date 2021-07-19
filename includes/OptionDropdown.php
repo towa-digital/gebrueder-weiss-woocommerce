@@ -1,14 +1,22 @@
 <?php
+/**
+ * Dropdown for option pages
+ *
+ * @package GbWeissOptions
+ */
 
 namespace GbWeiss\includes;
 
+/**
+ * Dropdown for option pages
+ */
 class OptionDropdown extends Option
 {
      /**
-     * Options for the dropdown
-     *
-     * @var mixed
-     */
+      * Options for the dropdown
+      *
+      * @var array
+      */
     public $options;
 
     /**
@@ -30,8 +38,7 @@ class OptionDropdown extends Option
         array $options,
         callable $sanitizeCallback = null,
         $default = null
-    )
-    {
+    ) {
         parent::__construct($name, $slug, $description, $group, 'dropdown', $sanitizeCallback, $default);
         $this->options = $options;
     }

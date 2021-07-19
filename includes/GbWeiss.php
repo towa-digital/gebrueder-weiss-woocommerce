@@ -9,7 +9,7 @@
 
 namespace GbWeiss\includes;
 
-defined('ABSPATH') || exit;
+use GbWeiss\includes\OrderStateRepository;
 
 /**
  * Main GbWeiss class
@@ -38,17 +38,22 @@ final class GbWeiss
     private $optionsPage;
 
     /**
+     * Order State Repository
+     *
+     * @var OrderStateRepository
+     */
+    private $orderStateRepository;
+
+    /**
      * Option Page Slug
      */
     const OPTIONPAGESLUG = 'gbw-woocommerce';
 
     /**
-     * Initialize GbWeiss Plugin
+     * Private constructor to prevent creating instances of the singleton
      */
-    public function __construct()
+    private function __construct()
     {
-        $this->initActions();
-        $this->initOptionPage();
     }
 
     /**
@@ -60,6 +65,17 @@ final class GbWeiss
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+    /**
+     * Initializes the plugin.
+     *
+     * @return void
+     */
+    public function initialize(): void
+    {
+        $this->initActions();
+        $this->initOptionPage();
     }
 
     /**
@@ -77,18 +93,9 @@ final class GbWeiss
             ->addOption(new Option('Client Secret', 'clientSecret', __('Client Secret', self::$languageDomain), 'account', 'string'));
 
         $optionsPage->addTab($accountTab);
+        $orderStatuses = $this->orderStateRepository->getAllOrderStates();
 
-        $orderStatuses = [
-            "1" => "Ordered",
-            "2" => "Shipped",
-            "3" => "Cancelled"
-        ];
-
-        $fulfilmentTab = new Tab(__('Fulfilment', self::$languageDomain), 'fulfilment');
-        $fulfilmentTab
-            ->addOption(new OptionDropdown('Fulfilment State', 'fulfilmentState', __('Fulfilment State', self::$languageDomain), 'fulfilment', $orderStatuses))
-            ->addOption(new OptionDropdown('Fulfilled State', 'fulfilledState', __('Fulfilled State', self::$languageDomain), 'fulfilment', $orderStatuses))
-            ->addOption(new OptionDropdown('Fulfilment Error State', 'fulfilmentErrorState', __('Fulfilment Error State', self::$languageDomain), 'fulfilment', $orderStatuses));
+        $fulfilmentTab = new FulfilmentOptionsTab($orderStatuses);
 
         $optionsPage->addTab($fulfilmentTab);
 
@@ -188,6 +195,27 @@ final class GbWeiss
     public function setOptionPage(OptionPage $optionPage)
     {
         $this->optionsPage = $optionPage;
+    }
+
+    /**
+     * Getter for the registered option page
+     *
+     * @return OptionPage|null
+     */
+    public function getOptionsPage(): ?OptionPage
+    {
+        return $this->optionsPage;
+    }
+
+    /**
+     * Sets the instance for the order state repository
+     *
+     * @param OrderStateRepository $orderStateRepository The order state repository.
+     * @return void
+     */
+    public function setOrderStateRepository(OrderStateRepository $orderStateRepository)
+    {
+        $this->orderStateRepository = $orderStateRepository;
     }
 
     /**
