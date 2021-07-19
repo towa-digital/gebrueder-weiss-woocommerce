@@ -9,6 +9,8 @@
 
 namespace GbWeiss\includes;
 
+defined('ABSPATH') || exit;
+
 /**
  * Option Class
  */

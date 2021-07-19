@@ -9,6 +9,8 @@
 
 namespace GbWeiss\includes;
 
+defined('ABSPATH') || exit;
+
 /**
  * Can be extended for Custom Singletons
  */

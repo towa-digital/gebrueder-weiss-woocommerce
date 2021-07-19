@@ -7,6 +7,8 @@
 
 namespace GbWeiss\includes;
 
+defined('ABSPATH') || exit;
+
 use Exception;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
