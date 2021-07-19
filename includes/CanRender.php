@@ -7,6 +7,8 @@
 
 namespace GbWeiss\includes;
 
+defined('ABSPATH') || exit;
+
 interface CanRender
 {
     /**

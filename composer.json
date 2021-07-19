@@ -44,7 +44,7 @@
       }
     },
     "scripts": {
-      "fix-cs": "phpcbf ./includes/",
-      "lint": "phpcs  ./includes/"
+      "fix-cs": "phpcbf",
+      "lint": "phpcs"
     }
 }
