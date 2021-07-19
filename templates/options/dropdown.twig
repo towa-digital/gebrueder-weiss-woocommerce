@@ -1,0 +1,6 @@
+<select name="{{ option.slug }}">
+    <option disabled {{ option.value is empty ? 'selected': '' }}>Select an option</option>
+    {% for value, label in option.options %}
+        <option value={{ value }} {{ (option.value == value) ? 'selected': '' }}>{{ label }}</option>
+    {% endfor %}
+</select>

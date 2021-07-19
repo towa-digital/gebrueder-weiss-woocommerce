@@ -78,6 +78,20 @@ final class GbWeiss
 
         $optionsPage->addTab($accountTab);
 
+        $orderStatuses = [
+            "1" => "Ordered",
+            "2" => "Shipped",
+            "3" => "Cancelled"
+        ];
+
+        $fulfilmentTab = new Tab(__('Fulfilment', self::$languageDomain), 'fulfilment');
+        $fulfilmentTab
+            ->addOption(new OptionDropdown('Fulfilment State', 'fulfilmentState', __('Fulfilment State', self::$languageDomain), 'fulfilment', $orderStatuses))
+            ->addOption(new OptionDropdown('Fulfilled State', 'fulfilledState', __('Fulfilled State', self::$languageDomain), 'fulfilment', $orderStatuses))
+            ->addOption(new OptionDropdown('Fulfilment Error State', 'fulfilmentErrorState', __('Fulfilment Error State', self::$languageDomain), 'fulfilment', $orderStatuses));
+
+        $optionsPage->addTab($fulfilmentTab);
+
         $this->setOptionPage($optionsPage);
     }
 
