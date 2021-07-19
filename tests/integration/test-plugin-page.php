@@ -5,7 +5,6 @@ namespace Tests;
 use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\Option;
 use GbWeiss\includes\OptionPage;
-use GbWeiss\includes\Tab;
 
 class TestPluginPage extends \WP_UnitTestCase
 {
