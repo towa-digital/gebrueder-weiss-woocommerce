@@ -25,11 +25,6 @@ require __DIR__ . '/vendor/autoload.php';
 use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\OrderStateRepository;
 
-// Include the main WooCommerce class.
-if (!class_exists('GbWeiss', false)) {
-    include_once dirname(__FILE__) . '/includes/GbWeiss.php';
-}
-
 add_action("init", function () {
     if (!GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
         return;
