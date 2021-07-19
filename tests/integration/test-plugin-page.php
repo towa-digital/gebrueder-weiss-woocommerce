@@ -4,17 +4,11 @@ namespace Tests;
 
 use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\Option;
+use GbWeiss\includes\OptionPage;
+use GbWeiss\includes\Tab;
 
 class TestPluginPage extends \WP_UnitTestCase
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-      // reset global settings between tests
-        global $wp_settings_fields;
-        $wp_settings_fields = null;
-    }
-
     public function test_if_option_registration_registers_settings()
     {
         global $wp_settings_fields;
@@ -31,23 +25,54 @@ class TestPluginPage extends \WP_UnitTestCase
         $setOption = $wp_settings_fields['gbw-woocommerce']["testgroup"]["gbw_testslug"];
         $this->assertEquals("gbw_testslug", $setOption["id"]);
         $this->assertEquals("testname", $setOption["title"]);
+        $this->tearDown();
     }
 
-    public function test_if_account_settings_are_added_to_settings()
+    public function test_if_settings_can_be_set()
     {
-        global $wp_settings_fields;
-        GbWeiss();
-        $this->assertArrayHasKey("gbw-woocommerce", $wp_settings_fields);
-        $this->assertArrayHasKey("account", $wp_settings_fields['gbw-woocommerce']);
+        $slug = 'customer_id';
+        $slug2 = 'client_secret';
 
-        $accountOptions = $wp_settings_fields['gbw-woocommerce']['account'];
-        $this->assertArrayHasKey('gbw_customerId', $accountOptions);
-        $this->assertArrayHasKey('gbw_clientKey', $accountOptions);
-        $this->assertArrayHasKey('gbw_clientSecret', $accountOptions);
+        update_option(Option::OPTIONSPREFIX . $slug, 12345);
+        update_option(Option::OPTIONSPREFIX . $slug2, 'test');
+
+        $option = new Option('client Secret', $slug, 'testdescription', 'testgroup', 'number');
+        $option2 = new Option('client Secret', $slug2, 'testdescription', 'testgroup', 'string');
+
+        $this->assertEquals(12345, $option->getValue());
+        $this->assertEquals('test', $option2->getValue());
+        $this->tearDown();
     }
 
-    public function test_if_regular_user_can_set_settings()
+    public function test_if_page_renders()
     {
-      //
+        $optionsPage = (new OptionPage('test', GbWeiss::OPTIONPAGESLUG));
+
+        \ob_start();
+        $optionsPage->render();
+        $html = \ob_get_clean();
+
+        $this->assertStringContainsString('<form method="post" action="options.php"', $html);
+        $this->assertStringContainsString('<input type="submit"', $html);
+        $this->tearDown();
+    }
+
+    public function test_if_option_renders()
+    {
+        $slug = 'testslug';
+        $valueToTest = '12345';
+
+      // set testvalue
+        update_option(Option::OPTIONSPREFIX . $slug, $valueToTest);
+
+        $option = new Option('testname', $slug, 'description', 'testgroup', 'string');
+
+        \ob_start();
+        $option->render();
+        $html = \ob_get_clean();
+
+        $this->assertStringContainsString('<input type="text"', $html);
+        $this->assertStringContainsString('name="' . Option::OPTIONSPREFIX . $slug . '"', $html);
+        $this->assertStringContainsString('value="' . $valueToTest . '"', $html);
     }
 }
