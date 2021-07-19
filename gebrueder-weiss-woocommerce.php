@@ -22,6 +22,7 @@ defined('ABSPATH') || exit;
 
 require __DIR__ . '/vendor/autoload.php';
 
+use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\OrderStateRepository;
 
 // Include the main WooCommerce class.
@@ -29,26 +30,18 @@ if (!class_exists('GbWeiss', false)) {
     include_once dirname(__FILE__) . '/includes/GbWeiss.php';
 }
 
-/**
- * Retrieve an instance of the plugin.
- */
-function GbWeiss()
-{
-    return GbWeiss\includes\GbWeiss::instance();
-}
-
 add_action("init", function () {
-    if (!GbWeiss\includes\GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
+    if (!GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
         return;
     };
 
-    $plugin = GbWeiss();
+    $plugin = GbWeiss::getInstance();
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->initialize();
 });
 
 add_action("admin_init", function () {
-    $plugin = GbWeiss();
+    $plugin = GbWeiss::getInstance();
 
     $plugin->showErrorMessageIfSelectedOrderStatesDoNotExist();
 });

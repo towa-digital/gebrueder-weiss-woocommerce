@@ -14,7 +14,7 @@ use GbWeiss\includes\OrderStateRepository;
 /**
  * Main GbWeiss class
  */
-final class GbWeiss
+final class GbWeiss extends Singleton
 {
     /**
      * The single instance of the class.
@@ -48,26 +48,6 @@ final class GbWeiss
      * Option Page Slug
      */
     const OPTIONPAGESLUG = 'gbw-woocommerce';
-
-    /**
-     * Private constructor to prevent creating instances of the singleton
-     */
-    private function __construct()
-    {
-    }
-
-    /**
-     * Returns the singleton instance for the GbWeiss class.
-     *
-     * @return GbWeiss
-     */
-    public static function instance(): GbWeiss
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
 
     /**
      * Initializes the plugin.
@@ -309,7 +289,7 @@ final class GbWeiss
      */
     public static function uninstall(): void
     {
-        $plugin = self::instance();
+        $plugin = self::getInstance();
 
         foreach ($plugin->optionsPage->getTabs() as $tab) {
             foreach ($tab->options as $option) {
