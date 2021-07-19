@@ -73,7 +73,6 @@ class OAuthAuthenticator
             throw new \Exception('Authentication failed: could not connect to the authentication host.');
         }
         if ($response->getStatusCode() === 400) {
-            echo "400er";
             throw new \Exception('Authentication failed. ' . json_decode($response->getBody(), true)['error_description']);
         }
         if ($response->getStatusCode() !== 200) {

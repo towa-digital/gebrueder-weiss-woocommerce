@@ -29,10 +29,9 @@ use GbWeiss\includes\OrderStateRepository;
 /**
  * Use Dotenv to set required environment variables and load .env file in root
  */
-$dotenv = \Dotenv\Dotenv::createUnsafeImmutable(__DIR__);
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 if (file_exists(__DIR__ . '/.env')) {
-    $dotenv->load();
-    $dotenv->required(['GEBRUEDER_WEISS_OAUTH_URL']);
+    $dotenv->safeLoad();
 }
 
 add_action("init", function () {
@@ -44,7 +43,7 @@ add_action("init", function () {
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->initialize();
     $authenticationClient = new OAuthAuthenticator(new GuzzleHttp\Client());
-    $authenticationClient->setAuthenticationEndpoint($_ENV['GEBRUEDER_WEISS_OAUTH_URL']);
+    $authenticationClient->setAuthenticationEndpoint($_ENV['GEBRUEDER_WEISS_OAUTH_URL'] ?: "https://apitest.gw-world.com:443/authorize");
     $plugin->setAuthenticationClient($authenticationClient);
 });
 
