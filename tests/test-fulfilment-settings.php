@@ -10,8 +10,6 @@
  namespace Tests;
 
 use GbWeiss\includes\FulfilmentOptionsTab;
-use GbWeiss\includes\GbWeiss;
-use GbWeiss\includes\OrderStateRepository;
 
 /**
  * Fulfilment Settings Test.
