@@ -87,7 +87,7 @@ class Tab implements CanRender
      */
     private function addActions()
     {
-        \add_action('admin_init', [$this, 'addSettingsSection']);
+        \add_action('admin_init', [$this, 'addSettingsSection'], 10);
     }
 
     /**
