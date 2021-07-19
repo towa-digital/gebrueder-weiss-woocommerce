@@ -9,11 +9,18 @@
 
 namespace GbWeiss\includes;
 
+defined('ABSPATH') || exit;
+
 /**
  * Option Class
  */
 class Option implements CanRender
 {
+    /**
+     * Prefix used for Option
+     */
+    public const OPTIONS_PREFIX = 'gbw_';
+
     /**
      * Value of the Option
      *
@@ -99,7 +106,7 @@ class Option implements CanRender
         $this->name = $name;
 
         // prefix all options with gbw.
-        $this->slug = 'gbw_' . $slug;
+        $this->slug = self::OPTIONS_PREFIX . $slug;
 
         $this->type = $type;
         $this->group = $group;
@@ -131,14 +138,14 @@ class Option implements CanRender
             $this->group,
             $this->slug,
             [
-            'type' => $this->type,
-            'description' => $this->description,
-            'sanitize_callback' => $this->sanitizeCallback ??
-            function ($text) {
-                return sanitize_text_field($text);
-            },
-            'show_in_rest' => false,
-            'default' => $this->default
+                'type' => $this->type,
+                'description' => $this->description,
+                'sanitize_callback' => $this->sanitizeCallback ??
+                function ($text) {
+                    return sanitize_text_field($text);
+                },
+                'show_in_rest' => false,
+                'default' => $this->default
             ]
         );
 
@@ -154,9 +161,9 @@ class Option implements CanRender
     /**
      * Get the Value of the Option
      *
-     * @return mixed
+     * @return int|string|object
      */
-    public function getValue(): mixed
+    public function getValue()
     {
         return $this->value;
     }

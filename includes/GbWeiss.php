@@ -58,6 +58,8 @@ final class GbWeiss
 
     /**
      * Returns the singleton instance for the GbWeiss class.
+     *
+     * @return GbWeiss
      */
     public static function instance(): GbWeiss
     {
@@ -76,6 +78,7 @@ final class GbWeiss
     {
         $this->initActions();
         $this->initOptionPage();
+        $this->registerUninstallHook();
     }
 
     /**
@@ -88,9 +91,9 @@ final class GbWeiss
         $optionsPage = new OptionPage('options', self::OPTIONPAGESLUG);
         $accountTab = new Tab(__('Account', self::$languageDomain), 'account');
         $accountTab
-            ->addOption(new Option('Customer Id', 'customerId', __('Customer Id', self::$languageDomain), 'account', 'integer'))
-            ->addOption(new Option('Client Key', 'clientKey', __('Client Key', self::$languageDomain), 'account', 'string'))
-            ->addOption(new Option('Client Secret', 'clientSecret', __('Client Secret', self::$languageDomain), 'account', 'string'));
+            ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::$languageDomain), 'account', 'integer'))
+            ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::$languageDomain), 'account', 'string'))
+            ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::$languageDomain), 'account', 'string'));
 
         $optionsPage->addTab($accountTab);
         $orderStatuses = $this->orderStateRepository->getAllOrderStates();
@@ -192,7 +195,7 @@ final class GbWeiss
      * @param OptionPage $optionPage Options Page to be registered.
      * @return void
      */
-    public function setOptionPage(OptionPage $optionPage)
+    public function setOptionPage(OptionPage $optionPage): void
     {
         $this->optionsPage = $optionPage;
     }
@@ -223,7 +226,7 @@ final class GbWeiss
      *
      * @return void
      */
-    public function renderOptionPage()
+    public function renderOptionPage(): void
     {
         $this->optionsPage->render();
     }
@@ -233,7 +236,7 @@ final class GbWeiss
      *
      * @return void
      */
-    public function addPluginPageToMenu()
+    public function addPluginPageToMenu(): void
     {
         \add_options_page(
             __('options', 'gbw-woocommerce'),
@@ -242,5 +245,31 @@ final class GbWeiss
             self::OPTIONPAGESLUG,
             [$this, 'renderOptionPage']
         );
+    }
+
+    /**
+     * Register uninstall hook
+     *
+     * @return void
+     */
+    public function registerUninstallHook(): void
+    {
+        \register_uninstall_hook(__FILE__, 'uninstall');
+    }
+
+    /**
+     * Uninstall Plugin
+     *
+     * @return void
+     */
+    public static function uninstall(): void
+    {
+        $plugin = self::instance();
+
+        foreach ($plugin->optionsPage->getTabs() as $tab) {
+            foreach ($tab->options as $option) {
+                delete_option($option->slug);
+            }
+        }
     }
 }
