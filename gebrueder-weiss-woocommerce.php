@@ -30,9 +30,7 @@ use GbWeiss\includes\OrderStateRepository;
  * Use Dotenv to set required environment variables and load .env file in root
  */
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
-if (file_exists(__DIR__ . '/.env')) {
-    $dotenv->safeLoad();
-}
+$dotenv->safeLoad();
 
 add_action("init", function () {
     if (!GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
