@@ -78,9 +78,9 @@ final class GbWeiss extends Singleton
         $optionsPage->addTab($accountTab);
         $orderStatuses = $this->orderStateRepository->getAllOrderStates();
 
-        $fulfilmentTab = new FulfilmentOptionsTab($orderStatuses);
+        $fulfillmentTab = new FulfillmentOptionsTab($orderStatuses);
 
-        $optionsPage->addTab($fulfilmentTab);
+        $optionsPage->addTab($fulfillmentTab);
 
         $this->setOptionPage($optionsPage);
     }
@@ -127,19 +127,19 @@ final class GbWeiss extends Singleton
      */
     public function showErrorMessageIfSelectedOrderStatesDoNotExist(): void
     {
-        $this->validateFulfilmentSetting("gbw_fulfilmentState", "Fulfilment State");
-        $this->validateFulfilmentSetting("gbw_fulfilledState", "Fulfilled State");
-        $this->validateFulfilmentSetting("gbw_fulfilmentErrorState", "Fulfilment Error State");
+        $this->validateFulfillmentSetting("gbw_fulfillmentState", "Fulfillment State");
+        $this->validateFulfillmentSetting("gbw_fulfilledState", "Fulfilled State");
+        $this->validateFulfillmentSetting("gbw_fulfillmentErrorState", "Fulfillment Error State");
     }
 
     /**
-     * Checks if the configured value for the given fulfilment setting is valid.
+     * Checks if the configured value for the given fulfillment setting is valid.
      *
      * @param string $optionName The name of the WordPress option.
      * @param string $displayName The name of the setting to be shown in error messages.
      * @return void
      */
-    private function validateFulfilmentSetting(string $optionName, string $displayName): void
+    private function validateFulfillmentSetting(string $optionName, string $displayName): void
     {
         $optionValue = \get_option($optionName);
 

@@ -9,12 +9,12 @@
 
  namespace Tests;
 
-use GbWeiss\includes\FulfilmentOptionsTab;
+use GbWeiss\includes\FulfillmentOptionsTab;
 
 /**
- * Fulfilment Settings Test.
+ * Fulfillment Settings Test.
  */
-class FulfilmentSettingsTest extends \WP_UnitTestCase
+class FulfillmentSettingsTest extends \WP_UnitTestCase
 {
 
     /**
@@ -23,11 +23,11 @@ class FulfilmentSettingsTest extends \WP_UnitTestCase
     public function test_it_has_the_woocommerce_order_states_as_options()
     {
         $statuses = [ "order-state-key" => "Order State Name" ];
-        $fulfilmentTab = new FulfilmentOptionsTab($statuses);
+        $fulfillmentTab = new FulfillmentOptionsTab($statuses);
 
-        $this->assertCount(3, $fulfilmentTab->options);
-        $this->assertSame($statuses, $fulfilmentTab->options[0]->options);
-        $this->assertSame($statuses, $fulfilmentTab->options[1]->options);
-        $this->assertSame($statuses, $fulfilmentTab->options[2]->options);
+        $this->assertCount(3, $fulfillmentTab->options);
+        $this->assertSame($statuses, $fulfillmentTab->options[0]->options);
+        $this->assertSame($statuses, $fulfillmentTab->options[1]->options);
+        $this->assertSame($statuses, $fulfillmentTab->options[2]->options);
     }
 }
