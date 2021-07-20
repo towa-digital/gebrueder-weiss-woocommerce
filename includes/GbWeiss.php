@@ -51,6 +51,19 @@ final class GbWeiss extends Singleton
      */
     const OPTIONPAGESLUG = 'gbw-woocommerce';
 
+    /** Authentication client for the API Token
+     *
+     * @var OAuthAuthenticator
+     */
+    private $authenticationClient = null;
+
+    /**
+     * Access Token retrieved from authentication
+     *
+     * @var String
+     */
+    private $accessToken = null;
+
     /**
      * Initializes the plugin.
      *
@@ -64,7 +77,7 @@ final class GbWeiss extends Singleton
     }
 
     /**
-     * Initializes the option page
+     * Initializes the option page.
      *
      * @return void
      */
@@ -88,13 +101,46 @@ final class GbWeiss extends Singleton
     }
 
     /**
-     * Initializes Wordpress Actions
+     * Sets the OAuthAuthentication client
+     *
+     * @param OAuthAuthenticator $client used for oauth authentication.
+     */
+    public function setAuthenticationClient(OAuthAuthenticator $client): void
+    {
+        $this->authenticationClient = $client;
+    }
+
+    /**
+     * Initializes Wordpress actions.
      *
      * @return void
      */
     public function initActions(): void
     {
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
+    }
+
+    /**
+     * Validates user-provided credentials on the gebrueder-weiss-api oauth endpoint
+     *
+     * @param string $clientId Id of the client.
+     * @param string $clientSecret Secret of the client.
+     */
+    public function validateCredentials(string $clientId, string $clientSecret): bool
+    {
+        return $this->authenticationClient->authenticate($clientId, $clientSecret) ? true : false;
+    }
+
+    /**
+     * Sets client credentials for later usage
+     *
+     * @param string $clientId Id of the client.
+     * @param string $clientSecret Secret of the client.
+     */
+    public function setAccessToken(string $clientId, string $clientSecret): bool
+    {
+        $this->accessToken = $this->authenticationClient->authenticate($clientId, $clientSecret);
+        return $this->accessToken ? true : false;
     }
 
     /**
@@ -212,9 +258,9 @@ final class GbWeiss extends Singleton
             "admin_notices",
             function () use ($message) {
                 ?>
-                    <div class="notice notice-error is-dismissible">
-                        <p><?php echo $message ?></p>
-                    </div>
+                <div class="notice notice-error is-dismissible">
+                    <p><?php echo $message ?></p>
+                </div>
                 <?php
             }
         );

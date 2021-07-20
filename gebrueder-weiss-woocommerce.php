@@ -18,6 +18,8 @@
  * Domain Path: /languages
  */
 
+use GbWeiss\includes\OAuthAuthenticator;
+
 defined('ABSPATH') || exit;
 
 require __DIR__ . '/vendor/autoload.php';
@@ -29,10 +31,12 @@ add_action("init", function () {
     if (!GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
         return;
     };
-
     $plugin = GbWeiss::getInstance();
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->initialize();
+    $authenticationClient = new OAuthAuthenticator(new GuzzleHttp\Client());
+    $authenticationClient->setAuthenticationEndpoint('http://18019fdce8ff:8887/token');
+    $plugin->setAuthenticationClient($authenticationClient);
 });
 
 add_action("admin_init", function () {
