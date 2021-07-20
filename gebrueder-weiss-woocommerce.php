@@ -38,11 +38,11 @@ add_action("init", function () {
     };
 
     $plugin = GbWeiss::getInstance();
-    $plugin->setOrderStateRepository(new OrderStateRepository());
-    $plugin->initialize();
     $authenticationClient = new OAuthAuthenticator(new GuzzleHttp\Client());
     $authenticationClient->setAuthenticationEndpoint($_ENV['GEBRUEDER_WEISS_OAUTH_URL'] ?: "https://apitest.gw-world.com:443/authorize");
     $plugin->setAuthenticationClient($authenticationClient);
+    $plugin->setOrderStateRepository(new OrderStateRepository());
+    $plugin->initialize();
 });
 
 add_action("admin_init", function () {

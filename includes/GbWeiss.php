@@ -127,15 +127,18 @@ final class GbWeiss extends Singleton
     /**
      * Validates user-provided credentials on the gebrueder-weiss-api oauth endpoint
      */
-    public function validateCredentials(): bool
+    public function validateCredentials(): void
     {
         $clientId = get_option('gbw_client_id', false);
         $clientSecret = get_option('gbw_client_secret', false);
 
         $isValid = $this->authenticationClient->authenticate($clientId, $clientSecret)->isValid();
 
-        self::showWordpressAdminErrorMessage('Validated Credentials: ' . $isValid ? 'True' : 'False');
-        return $isValid;
+        if ($isValid) {
+            self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
+        } else {
+            self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::$languageDomain));
+        }
     }
 
     /**
@@ -254,6 +257,25 @@ final class GbWeiss extends Singleton
             function () use ($message) {
                 ?>
                 <div class="notice notice-error is-dismissible">
+                    <p><?php echo $message ?></p>
+                </div>
+                <?php
+            }
+        );
+    }
+
+    /**
+     * Shows the passed message as a success in the admin panel
+     *
+     * @param string $message The message to be shown in the admin panel.
+     */
+    private static function showWordpressAdminSuccessMessage(string $message): void
+    {
+        \add_action(
+            "admin_notices",
+            function () use ($message) {
+                ?>
+                <div class="notice notice-success is-dismissible">
                     <p><?php echo $message ?></p>
                 </div>
                 <?php
