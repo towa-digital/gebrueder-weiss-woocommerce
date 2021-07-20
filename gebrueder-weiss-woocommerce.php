@@ -39,7 +39,9 @@ add_action("init", function () {
 
     $plugin = GbWeiss::getInstance();
     $authenticationClient = new OAuthAuthenticator(new GuzzleHttp\Client());
-    $authenticationClient->setAuthenticationEndpoint($_ENV['GEBRUEDER_WEISS_OAUTH_URL'] ?: "https://apitest.gw-world.com:443/authorize");
+
+    $authEndpoint = array_key_exists('GEBRUEDER_WEISS_OAUTH_URL', $_ENV) ? $_ENV['GEBRUEDER_WEISS_OAUTH_URL'] : "https://apitest.gw-world.com:443/authorize";
+    $authenticationClient->setAuthenticationEndpoint($authEndpoint);
     $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->initialize();

@@ -10,6 +10,7 @@
 
 namespace GbWeiss\includes\OAuth;
 
+defined('ABSPATH') || exit;
 /**
  * OAuthAuthenticator Class
  */

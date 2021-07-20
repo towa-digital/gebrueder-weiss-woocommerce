@@ -61,13 +61,6 @@ final class GbWeiss extends Singleton
     private $authenticationClient = null;
 
     /**
-     * OAuthToken retrieved from authentication
-     *
-     * @var OAuthToken
-     */
-    private $token = null;
-
-    /**
      * Initializes the plugin.
      *
      * @return void

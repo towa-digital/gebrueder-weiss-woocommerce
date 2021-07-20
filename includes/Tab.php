@@ -137,7 +137,7 @@ class Tab implements CanRender
      */
     public function render(): void
     {
-        // Does nothing (maybe another call necessary?).
+        // not yet used.
     }
 
     /**
