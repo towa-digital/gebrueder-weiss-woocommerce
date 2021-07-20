@@ -8,7 +8,7 @@
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  */
 
-namespace GbWeiss\includes;
+namespace GbWeiss\includes\OAuth;
 
 use stdClass;
 
@@ -60,7 +60,7 @@ class OAuthAuthenticator
      * @throws \Exception With message.
      * @return string
      */
-    public function authenticate(string $clientId, string $clientSecret): string
+    public function authenticate(string $clientId, string $clientSecret): object
     {
         $response = $this->client->post($this->authenticationEndpoint, [
             "form_params" => [
@@ -77,7 +77,11 @@ class OAuthAuthenticator
             throw new \Exception('Authentication failed. ');
         }
 
-        $response_object = json_decode($response->getBody());
-        return $response_object->access_token;
+        $rawToken = json_decode($response->getBody());
+        return new OAuthToken(
+            $rawToken->access_token ?? null,
+            $rawToken->token_type ?? null,
+            $rawToken->expires_in ?? null,
+        );
     }
 }

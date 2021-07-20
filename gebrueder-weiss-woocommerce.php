@@ -18,13 +18,12 @@
  * Domain Path: /languages
  */
 
-use GbWeiss\includes\OAuthAuthenticator;
-
 defined('ABSPATH') || exit;
 
 require __DIR__ . '/vendor/autoload.php';
 
 use GbWeiss\includes\GbWeiss;
+use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OrderStateRepository;
 
 add_action("init", function () {
@@ -41,6 +40,5 @@ add_action("init", function () {
 
 add_action("admin_init", function () {
     $plugin = GbWeiss::getInstance();
-
     $plugin->showErrorMessageIfSelectedOrderStatesDoNotExist();
 });

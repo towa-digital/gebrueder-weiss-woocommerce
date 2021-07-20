@@ -10,6 +10,8 @@
 namespace GbWeiss\includes;
 
 use GbWeiss\includes\OrderStateRepository;
+use GbWeiss\includes\OAuth\OAuthAuthenticator;
+use GbWeiss\includes\OAuth\OAuthToken;
 
 defined('ABSPATH') || exit;
 
@@ -58,11 +60,11 @@ final class GbWeiss extends Singleton
     private $authenticationClient = null;
 
     /**
-     * Access Token retrieved from authentication
+     * OAuthToken retrieved from authentication
      *
-     * @var String
+     * @var OAuthToken
      */
-    private $accessToken = null;
+    private $token = null;
 
     /**
      * Initializes the plugin.
@@ -128,19 +130,7 @@ final class GbWeiss extends Singleton
      */
     public function validateCredentials(string $clientId, string $clientSecret): bool
     {
-        return $this->authenticationClient->authenticate($clientId, $clientSecret) ? true : false;
-    }
-
-    /**
-     * Sets client credentials for later usage
-     *
-     * @param string $clientId Id of the client.
-     * @param string $clientSecret Secret of the client.
-     */
-    public function setAccessToken(string $clientId, string $clientSecret): bool
-    {
-        $this->accessToken = $this->authenticationClient->authenticate($clientId, $clientSecret);
-        return $this->accessToken ? true : false;
+        return $this->authenticationClient->authenticate($clientId, $clientSecret)->isValid();
     }
 
     /**
