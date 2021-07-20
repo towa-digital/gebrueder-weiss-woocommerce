@@ -5,10 +5,14 @@
         "This file is @generated automatically"
     ],
 <<<<<<< HEAD
+<<<<<<< HEAD
     "content-hash": "6ec2a3d508c33a0207dc078d78d4542a",
 =======
     "content-hash": "042a7a0c7982e9bb99d92424f2eb7b43",
 >>>>>>> feat: added authmockserver in phpunit tests
+=======
+    "content-hash": "3b2942941f7481e85041612be422000b",
+>>>>>>> fix: downgrade composer guzzle
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -2719,11 +2723,17 @@
     "prefer-lowest": false,
     "platform": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
     "platform-dev": {
         "php": "^7.3|^8.0"
     },
 =======
     "platform-dev": [],
 >>>>>>> feat: added authmockserver in phpunit tests
+=======
+    "platform-dev": {
+        "php": "^7.3|^8.0"
+    },
+>>>>>>> fix: downgrade composer guzzle
     "plugin-api-version": "2.1.0"
 }
