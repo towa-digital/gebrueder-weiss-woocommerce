@@ -13,7 +13,7 @@ namespace GbWeiss\includes;
 class OrderStateRepository
 {
     /**
-     * Returns all order statuses available in WooCommerce.
+     * Returns all order states available in WooCommerce.
      *
      * @return array
      */
