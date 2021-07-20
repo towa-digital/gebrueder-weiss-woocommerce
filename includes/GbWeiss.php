@@ -14,6 +14,8 @@ defined('ABSPATH') || exit;
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
 
+defined('ABSPATH') || exit;
+
 /**
  * Main GbWeiss class
  */
