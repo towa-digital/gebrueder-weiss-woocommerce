@@ -137,7 +137,18 @@ class Tab implements CanRender
      */
     public function render(): void
     {
-        echo "render";
         // Does nothing (maybe another call necessary?).
+    }
+
+    /**
+     * Callable function run on form init.
+     *
+     * @param callable $callbackFunction Callable callback function.
+     * @return Tab
+     */
+    public function onTabInit(callable $callbackFunction): Tab
+    {
+        $callbackFunction();
+        return $this;
     }
 }

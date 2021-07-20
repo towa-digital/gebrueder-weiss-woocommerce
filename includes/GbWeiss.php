@@ -87,7 +87,7 @@ final class GbWeiss extends Singleton
     public function initOptionPage(): void
     {
         $optionsPage = new OptionPage('options', self::OPTIONPAGESLUG);
-        $accountTab = new Tab(__('Account', self::$languageDomain), 'account');
+        $accountTab = (new Tab(__('Account', self::$languageDomain), 'account'))->onTabInit([$this, 'validateCredentials']);
 
         $accountTab
             ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::$languageDomain), 'account', 'integer'))
@@ -127,7 +127,7 @@ final class GbWeiss extends Singleton
     /**
      * Validates user-provided credentials on the gebrueder-weiss-api oauth endpoint
      */
-    public function validateCredentials(): void
+    public function validateCredentials(): bool
     {
         $clientId = get_option('gbw_client_id', false);
         $clientSecret = get_option('gbw_client_secret', false);
@@ -135,6 +135,7 @@ final class GbWeiss extends Singleton
         $isValid = $this->authenticationClient->authenticate($clientId, $clientSecret)->isValid();
 
         self::showWordpressAdminErrorMessage('Validated Credentials: ' . $isValid ? 'True' : 'False');
+        return $isValid;
     }
 
     /**

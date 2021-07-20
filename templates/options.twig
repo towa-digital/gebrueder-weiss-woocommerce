@@ -12,14 +12,9 @@
       <table class="form-table">
       {{ do_settings_fields( tab.slug ) }}
       </table>
-      
     {% endif %}
   {% endfor %}
 
   {{ submit_button() }}
-  </form>
-  <form method="post" action="admin.php">
-    <input type="hidden" name="action" value="validate_credentials" />
-    <button type="submit">Valiate Credentials</button>
   </form>
 </div>
