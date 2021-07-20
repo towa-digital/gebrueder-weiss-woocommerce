@@ -9,12 +9,12 @@
 
 namespace GbWeiss\includes;
 
-defined('ABSPATH') || exit;
+use GbWeiss\includes\OrderStateRepository;
 
 /**
  * Main GbWeiss class
  */
-final class GbWeiss
+final class GbWeiss extends Singleton
 {
     /**
      * The single instance of the class.
@@ -38,31 +38,27 @@ final class GbWeiss
     private $optionsPage;
 
     /**
+     * Order State Repository
+     *
+     * @var OrderStateRepository
+     */
+    private $orderStateRepository;
+
+    /**
      * Option Page Slug
      */
     const OPTIONPAGESLUG = 'gbw-woocommerce';
 
     /**
-     * Initialize GbWeiss Plugin
+     * Initializes the plugin.
+     *
+     * @return void
      */
-    public function __construct()
+    public function initialize(): void
     {
         $this->initActions();
         $this->initOptionPage();
         $this->registerUninstallHook();
-    }
-
-    /**
-     * Returns the singleton instance for the GbWeiss class.
-     *
-     * @return GbWeiss
-     */
-    public static function instance(): GbWeiss
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
     }
 
     /**
@@ -80,6 +76,11 @@ final class GbWeiss
             ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::$languageDomain), 'account', 'string'));
 
         $optionsPage->addTab($accountTab);
+        $orderStatuses = $this->orderStateRepository->getAllOrderStates();
+
+        $fulfillmentTab = new FulfillmentOptionsTab($orderStatuses);
+
+        $optionsPage->addTab($fulfillmentTab);
 
         $this->setOptionPage($optionsPage);
     }
@@ -103,19 +104,68 @@ final class GbWeiss
     {
         if (!self::pluginIsCompatibleWithCurrentPhpVersion()) {
             self::showWordpressAdminErrorMessage(
-                "Gebrüder Weiss WooCommerce is not compatible with PHP " . phpversion() . "."
+                __("Gebrüder Weiss WooCommerce is not compatible with PHP " . phpversion() . ".", self::$languageDomain)
             );
             return false;
         }
 
         if (!self::isWooCommerceActive()) {
             self::showWordpressAdminErrorMessage(
-                "Gebrüder Weiss WooCommerce requires WooCommerce to be installed."
+                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed.", self::$languageDomain)
             );
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Checks if the selected order states in the settings exist and shows error messages
+     * in the admin backend if that is not the case.
+     *
+     * @return void
+     */
+    public function showErrorMessageIfSelectedOrderStatesDoNotExist(): void
+    {
+        $this->validateFulfillmentSetting("gbw_fulfillmentState", "Fulfillment State");
+        $this->validateFulfillmentSetting("gbw_fulfilledState", "Fulfilled State");
+        $this->validateFulfillmentSetting("gbw_fulfillmentErrorState", "Fulfillment Error State");
+    }
+
+    /**
+     * Checks if the configured value for the given fulfillment setting is valid.
+     *
+     * @param string $optionName The name of the WordPress option.
+     * @param string $displayName The name of the setting to be shown in error messages.
+     * @return void
+     */
+    private function validateFulfillmentSetting(string $optionName, string $displayName): void
+    {
+        $optionValue = \get_option($optionName);
+
+        if (!$optionValue) {
+            $this->showWordpressAdminErrorMessage(
+                __("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".", self::$languageDomain)
+            );
+            return;
+        }
+
+        if (!$this->checkIfWooCommerceOrderStateExists($optionValue)) {
+            $this->showWordpressAdminErrorMessage(
+                __("The selected order state for " . $displayName . " in the options for the Gebrüder Weiss WooCommerce Plugin does not exist in WooCommerce.", self::$languageDomain)
+            );
+        }
+    }
+
+    /**
+     * Checks if there is an order state registered with WooCommerce for the given slug.
+     *
+     * @param string $slug The slug for the order state.
+     * @return boolean
+     */
+    private function checkIfWooCommerceOrderStateExists(string $slug): bool
+    {
+        return !!$this->orderStateRepository->getOrderStateBySlug($slug);
     }
 
     /**
@@ -180,6 +230,27 @@ final class GbWeiss
     }
 
     /**
+     * Getter for the registered option page
+     *
+     * @return OptionPage|null
+     */
+    public function getOptionsPage(): ?OptionPage
+    {
+        return $this->optionsPage;
+    }
+
+    /**
+     * Sets the instance for the order state repository
+     *
+     * @param OrderStateRepository $orderStateRepository The order state repository.
+     * @return void
+     */
+    public function setOrderStateRepository(OrderStateRepository $orderStateRepository)
+    {
+        $this->orderStateRepository = $orderStateRepository;
+    }
+
+    /**
      * Render Option Page
      *
      * @return void
@@ -222,22 +293,12 @@ final class GbWeiss
      */
     public static function uninstall(): void
     {
-        $plugin = self::instance();
+        $plugin = self::getInstance();
 
         foreach ($plugin->optionsPage->getTabs() as $tab) {
             foreach ($tab->options as $option) {
                 delete_option($option->slug);
             }
         }
-    }
-
-    /**
-     * Gets Plugins Option Page
-     *
-     * @return OptionPage
-     */
-    public function getOptionsPage(): OptionPage
-    {
-        return $this->optionsPage;
     }
 }
