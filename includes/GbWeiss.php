@@ -50,13 +50,6 @@ final class GbWeiss extends Singleton
     private $orderStateRepository;
 
     /**
-     * Authentication client for the API Token
-     *
-     * @var OAuthAuthenticator
-     */
-    private $authenticationClient = null;
-
-    /**
      * Access Token retrieved from authentication
      *
      * @var String

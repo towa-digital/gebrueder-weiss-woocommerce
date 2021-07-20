@@ -18,8 +18,6 @@
  * Domain Path: /languages
  */
 
-use GbWeiss\includes\OAuthAuthenticator;
-
 defined('ABSPATH') || exit;
 
 require __DIR__ . '/vendor/autoload.php';
