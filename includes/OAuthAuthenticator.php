@@ -1,7 +1,8 @@
 <?php
 /**
  * OAuthAuthenticator
- * Used to retrieve to authenticate the client & retrieves the access token
+ * Retrieves the Access Token.
+ * Uses league/oauth2-client
  *
  * @package GbWeiss
  * @author Towa Digital <developer@towa.at>
@@ -25,20 +26,10 @@ class OAuthAuthenticator
     private $authenticationEndpoint = null;
 
     /**
-     * The http client implementation used.
-     *
-     * @var Object
-     */
-    private $client = null;
-
-    /**
      * Constructor.
-     *
-     * @param Object $client Authentication Client implemenation.
      */
-    public function __construct($client)
+    public function __construct()
     {
-        $this->client = $client;
     }
 
     /**
@@ -62,22 +53,22 @@ class OAuthAuthenticator
      */
     public function authenticate(string $clientId, string $clientSecret): string
     {
-        $response = $this->client->post($this->authenticationEndpoint, [
-            "form_params" => [
-                "grant_type" => "client_credentials",
-                "client_id" => $clientId,
-                "client_secret" => $clientSecret
-            ]
+        $provider = new \League\OAuth2\Client\Provider\GenericProvider([
+            'clientId'                => $clientId,
+            'clientSecret'            => $clientSecret,
+            'redirectUri'             => 'https://my.example.com/your-redirect-url/',
+            'urlAuthorize'            => null,
+            'urlAccessToken'            => 'http://18019fdce8ff:8887/token',
+            'urlResourceOwnerDetails' => null
         ]);
-
-        if ($response->getStatusCode() === 400) {
-            throw new \Exception('Authentication failed. ' . json_decode($response->getBody(), true)['error_description']);
+        try {
+            $accessToken = $provider->getAccessToken('client_credentials', [
+                'clientId' => $clientId,
+                'clientSecret' => $clientSecret,
+            ]);
+        } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+            return '';
         }
-        if ($response->getStatusCode() !== 200) {
-            throw new \Exception('Authentication failed. ');
-        }
-
-        $response_object = json_decode($response->getBody());
-        return $response_object->access_token;
+        return $accessToken;
     }
 }
