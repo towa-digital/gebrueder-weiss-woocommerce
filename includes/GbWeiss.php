@@ -10,7 +10,6 @@
 namespace GbWeiss\includes;
 
 use GbWeiss\includes\OrderStateRepository;
-use Towa\GebruederWeissSDK\{Configuration, Api\ReadApi};
 
 defined('ABSPATH') || exit;
 
