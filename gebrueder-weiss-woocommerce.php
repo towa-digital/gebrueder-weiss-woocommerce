@@ -23,7 +23,14 @@ defined('ABSPATH') || exit;
 require __DIR__ . '/vendor/autoload.php';
 
 use GbWeiss\includes\GbWeiss;
+use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OrderStateRepository;
+
+/**
+ * Use Dotenv to set required environment variables and load .env file in root
+ */
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->safeLoad();
 
 add_action("init", function () {
     if (!GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
@@ -31,12 +38,16 @@ add_action("init", function () {
     };
 
     $plugin = GbWeiss::getInstance();
+    $authenticationClient = new OAuthAuthenticator(new GuzzleHttp\Client());
+
+    $authEndpoint = array_key_exists('GEBRUEDER_WEISS_OAUTH_URL', $_ENV) ? $_ENV['GEBRUEDER_WEISS_OAUTH_URL'] : "https://apitest.gw-world.com:443/authorize";
+    $authenticationClient->setAuthenticationEndpoint($authEndpoint);
+    $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->initialize();
 });
 
 add_action("admin_init", function () {
     $plugin = GbWeiss::getInstance();
-
     $plugin->showErrorMessageIfSelectedOrderStatesDoNotExist();
 });

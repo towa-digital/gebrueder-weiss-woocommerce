@@ -10,6 +10,10 @@
 namespace GbWeiss\includes;
 
 use GbWeiss\includes\OrderStateRepository;
+use GbWeiss\includes\OAuth\OAuthAuthenticator;
+use GbWeiss\includes\OAuth\OAuthToken;
+
+defined('ABSPATH') || exit;
 
 /**
  * Main GbWeiss class
@@ -50,6 +54,13 @@ final class GbWeiss extends Singleton
     const OPTIONPAGESLUG = 'gbw-woocommerce';
 
     /**
+     * Authentication client for the API Token.
+     *
+     * @var OAuthAuthenticator
+     */
+    private $authenticationClient = null;
+
+    /**
      * Initializes the plugin.
      *
      * @return void
@@ -62,20 +73,21 @@ final class GbWeiss extends Singleton
     }
 
     /**
-     * Initializes the option page
+     * Initializes the option page.
      *
      * @return void
      */
     public function initOptionPage(): void
     {
         $optionsPage = new OptionPage('options', self::OPTIONPAGESLUG);
-        $accountTab = new Tab(__('Account', self::$languageDomain), 'account');
+        $accountTab = (new Tab(__('Account', self::$languageDomain), 'account'))->onTabInit([$this, 'validateCredentials']);
+
         $accountTab
             ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::$languageDomain), 'account', 'integer'))
             ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::$languageDomain), 'account', 'string'))
             ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::$languageDomain), 'account', 'string'));
-
         $optionsPage->addTab($accountTab);
+
         $orderStatuses = $this->orderStateRepository->getAllOrderStates();
 
         $fulfillmentTab = new FulfillmentOptionsTab($orderStatuses);
@@ -86,13 +98,40 @@ final class GbWeiss extends Singleton
     }
 
     /**
-     * Initializes Wordpress Actions
+     * Sets the OAuthAuthentication client
+     *
+     * @param OAuthAuthenticator $client used for oauth authentication.
+     */
+    public function setAuthenticationClient(OAuthAuthenticator $client): void
+    {
+        $this->authenticationClient = $client;
+    }
+
+    /**
+     * Initializes Wordpress actions.
      *
      * @return void
      */
     public function initActions(): void
     {
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
+    }
+
+    /**
+     * Validates user-provided credentials on the gebrueder-weiss-api oauth endpoint
+     */
+    public function validateCredentials(): void
+    {
+        $clientId = get_option('gbw_client_id', false);
+        $clientSecret = get_option('gbw_client_secret', false);
+
+        $isValid = $this->authenticationClient->authenticate($clientId, $clientSecret)->isValid();
+
+        if ($isValid) {
+            self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
+        } else {
+            self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::$languageDomain));
+        }
     }
 
     /**
@@ -210,9 +249,28 @@ final class GbWeiss extends Singleton
             "admin_notices",
             function () use ($message) {
                 ?>
-                    <div class="notice notice-error is-dismissible">
-                        <p><?php echo $message ?></p>
-                    </div>
+                <div class="notice notice-error is-dismissible">
+                    <p><?php echo $message ?></p>
+                </div>
+                <?php
+            }
+        );
+    }
+
+    /**
+     * Shows the passed message as a success in the admin panel
+     *
+     * @param string $message The message to be shown in the admin panel.
+     */
+    private static function showWordpressAdminSuccessMessage(string $message): void
+    {
+        \add_action(
+            "admin_notices",
+            function () use ($message) {
+                ?>
+                <div class="notice notice-success is-dismissible">
+                    <p><?php echo $message ?></p>
+                </div>
                 <?php
             }
         );

@@ -1,5 +1,6 @@
 vendor/
-.*
+.env
+settings.json
 node_modules/
 
 # whitelist
