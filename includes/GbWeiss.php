@@ -125,12 +125,16 @@ final class GbWeiss extends Singleton
         $clientId = get_option('gbw_client_id', false);
         $clientSecret = get_option('gbw_client_secret', false);
 
-        $isValid = $this->authenticationClient->authenticate($clientId, $clientSecret)->isValid();
+        try {
+            $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
 
-        if ($isValid) {
-            self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
-        } else {
-            self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::$languageDomain));
+            if ($token && $token->isValid()) {
+                self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
+            } else {
+                self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::$languageDomain));
+            }
+        } catch (\Exception $e) {
+            self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed", self::$languageDomain));
         }
     }
 
