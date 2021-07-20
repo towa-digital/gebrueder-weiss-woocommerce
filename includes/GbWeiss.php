@@ -53,7 +53,8 @@ final class GbWeiss extends Singleton
      */
     const OPTIONPAGESLUG = 'gbw-woocommerce';
 
-    /** Authentication client for the API Token
+    /**
+     * Authentication client for the API Token.
      *
      * @var OAuthAuthenticator
      */
@@ -87,12 +88,13 @@ final class GbWeiss extends Singleton
     {
         $optionsPage = new OptionPage('options', self::OPTIONPAGESLUG);
         $accountTab = new Tab(__('Account', self::$languageDomain), 'account');
+
         $accountTab
             ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::$languageDomain), 'account', 'integer'))
             ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::$languageDomain), 'account', 'string'))
             ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::$languageDomain), 'account', 'string'));
-
         $optionsPage->addTab($accountTab);
+
         $orderStatuses = $this->orderStateRepository->getAllOrderStates();
 
         $fulfillmentTab = new FulfillmentOptionsTab($orderStatuses);
@@ -124,13 +126,15 @@ final class GbWeiss extends Singleton
 
     /**
      * Validates user-provided credentials on the gebrueder-weiss-api oauth endpoint
-     *
-     * @param string $clientId Id of the client.
-     * @param string $clientSecret Secret of the client.
      */
-    public function validateCredentials(string $clientId, string $clientSecret): bool
+    public function validateCredentials(): void
     {
-        return $this->authenticationClient->authenticate($clientId, $clientSecret)->isValid();
+        $clientId = get_option('gbw_client_id', false);
+        $clientSecret = get_option('gbw_client_secret', false);
+
+        $isValid = $this->authenticationClient->authenticate($clientId, $clientSecret)->isValid();
+
+        self::showWordpressAdminErrorMessage('Validated Credentials: ' . $isValid ? 'True' : 'False');
     }
 
     /**
