@@ -133,6 +133,6 @@ class OAuthToken
      */
     public function isValid(): bool
     {
-        return $this->access_token && (($this->timestampCreated + $this->expires_in) < time());
+        return $this->access_token && (($this->timestampCreated + $this->expires_in) > time());
     }
 }
