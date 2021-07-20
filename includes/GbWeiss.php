@@ -104,14 +104,14 @@ final class GbWeiss extends Singleton
     {
         if (!self::pluginIsCompatibleWithCurrentPhpVersion()) {
             self::showWordpressAdminErrorMessage(
-                "Gebrüder Weiss WooCommerce is not compatible with PHP " . phpversion() . "."
+                __("Gebrüder Weiss WooCommerce is not compatible with PHP " . phpversion() . ".", self::$languageDomain)
             );
             return false;
         }
 
         if (!self::isWooCommerceActive()) {
             self::showWordpressAdminErrorMessage(
-                "Gebrüder Weiss WooCommerce requires WooCommerce to be installed."
+                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed.", self::$languageDomain)
             );
             return false;
         }
@@ -144,12 +144,16 @@ final class GbWeiss extends Singleton
         $optionValue = \get_option($optionName);
 
         if (!$optionValue) {
-            $this->showWordpressAdminErrorMessage("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".");
+            $this->showWordpressAdminErrorMessage(
+                __("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".", self::$languageDomain)
+            );
             return;
         }
 
         if (!$this->checkIfWooCommerceOrderStateExists($optionValue)) {
-            $this->showWordpressAdminErrorMessage("The selected order state for " . $displayName . " in the options for the Gebrüder Weiss WooCommerce Plugin does not exist in WooCommerce.");
+            $this->showWordpressAdminErrorMessage(
+                __("The selected order state for " . $displayName . " in the options for the Gebrüder Weiss WooCommerce Plugin does not exist in WooCommerce.", self::$languageDomain)
+            );
         }
     }
 
