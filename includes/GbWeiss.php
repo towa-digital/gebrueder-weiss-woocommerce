@@ -11,7 +11,6 @@ namespace GbWeiss\includes;
 
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
-use GbWeiss\includes\OAuth\OAuthToken;
 
 defined('ABSPATH') || exit;
 
