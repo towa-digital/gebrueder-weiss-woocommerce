@@ -114,6 +114,7 @@ final class GbWeiss extends Singleton
      */
     public function initActions(): void
     {
+        \add_action('admin_init', [$this, 'showErrorMessageIfSelectedOrderStatesDoNotExist']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
     }
 
@@ -154,7 +155,7 @@ final class GbWeiss extends Singleton
 
         if (!self::isWooCommerceActive()) {
             self::showWordpressAdminErrorMessage(
-                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed.", self::$languageDomain)
+                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed and active.", self::$languageDomain)
             );
             return false;
         }
