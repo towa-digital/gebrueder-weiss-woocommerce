@@ -61,6 +61,13 @@ class Tab implements CanRender
     public $page;
 
     /**
+     * Callbacks for onTabInit
+     *
+     * @var array
+     */
+    private $onTabInitCallbacks = [];
+
+    /**
      * Initialize Tab on Options Page
      *
      * @param string $name Name of the tab.
@@ -90,6 +97,7 @@ class Tab implements CanRender
     private function addActions()
     {
         \add_action('admin_init', [$this, 'addSettingsSection'], 10);
+        \add_action('admin_head', [$this, 'fireOnTabInitIfCurrentTab'], 10);
     }
 
     /**
@@ -131,6 +139,22 @@ class Tab implements CanRender
     }
 
     /**
+     * Fires the on tab init callbacks if the tab is to be shown
+     *
+     * @return void
+     */
+    public function fireOnTabInitIfCurrentTab(): void
+    {
+        if (!$this->isActive) {
+            return;
+        }
+
+        foreach ($this->onTabInitCallbacks as $callback) {
+            $callback();
+        }
+    }
+
+    /**
      * Renders Tab
      *
      * @return void
@@ -148,7 +172,15 @@ class Tab implements CanRender
      */
     public function onTabInit(callable $callbackFunction): Tab
     {
-        $callbackFunction();
+        /**
+         * When passing the function directly to the callback array
+         * PHP is not able to execute it later on. Wrapping it into
+         * an anonymous closure prevents that.
+         */
+        $this->onTabInitCallbacks[] = function () use ($callbackFunction) {
+            $callbackFunction();
+        };
+
         return $this;
     }
 }
