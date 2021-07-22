@@ -136,7 +136,6 @@ final class GbWeiss extends Singleton
 
         try {
             $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
-
             if ($token && $token->isValid()) {
                 self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
             } else {

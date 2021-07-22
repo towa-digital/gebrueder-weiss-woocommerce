@@ -6,7 +6,8 @@
         "twig/twig": "^3.3",
         "guzzlehttp/guzzle": "^6",
         "towa/gbw-sdk": "^1.0",
-        "vlucas/phpdotenv": "^5.3"
+        "vlucas/phpdotenv": "^5.3",
+        "league/oauth2-client": "^2.6"
     },
     "homepage": "https://www.towa-digital.com",
     "require-dev": {

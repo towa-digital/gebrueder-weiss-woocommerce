@@ -1,7 +1,8 @@
 <?php
 /**
  * OAuthAuthenticator
- * Used to retrieve to authenticate the client & retrieves the access token
+ * Retrieves the Access Token.
+ * Uses league/oauth2-client
  *
  * @package GbWeiss
  * @author Towa Digital <developer@towa.at>
@@ -10,7 +11,8 @@
 
 namespace GbWeiss\includes\OAuth;
 
-defined('ABSPATH') || exit;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+
 /**
  * OAuthAuthenticator Class
  */
@@ -24,20 +26,19 @@ class OAuthAuthenticator
     private $authenticationEndpoint = null;
 
     /**
-     * The http client implementation used.
+     * Client Provider Object.
      *
-     * @var Object
+     * @param object $authProvider the oAuth authProvider.
      */
-    private $client = null;
 
     /**
      * Constructor.
      *
-     * @param Object $client Authentication Client implemenation.
+     * @param object $authProvider client object.
      */
-    public function __construct($client)
+    public function __construct($authProvider)
     {
-        $this->client = $client;
+        $this->authProvider = $authProvider;
     }
 
     /**
@@ -59,35 +60,23 @@ class OAuthAuthenticator
      * @throws \Exception With message.
      * @return string
      */
-    public function authenticate(string $clientId, string $clientSecret): object
+    public function authenticate(string $clientId, string $clientSecret): OAuthToken
     {
-        $timestampCreated = time();
         try {
-            $response = $this->client->post($this->authenticationEndpoint, [
-                "form_params" => [
-                    "grant_type" => "client_credentials",
-                    "client_id" => $clientId,
-                    "client_secret" => $clientSecret
-                ]
+            $timestampCreated = time();
+            $leagueToken = $this->authProvider->getAccessToken('client_credentials', [
+                'clientId' => $clientId,
+                'clientSecret' => $clientSecret,
             ]);
-        } catch (\Exception $e) {
-            throw new \Exception('Authentication failed: could not connect to the authentication host.');
-        }
-        if ($response->getStatusCode() === 400) {
-            throw new \Exception('Authentication failed. ' . json_decode($response->getBody(), true)['error_description']);
-        }
-        if ($response->getStatusCode() !== 200) {
-            throw new \Exception('Authentication failed. ');
-        }
 
-        $rawToken = json_decode($response->getBody());
-        return new OAuthToken(
-            $rawToken->access_token ?? null,
-            $rawToken->token_type ?? null,
-            $rawToken->expires_in ?? null,
-            null,
-            null,
-            $timestampCreated,
-        );
+            return new OAuthToken(
+                $leagueToken->getToken(),
+                'Bearer',
+                $leagueToken->getExpires(),
+                $leagueToken->getRefreshToken()
+            );
+        } catch (IdentityProviderException $e) {
+            throw new \Exception('Authentication failed: ' . $e->getMessage());
+        }
     }
 }
