@@ -7,9 +7,9 @@
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  */
 
-defined('ABSPATH') || exit;
-
 namespace GbWeiss\includes;
+
+defined('ABSPATH') || exit;
 
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
