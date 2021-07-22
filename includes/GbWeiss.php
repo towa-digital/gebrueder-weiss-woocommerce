@@ -135,7 +135,7 @@ final class GbWeiss extends Singleton
                 self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::$languageDomain));
             }
         } catch (\Exception $e) {
-            self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed", self::$languageDomain));
+            self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed.", self::$languageDomain));
         }
     }
 
