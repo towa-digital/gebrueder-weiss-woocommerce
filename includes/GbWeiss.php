@@ -9,11 +9,10 @@
 
 namespace GbWeiss\includes;
 
+defined('ABSPATH') || exit;
+
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
-use GbWeiss\includes\OAuth\OAuthToken;
-
-defined('ABSPATH') || exit;
 
 /**
  * Main GbWeiss class
@@ -114,6 +113,7 @@ final class GbWeiss extends Singleton
      */
     public function initActions(): void
     {
+        \add_action('admin_init', [$this, 'showErrorMessageIfSelectedOrderStatesDoNotExist']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
     }
 
@@ -134,7 +134,7 @@ final class GbWeiss extends Singleton
                 self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::$languageDomain));
             }
         } catch (\Exception $e) {
-            self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed", self::$languageDomain));
+            self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed.", self::$languageDomain));
         }
     }
 
@@ -154,7 +154,7 @@ final class GbWeiss extends Singleton
 
         if (!self::isWooCommerceActive()) {
             self::showWordpressAdminErrorMessage(
-                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed.", self::$languageDomain)
+                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed and active.", self::$languageDomain)
             );
             return false;
         }
