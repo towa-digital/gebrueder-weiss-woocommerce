@@ -151,7 +151,7 @@ final class GbWeiss extends Singleton
         $clientId = get_option('gbw_client_id', false);
         $clientSecret = get_option('gbw_client_secret', false);
 
-        $this->updateTokenInDatabase($this->authenticationClient->authenticate($clientId, $clientSecret));
+        return $this->updateTokenInDatabase($this->authenticationClient->authenticate($clientId, $clientSecret));
     }
 
     /**
