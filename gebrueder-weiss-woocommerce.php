@@ -25,6 +25,7 @@ require __DIR__ . '/vendor/autoload.php';
 use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OrderStateRepository;
+use League\OAuth2\Client\Provider\GenericProvider;
 
 /**
  * Use Dotenv to set required environment variables and load .env file in root
@@ -38,11 +39,38 @@ add_action("init", function () {
     };
 
     $plugin = GbWeiss::getInstance();
-    $authenticationClient = new OAuthAuthenticator(new GuzzleHttp\Client());
 
-    $authEndpoint = array_key_exists('GEBRUEDER_WEISS_OAUTH_URL', $_ENV) ? $_ENV['GEBRUEDER_WEISS_OAUTH_URL'] : "https://apitest.gw-world.com:443/authorize";
-    $authenticationClient->setAuthenticationEndpoint($authEndpoint);
+
+    $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://apitest.gw-world.com:443/token');
+
+    $authProvider = new GenericProvider([
+        // Has to be set as non-empty string to instantiate provider.
+        'clientId'                => 'clientId',
+        // Has to be set as non-empty string to instantiate provider.
+        'clientSecret'            => 'clientSecret',
+        'redirectUri'             => null,
+        'urlAuthorize'            => null,
+        'urlAccessToken'          => $tokenEndpoint,
+        'urlResourceOwnerDetails' => null
+    ]);
+    $authenticationClient = new OAuthAuthenticator($authProvider);
+
+
     $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->initialize();
 });
+
+if (!function_exists('env')) {
+    /**
+     * Retrieves variable value from .env or default value.
+     *
+     * @param string $varName the name of the variable defined in the .env.
+     * @param string $defaultValue default value to be returned if variable not found.
+     * @return string
+     */
+    function env(string $varName, string $defaultValue = null): string
+    {
+        return array_key_exists($varName, $_ENV) ? $_ENV[$varName] : $defaultValue;
+    }
+}

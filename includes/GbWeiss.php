@@ -13,6 +13,9 @@ defined('ABSPATH') || exit;
 
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
+use GbWeiss\includes\OAuth\OAuthToken;
+
+defined('ABSPATH') || exit;
 
 /**
  * Main GbWeiss class
@@ -127,7 +130,6 @@ final class GbWeiss extends Singleton
 
         try {
             $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
-
             if ($token && $token->isValid()) {
                 self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
             } else {
@@ -139,8 +141,43 @@ final class GbWeiss extends Singleton
     }
 
     /**
+     *  Requests a new OAuthToken and stores the accessToken in
+     *  the ws_options table
+     *
+     *  @throws \Exception If the token could not be saved.
+     */
+    public function updateAuthToken(): bool
+    {
+        $clientId = get_option('gbw_client_id', false);
+        $clientSecret = get_option('gbw_client_secret', false);
+
+        return $this->updateTokenInDatabase($this->authenticationClient->authenticate($clientId, $clientSecret));
+    }
+
+    /**
+     * Returns the currently stored Access token.
+     *
+     * @return string
+     */
+    public function getAccessToken(): string
+    {
+        return get_option('gbw_accessToken', false);
+    }
+
+    /**
+     * Updates the access token in the database.
+     *
+     * @param OAuthToken $token the token to store.
+     * @return bool
+     */
+    private function updateTokenInDatabase(OAuthToken $token): bool
+    {
+        return update_option('gbw_accessToken', $token->getAccessToken());
+    }
+
+    /**
      * Checks whether the plugin is compatible with the current
-     *  WordPress installation and shows error messages
+     * WordPress installation and shows error messages
      * for compatibility issues in the admin panel.
      */
     public static function checkPluginCompatabilityAndPrintErrorMessages(): bool
