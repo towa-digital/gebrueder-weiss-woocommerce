@@ -13,6 +13,7 @@ defined('ABSPATH') || exit;
 
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
+use GbWeiss\includes\OAuth\OAuthToken;
 
 defined('ABSPATH') || exit;
 
@@ -140,8 +141,19 @@ final class GbWeiss extends Singleton
     }
 
     /**
+     * Updates the token in the database.
+     *
+     * @param OAuthToken $token the token to Store.
+     * @return bool
+     */
+    public function updateTokenInDatabase(OAuthToken $token): bool
+    {
+        return update_option('gbw_accessToken', $token->getAccessToken());
+    }
+
+    /**
      * Checks whether the plugin is compatible with the current
-     *  WordPress installation and shows error messages
+     * WordPress installation and shows error messages
      * for compatibility issues in the admin panel.
      */
     public static function checkPluginCompatabilityAndPrintErrorMessages(): bool
