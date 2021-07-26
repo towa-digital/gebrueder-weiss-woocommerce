@@ -11,6 +11,9 @@
 
 namespace GbWeiss\includes\OAuth;
 
+defined('ABSPATH') || exit;
+
+use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 
 /**
@@ -28,15 +31,15 @@ class OAuthAuthenticator
     /**
      * Client Provider Object.
      *
-     * @param object $authProvider the oAuth authProvider.
+     * @param GenericProvider $authProvider the oAuth authProvider.
      */
 
     /**
      * Constructor.
      *
-     * @param object $authProvider client object.
+     * @param GenericProvider $authProvider client object.
      */
-    public function __construct($authProvider)
+    public function __construct(GenericProvider $authProvider)
     {
         $this->authProvider = $authProvider;
     }

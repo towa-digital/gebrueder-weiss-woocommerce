@@ -14,6 +14,8 @@ defined('ABSPATH') || exit;
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
 
+defined('ABSPATH') || exit;
+
 /**
  * Main GbWeiss class
  */
@@ -46,13 +48,6 @@ final class GbWeiss extends Singleton
      * @var OrderStateRepository
      */
     private $orderStateRepository;
-
-    /**
-     * Access Token retrieved from authentication
-     *
-     * @var String
-     */
-    private $accessToken = null;
 
     /**
      * Initialize GbWeiss Plugin
