@@ -23,7 +23,7 @@ use Mockery;
 class TokenTest extends TestCase
 {
     /**
-     * Test if the client can authenticate against OAuthAuthentication
+     * Test if an Access Token can be retrieved and stored in the options table.
      */
     public function test_retrieve_and_store_token()
     {
