@@ -15,12 +15,9 @@ If you want to develop with this plugin, you would want to clone the repo and ru
 
 The Project contains automated tests which can be run locally with `phpunit` from the commandline and the root of the plugin
 
-run the auth mock server: `npx oauth2-mock-server -p 8887`
 ### Important Note
 
 - if you want to use intellisense in your tests, make sure the tests folder of `vendor/wordpress/wordpress/tests/includes` is added to your intellisense language server includes, AND that its not ignored by a pattern.
-run the auth mock server: `npx oauth2-mock-server -p 8887`
-
 
 ### Setup
 
