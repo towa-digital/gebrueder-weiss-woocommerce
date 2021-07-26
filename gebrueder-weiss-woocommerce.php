@@ -62,14 +62,16 @@ add_action("init", function () {
     $plugin->updateToken();
 });
 
-/**
- * Retrieves variable value from .env or default value.
- *
- * @param string $varName the name of the variable defined in the .env.
- * @param string $defaultValue default value to be returned if variable not found.
- * @return string
- */
-function env(string $varName, string $defaultValue = null): string
-{
-    return array_key_exists($varName, $_ENV) ? $_ENV[$varName] : $defaultValue;
+if (!function_exists('env')) {
+    /**
+     * Retrieves variable value from .env or default value.
+     *
+     * @param string $varName the name of the variable defined in the .env.
+     * @param string $defaultValue default value to be returned if variable not found.
+     * @return string
+     */
+    function env(string $varName, string $defaultValue = null): string
+    {
+        return array_key_exists($varName, $_ENV) ? $_ENV[$varName] : $defaultValue;
+    }
 }
