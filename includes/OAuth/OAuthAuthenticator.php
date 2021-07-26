@@ -66,7 +66,6 @@ class OAuthAuthenticator
     public function authenticate(string $clientId, string $clientSecret): OAuthToken
     {
         try {
-            $timestampCreated = time();
             $leagueToken = $this->authProvider->getAccessToken('client_credentials', [
                 'clientId' => $clientId,
                 'clientSecret' => $clientSecret,
