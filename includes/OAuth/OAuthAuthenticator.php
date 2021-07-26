@@ -63,7 +63,7 @@ class OAuthAuthenticator
      * @throws \Exception With message.
      * @return string
      */
-    public function authenticate(string $clientId, string $clientSecret): OAuthToken
+    public function getToken(string $clientId, string $clientSecret): OAuthToken
     {
         try {
             $leagueToken = $this->authProvider->getAccessToken('client_credentials', [

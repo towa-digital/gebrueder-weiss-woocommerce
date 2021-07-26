@@ -129,7 +129,7 @@ final class GbWeiss extends Singleton
         $clientSecret = get_option('gbw_client_secret', false);
 
         try {
-            $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
+            $token = $this->authenticationClient->getToken($clientId, $clientSecret);
             if ($token && $token->isValid()) {
                 self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
             } else {
@@ -141,12 +141,35 @@ final class GbWeiss extends Singleton
     }
 
     /**
-     * Updates the token in the database.
+     *  Requests a new OAuthToken and stores the accessToken in
+     *  the ws_options table
      *
-     * @param OAuthToken $token the token to Store.
+     *  @throws \Exception If the token could not be saved.
+     */
+    public function updateToken(): bool
+    {
+        $clientId = get_option('gbw_client_id', false);
+        $clientSecret = get_option('gbw_client_secret', false);
+
+        try {
+            $token = $this->authenticationClient->getToken($clientId, $clientSecret);
+            if ($token->isValid()) {
+                return $this->updateTokenInDatabase($token);
+            } else {
+                return false;
+            }
+        } catch (\Exception $e) {
+            throw new \Exception($e);
+        }
+    }
+
+    /**
+     * Updates the access token in the database.
+     *
+     * @param OAuthToken $token the token to store.
      * @return bool
      */
-    public function updateTokenInDatabase(OAuthToken $token): bool
+    private function updateTokenInDatabase(OAuthToken $token): bool
     {
         return update_option('gbw_accessToken', $token->getAccessToken());
     }
