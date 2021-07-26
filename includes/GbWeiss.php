@@ -51,7 +51,7 @@ final class GbWeiss extends Singleton
     private $orderStateRepository;
 
     /**
-     * Initialize GbWeiss Plugin
+     * Option Page Slug
      */
     const OPTIONPAGESLUG = 'gbw-woocommerce';
 
@@ -129,7 +129,7 @@ final class GbWeiss extends Singleton
         $clientSecret = get_option('gbw_client_secret', false);
 
         try {
-            $token = $this->authenticationClient->getToken($clientId, $clientSecret);
+            $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
             if ($token && $token->isValid()) {
                 self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
             } else {
@@ -146,21 +146,26 @@ final class GbWeiss extends Singleton
      *
      *  @throws \Exception If the token could not be saved.
      */
-    public function updateToken(): bool
+    public function updateAuthToken(): bool
     {
         $clientId = get_option('gbw_client_id', false);
         $clientSecret = get_option('gbw_client_secret', false);
 
         try {
-            $token = $this->authenticationClient->getToken($clientId, $clientSecret);
-            if ($token->isValid()) {
-                return $this->updateTokenInDatabase($token);
-            } else {
-                return false;
-            }
+            return $this->updateTokenInDatabase($this->authenticationClient->authenticate($clientId, $clientSecret));
         } catch (\Exception $e) {
             throw new \Exception($e);
         }
+    }
+
+    /**
+     * Returns the currently stored Access token.
+     *
+     * @return string
+     */
+    public function getAccessToken(): string
+    {
+        return get_option('gbw_accessToken', false);
     }
 
     /**

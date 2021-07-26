@@ -38,7 +38,7 @@ class OAuthAuthenticatorTest extends TestCase
               ])
           );
         $authenticator = new OAuthAuthenticator($mock);
-        $authenticationToken = $authenticator->getToken('1234', '4567');
+        $authenticationToken = $authenticator->authenticate('1234', '4567');
         $this->assertEquals('MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3', $authenticationToken->getAccessToken());
     }
 
@@ -52,7 +52,7 @@ class OAuthAuthenticatorTest extends TestCase
           ->andThrow(new IdentityProviderException('Invalid parameters.', 500, ''));
         $authenticator = new OAuthAuthenticator($mock);
         try {
-            $authenticator->getToken('1234', '4567');
+            $authenticator->authenticate('1234', '4567');
             $this->assertEquals(true, false);
         } catch (\Exception $e) {
             $this->assertStringContainsString('Authentication failed', $e->getMessage());

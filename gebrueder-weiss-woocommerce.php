@@ -59,7 +59,6 @@ add_action("init", function () {
     $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->initialize();
-    $plugin->updateToken();
 });
 
 if (!function_exists('env')) {
