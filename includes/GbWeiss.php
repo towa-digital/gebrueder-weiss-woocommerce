@@ -61,6 +61,13 @@ final class GbWeiss extends Singleton
     private $authenticationClient = null;
 
     /**
+     * Repository to retrieve plugin settings.
+     *
+     * @var SettingsRepository
+     */
+    private $settingsRepository = null;
+
+    /**
      * Initializes the plugin.
      *
      * @return void
@@ -306,6 +313,17 @@ final class GbWeiss extends Singleton
     public function setAuthenticationClient(OAuthAuthenticator $client): void
     {
         $this->authenticationClient = $client;
+    }
+
+    /**
+     * Sets the settings repository.
+     *
+     * @param SettingsRepository $settingsRepository The settings repository instance.
+     * @return void
+     */
+    public function setSettingsRepository(SettingsRepository $settingsRepository): void
+    {
+        $this->settingsRepository = $settingsRepository;
     }
 
     /**
