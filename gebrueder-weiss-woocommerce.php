@@ -25,6 +25,7 @@ require __DIR__ . '/vendor/autoload.php';
 use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OrderStateRepository;
+use GbWeiss\includes\SettingsRepository;
 use League\OAuth2\Client\Provider\GenericProvider;
 
 /**
@@ -58,6 +59,7 @@ add_action("init", function () {
 
     $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
+    $plugin->setSettingsRepository(new SettingsRepository());
     $plugin->initialize();
 });
 
