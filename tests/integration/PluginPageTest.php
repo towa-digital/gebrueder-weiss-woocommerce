@@ -6,7 +6,7 @@ use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\Option;
 use GbWeiss\includes\OptionPage;
 
-class TestPluginPage extends \WP_UnitTestCase
+class PluginPageTest extends \WP_UnitTestCase
 {
     public function test_if_option_registration_registers_settings()
     {

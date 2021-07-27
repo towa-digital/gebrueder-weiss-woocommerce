@@ -4,7 +4,7 @@ namespace Tests;
 
 use GbWeiss\includes\GbWeiss;
 
-class TestPluginInitialization extends \WP_UnitTestCase
+class PluginInitializationTest extends \WP_UnitTestCase
 {
     public function test_it_registers_an_init_hook()
     {
