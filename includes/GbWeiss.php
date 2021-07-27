@@ -15,8 +15,6 @@ use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OAuth\OAuthToken;
 
-defined('ABSPATH') || exit;
-
 /**
  * Main GbWeiss class
  */
@@ -118,6 +116,7 @@ final class GbWeiss extends Singleton
     {
         \add_action('admin_init', [$this, 'showErrorMessageIfSelectedOrderStatesDoNotExist']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
+        \add_action('woocommerce_order_status_changed', [$this, "wooCommerceOrderStatusChanged"], 10, 4);
     }
 
     /**
@@ -315,6 +314,19 @@ final class GbWeiss extends Singleton
                 <?php
             }
         );
+    }
+
+    /**
+     * The action that should be executed when an WooCommerce Order status changes.
+     *
+     * @param integer $orderId  Id for the affected order.
+     * @param string  $from      Original state.
+     * @param string  $to        New state.
+     * @param object  $order     Order object.
+     * @return void
+     */
+    public function wooCommerceOrderStatusChanged(int $orderId, string $from, string $to, object $order)
+    {
     }
 
     /**
