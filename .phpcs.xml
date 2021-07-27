@@ -27,4 +27,7 @@
     <rule ref="Squiz.Commenting">
         <exclude-pattern>/tests/*.php</exclude-pattern>
     </rule>
+    <rule ref="Generic.Commenting.DocComment">
+        <exclude-pattern>/tests/*.php</exclude-pattern>
+    </rule>
 </ruleset>
