@@ -9,18 +9,12 @@
 
 namespace Tests;
 
-use PHPUnit\Framework\TestCase;
 use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OAuth\OAuthToken;
-
-
 use Mockery;
 
-/**
- * Sample test case.
- */
-class TokenTest extends TestCase
+class TokenTest extends \WP_UnitTestCase
 {
     /**
      * Test if an Access Token can be retrieved and stored in the options table.
