@@ -1,13 +1,6 @@
 <?php
-/**
- * Class OAuthAuthenticatorTest
- *
- * @package GbWeiss
- * @author Towa Digital <developer@towa.at>
- * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
- */
 
-namespace Tests;
+namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;

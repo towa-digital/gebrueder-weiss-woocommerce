@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Tests\Integration;
 
 use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\OrderStateRepository;
