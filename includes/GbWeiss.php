@@ -21,6 +21,11 @@ use GbWeiss\includes\OAuth\OAuthToken;
 final class GbWeiss extends Singleton
 {
     /**
+     * Option Page Slug
+     */
+    const OPTIONPAGESLUG = 'gbw-woocommerce';
+
+    /**
      * The single instance of the class.
      *
      * @var GbWeiss
@@ -47,11 +52,6 @@ final class GbWeiss extends Singleton
      * @var OrderStateRepository
      */
     private $orderStateRepository;
-
-    /**
-     * Option Page Slug
-     */
-    const OPTIONPAGESLUG = 'gbw-woocommerce';
 
     /**
      * Authentication client for the API Token.
@@ -95,16 +95,6 @@ final class GbWeiss extends Singleton
         $optionsPage->addTab($fulfillmentTab);
 
         $this->setOptionPage($optionsPage);
-    }
-
-    /**
-     * Sets the OAuthAuthentication client
-     *
-     * @param OAuthAuthenticator $client used for oauth authentication.
-     */
-    public function setAuthenticationClient(OAuthAuthenticator $client): void
-    {
-        $this->authenticationClient = $client;
     }
 
     /**
@@ -212,6 +202,113 @@ final class GbWeiss extends Singleton
     }
 
     /**
+     * The action that should be executed when an WooCommerce Order status changes.
+     *
+     * @param integer $orderId  Id for the affected order.
+     * @param string  $from      Original state.
+     * @param string  $to        New state.
+     * @param object  $order     Order object.
+     * @return void
+     */
+    public function wooCommerceOrderStatusChanged(int $orderId, string $from, string $to, object $order)
+    {
+    }
+
+    /**
+     * Render Option Page
+     *
+     * @return void
+     */
+    public function renderOptionPage(): void
+    {
+        $this->optionsPage->render();
+    }
+
+    /**
+     * Adds Options Page for Plugin under Settings
+     *
+     * @return void
+     */
+    public function addPluginPageToMenu(): void
+    {
+        \add_options_page(
+            __('options', 'gbw-woocommerce'),
+            __('Gebrüder Weiss Woocommerce', 'gbw-woocommerce'),
+            'manage_options',
+            self::OPTIONPAGESLUG,
+            [$this, 'renderOptionPage']
+        );
+    }
+
+    /**
+     * Register uninstall hook
+     *
+     * @return void
+     */
+    public function registerUninstallHook(): void
+    {
+        \register_uninstall_hook(__FILE__, 'uninstall');
+    }
+
+    /**
+     * Uninstall Plugin
+     *
+     * @return void
+     */
+    public static function uninstall(): void
+    {
+        $plugin = self::getInstance();
+
+        foreach ($plugin->optionsPage->getTabs() as $tab) {
+            foreach ($tab->options as $option) {
+                delete_option($option->slug);
+            }
+        }
+    }
+
+    /**
+     * Set Option Page of Plugin
+     *
+     * @param OptionPage $optionPage Options Page to be registered.
+     * @return void
+     */
+    public function setOptionPage(OptionPage $optionPage): void
+    {
+        $this->optionsPage = $optionPage;
+    }
+
+    /**
+     * Getter for the registered option page
+     *
+     * @return OptionPage|null
+     */
+    public function getOptionsPage(): ?OptionPage
+    {
+        return $this->optionsPage;
+    }
+
+    /**
+     * Sets the instance for the order state repository
+     *
+     * @param OrderStateRepository $orderStateRepository The order state repository.
+     * @return void
+     */
+    public function setOrderStateRepository(OrderStateRepository $orderStateRepository)
+    {
+        $this->orderStateRepository = $orderStateRepository;
+    }
+
+    /**
+     * Sets the OAuthAuthentication client
+     *
+     * @param OAuthAuthenticator $client used for oauth authentication.
+     */
+    public function setAuthenticationClient(OAuthAuthenticator $client): void
+    {
+        $this->authenticationClient = $client;
+    }
+
+    /**
      * Checks if the configured value for the given fulfillment setting is valid.
      *
      * @param string $optionName The name of the WordPress option.
@@ -314,102 +411,5 @@ final class GbWeiss extends Singleton
                 <?php
             }
         );
-    }
-
-    /**
-     * The action that should be executed when an WooCommerce Order status changes.
-     *
-     * @param integer $orderId  Id for the affected order.
-     * @param string  $from      Original state.
-     * @param string  $to        New state.
-     * @param object  $order     Order object.
-     * @return void
-     */
-    public function wooCommerceOrderStatusChanged(int $orderId, string $from, string $to, object $order)
-    {
-    }
-
-    /**
-     * Set Option Page of Plugin
-     *
-     * @param OptionPage $optionPage Options Page to be registered.
-     * @return void
-     */
-    public function setOptionPage(OptionPage $optionPage): void
-    {
-        $this->optionsPage = $optionPage;
-    }
-
-    /**
-     * Getter for the registered option page
-     *
-     * @return OptionPage|null
-     */
-    public function getOptionsPage(): ?OptionPage
-    {
-        return $this->optionsPage;
-    }
-
-    /**
-     * Sets the instance for the order state repository
-     *
-     * @param OrderStateRepository $orderStateRepository The order state repository.
-     * @return void
-     */
-    public function setOrderStateRepository(OrderStateRepository $orderStateRepository)
-    {
-        $this->orderStateRepository = $orderStateRepository;
-    }
-
-    /**
-     * Render Option Page
-     *
-     * @return void
-     */
-    public function renderOptionPage(): void
-    {
-        $this->optionsPage->render();
-    }
-
-    /**
-     * Adds Options Page for Plugin under Settings
-     *
-     * @return void
-     */
-    public function addPluginPageToMenu(): void
-    {
-        \add_options_page(
-            __('options', 'gbw-woocommerce'),
-            __('Gebrüder Weiss Woocommerce', 'gbw-woocommerce'),
-            'manage_options',
-            self::OPTIONPAGESLUG,
-            [$this, 'renderOptionPage']
-        );
-    }
-
-    /**
-     * Register uninstall hook
-     *
-     * @return void
-     */
-    public function registerUninstallHook(): void
-    {
-        \register_uninstall_hook(__FILE__, 'uninstall');
-    }
-
-    /**
-     * Uninstall Plugin
-     *
-     * @return void
-     */
-    public static function uninstall(): void
-    {
-        $plugin = self::getInstance();
-
-        foreach ($plugin->optionsPage->getTabs() as $tab) {
-            foreach ($tab->options as $option) {
-                delete_option($option->slug);
-            }
-        }
     }
 }
