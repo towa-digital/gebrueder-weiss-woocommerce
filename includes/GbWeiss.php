@@ -15,13 +15,16 @@ use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OAuth\OAuthToken;
 
-defined('ABSPATH') || exit;
-
 /**
  * Main GbWeiss class
  */
 final class GbWeiss extends Singleton
 {
+    /**
+     * Option Page Slug
+     */
+    const OPTIONPAGESLUG = 'gbw-woocommerce';
+
     /**
      * The single instance of the class.
      *
@@ -51,16 +54,18 @@ final class GbWeiss extends Singleton
     private $orderStateRepository;
 
     /**
-     * Option Page Slug
-     */
-    const OPTIONPAGESLUG = 'gbw-woocommerce';
-
-    /**
      * Authentication client for the API Token.
      *
      * @var OAuthAuthenticator
      */
     private $authenticationClient = null;
+
+    /**
+     * Repository to retrieve plugin settings.
+     *
+     * @var SettingsRepository
+     */
+    private $settingsRepository = null;
 
     /**
      * Initializes the plugin.
@@ -100,16 +105,6 @@ final class GbWeiss extends Singleton
     }
 
     /**
-     * Sets the OAuthAuthentication client
-     *
-     * @param OAuthAuthenticator $client used for oauth authentication.
-     */
-    public function setAuthenticationClient(OAuthAuthenticator $client): void
-    {
-        $this->authenticationClient = $client;
-    }
-
-    /**
      * Initializes Wordpress actions.
      *
      * @return void
@@ -118,6 +113,7 @@ final class GbWeiss extends Singleton
     {
         \add_action('admin_init', [$this, 'showErrorMessageIfSelectedOrderStatesDoNotExist']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
+        \add_action('woocommerce_order_status_changed', [$this, "wooCommerceOrderStatusChanged"], 10, 4);
     }
 
     /**
@@ -125,8 +121,8 @@ final class GbWeiss extends Singleton
      */
     public function validateCredentials(): void
     {
-        $clientId = get_option('gbw_client_id', false);
-        $clientSecret = get_option('gbw_client_secret', false);
+        $clientId = $this->settingsRepository->getClientId();
+        $clientSecret = $this->settingsRepository->getClientSecret();
 
         try {
             $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
@@ -146,33 +142,14 @@ final class GbWeiss extends Singleton
      *
      *  @throws \Exception If the token could not be saved.
      */
-    public function updateAuthToken(): bool
+    public function updateAuthToken(): void
     {
-        $clientId = get_option('gbw_client_id', false);
-        $clientSecret = get_option('gbw_client_secret', false);
+        $clientId = $this->settingsRepository->getClientId();
+        $clientSecret = $this->settingsRepository->getClientSecret();
 
-        return $this->updateTokenInDatabase($this->authenticationClient->authenticate($clientId, $clientSecret));
-    }
+        $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
 
-    /**
-     * Returns the currently stored Access token.
-     *
-     * @return string
-     */
-    public function getAccessToken(): string
-    {
-        return get_option('gbw_accessToken', false);
-    }
-
-    /**
-     * Updates the access token in the database.
-     *
-     * @param OAuthToken $token the token to store.
-     * @return bool
-     */
-    private function updateTokenInDatabase(OAuthToken $token): bool
-    {
-        return update_option('gbw_accessToken', $token->getAccessToken());
+        $this->settingsRepository->setAccessToken($token->getAccessToken());
     }
 
     /**
@@ -207,22 +184,148 @@ final class GbWeiss extends Singleton
      */
     public function showErrorMessageIfSelectedOrderStatesDoNotExist(): void
     {
-        $this->validateFulfillmentSetting("gbw_fulfillmentState", "Fulfillment State");
-        $this->validateFulfillmentSetting("gbw_fulfilledState", "Fulfilled State");
-        $this->validateFulfillmentSetting("gbw_fulfillmentErrorState", "Fulfillment Error State");
+        $this->validateFulfillmentSetting($this->settingsRepository->getFulfillmentState(), "Fulfillment State");
+        $this->validateFulfillmentSetting($this->settingsRepository->getFulfilledState(), "Fulfilled State");
+        $this->validateFulfillmentSetting($this->settingsRepository->getFulfillmentErrorState(), "Fulfillment Error State");
+    }
+
+    /**
+     * The action that should be executed when an WooCommerce Order status changes.
+     *
+     * @param integer $orderId  Id for the affected order.
+     * @param string  $from      Original state.
+     * @param string  $to        New state.
+     * @param object  $order     Order object.
+     * @return void
+     */
+    public function wooCommerceOrderStatusChanged(int $orderId, string $from, string $to, object $order)
+    {
+        $fulfillmentState = $this->settingsRepository->getFulfillmentState();
+
+        // The WooCommerce order states need to have a wc- prefix. The prefix is missing when it gets passed to this function.
+        $prefixedTargetState = "wc-" . $to;
+
+        if (is_null($fulfillmentState) || $fulfillmentState !== $prefixedTargetState) {
+            return;
+        }
+
+        // Send request.
+    }
+
+    /**
+     * Render Option Page
+     *
+     * @return void
+     */
+    public function renderOptionPage(): void
+    {
+        $this->optionsPage->render();
+    }
+
+    /**
+     * Adds Options Page for Plugin under Settings
+     *
+     * @return void
+     */
+    public function addPluginPageToMenu(): void
+    {
+        \add_options_page(
+            __('options', 'gbw-woocommerce'),
+            __('Gebrüder Weiss Woocommerce', 'gbw-woocommerce'),
+            'manage_options',
+            self::OPTIONPAGESLUG,
+            [$this, 'renderOptionPage']
+        );
+    }
+
+    /**
+     * Register uninstall hook
+     *
+     * @return void
+     */
+    public function registerUninstallHook(): void
+    {
+        \register_uninstall_hook(__FILE__, 'uninstall');
+    }
+
+    /**
+     * Uninstall Plugin
+     *
+     * @return void
+     */
+    public static function uninstall(): void
+    {
+        $plugin = self::getInstance();
+
+        foreach ($plugin->optionsPage->getTabs() as $tab) {
+            foreach ($tab->options as $option) {
+                delete_option($option->slug);
+            }
+        }
+    }
+
+    /**
+     * Set Option Page of Plugin
+     *
+     * @param OptionPage $optionPage Options Page to be registered.
+     * @return void
+     */
+    public function setOptionPage(OptionPage $optionPage): void
+    {
+        $this->optionsPage = $optionPage;
+    }
+
+    /**
+     * Getter for the registered option page
+     *
+     * @return OptionPage|null
+     */
+    public function getOptionsPage(): ?OptionPage
+    {
+        return $this->optionsPage;
+    }
+
+    /**
+     * Sets the instance for the order state repository
+     *
+     * @param OrderStateRepository $orderStateRepository The order state repository.
+     * @return void
+     */
+    public function setOrderStateRepository(OrderStateRepository $orderStateRepository)
+    {
+        $this->orderStateRepository = $orderStateRepository;
+    }
+
+    /**
+     * Sets the OAuthAuthentication client
+     *
+     * @param OAuthAuthenticator $client used for oauth authentication.
+     */
+    public function setAuthenticationClient(OAuthAuthenticator $client): void
+    {
+        $this->authenticationClient = $client;
+    }
+
+    /**
+     * Sets the settings repository.
+     *
+     * @param SettingsRepository $settingsRepository The settings repository instance.
+     * @return void
+     */
+    public function setSettingsRepository(SettingsRepository $settingsRepository): void
+    {
+        $this->settingsRepository = $settingsRepository;
     }
 
     /**
      * Checks if the configured value for the given fulfillment setting is valid.
      *
-     * @param string $optionName The name of the WordPress option.
+     * @param string $optionValue The value of the fulfillment option.
      * @param string $displayName The name of the setting to be shown in error messages.
      * @return void
      */
-    private function validateFulfillmentSetting(string $optionName, string $displayName): void
+    private function validateFulfillmentSetting(string $optionValue, string $displayName): void
     {
-        $optionValue = \get_option($optionName);
-
         if (!$optionValue) {
             $this->showWordpressAdminErrorMessage(
                 __("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".", self::$languageDomain)
@@ -315,89 +418,5 @@ final class GbWeiss extends Singleton
                 <?php
             }
         );
-    }
-
-    /**
-     * Set Option Page of Plugin
-     *
-     * @param OptionPage $optionPage Options Page to be registered.
-     * @return void
-     */
-    public function setOptionPage(OptionPage $optionPage): void
-    {
-        $this->optionsPage = $optionPage;
-    }
-
-    /**
-     * Getter for the registered option page
-     *
-     * @return OptionPage|null
-     */
-    public function getOptionsPage(): ?OptionPage
-    {
-        return $this->optionsPage;
-    }
-
-    /**
-     * Sets the instance for the order state repository
-     *
-     * @param OrderStateRepository $orderStateRepository The order state repository.
-     * @return void
-     */
-    public function setOrderStateRepository(OrderStateRepository $orderStateRepository)
-    {
-        $this->orderStateRepository = $orderStateRepository;
-    }
-
-    /**
-     * Render Option Page
-     *
-     * @return void
-     */
-    public function renderOptionPage(): void
-    {
-        $this->optionsPage->render();
-    }
-
-    /**
-     * Adds Options Page for Plugin under Settings
-     *
-     * @return void
-     */
-    public function addPluginPageToMenu(): void
-    {
-        \add_options_page(
-            __('options', 'gbw-woocommerce'),
-            __('Gebrüder Weiss Woocommerce', 'gbw-woocommerce'),
-            'manage_options',
-            self::OPTIONPAGESLUG,
-            [$this, 'renderOptionPage']
-        );
-    }
-
-    /**
-     * Register uninstall hook
-     *
-     * @return void
-     */
-    public function registerUninstallHook(): void
-    {
-        \register_uninstall_hook(__FILE__, 'uninstall');
-    }
-
-    /**
-     * Uninstall Plugin
-     *
-     * @return void
-     */
-    public static function uninstall(): void
-    {
-        $plugin = self::getInstance();
-
-        foreach ($plugin->optionsPage->getTabs() as $tab) {
-            foreach ($tab->options as $option) {
-                delete_option($option->slug);
-            }
-        }
     }
 }

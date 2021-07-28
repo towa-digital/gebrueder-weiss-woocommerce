@@ -1,10 +1,12 @@
 <?php
 
-namespace Tests;
+namespace Tests\Integration;
 
 use GbWeiss\includes\GbWeiss;
+use GbWeiss\includes\OrderStateRepository;
+use Mockery;
 
-class TestPluginInitialization extends \WP_UnitTestCase
+class PluginInitializationTest extends \WP_UnitTestCase
 {
     public function test_it_registers_an_init_hook()
     {
@@ -31,9 +33,24 @@ class TestPluginInitialization extends \WP_UnitTestCase
         $this->assertFalse(GbWeiss::checkPluginCompatabilityAndPrintErrorMessages());
     }
 
-    public function test_it_does_not_passes_the_compatibility_check_with_woocommerce_active()
+    public function test_it_does_pass_the_compatibility_check_with_woocommerce_active()
     {
         update_option("active_plugins", ["woocommerce/woocommerce.php"]);
         $this->assertTrue(GbWeiss::checkPluginCompatabilityAndPrintErrorMessages());
+    }
+
+    public function test_it_registers_an_action_for_woocommerce_order_status()
+    {
+        global $wp_filter;
+        $mock = Mockery::mock(OrderStateRepository::class);
+        $mock->shouldReceive("getAllOrderStates")->andReturn([]);
+
+        /** @var GbWeiss */
+        $plugin = GbWeiss::getInstance();
+        $plugin->setOrderStateRepository($mock);
+        $plugin->initialize();
+
+        $numberOfInitFiltersAfterCheck = count($wp_filter['woocommerce_order_status_changed'][10]);
+        $this->assertSame(1, $numberOfInitFiltersAfterCheck);
     }
 }

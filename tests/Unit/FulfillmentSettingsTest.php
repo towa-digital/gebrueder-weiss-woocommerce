@@ -1,13 +1,6 @@
 <?php
-/**
- * Class SampleTest
- *
- * @package GbWeiss
- * @author Towa Digital <developer@towa.at>
- * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
- */
 
- namespace Tests;
+namespace Tests\Unit;
 
 use GbWeiss\includes\FulfillmentOptionsTab;
 
@@ -17,9 +10,6 @@ use GbWeiss\includes\FulfillmentOptionsTab;
 class FulfillmentSettingsTest extends \WP_UnitTestCase
 {
 
-    /**
-     * A single example test.
-     */
     public function test_it_has_the_woocommerce_order_states_as_options()
     {
         $states = [ "order-state-key" => "Order State Name" ];
