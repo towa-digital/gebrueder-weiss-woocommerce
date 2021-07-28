@@ -111,7 +111,7 @@ final class GbWeiss extends Singleton
      */
     public function initActions(): void
     {
-        \add_action('admin_init', [$this, 'showErrorMessageIfSelectedOrderStatesDoNotExist']);
+        \add_action('admin_init', [$this, 'validateSelectedFulfillmentStates']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
         \add_action('woocommerce_order_status_changed', [$this, "wooCommerceOrderStatusChanged"], 10, 4);
     }
@@ -182,11 +182,33 @@ final class GbWeiss extends Singleton
      *
      * @return void
      */
-    public function showErrorMessageIfSelectedOrderStatesDoNotExist(): void
+    public function validateSelectedFulfillmentStates(): void
     {
-        $this->validateFulfillmentSetting($this->settingsRepository->getFulfillmentState(), "Fulfillment State");
-        $this->validateFulfillmentSetting($this->settingsRepository->getFulfilledState(), "Fulfilled State");
-        $this->validateFulfillmentSetting($this->settingsRepository->getFulfillmentErrorState(), "Fulfillment Error State");
+        $fulfillmentState = $this->settingsRepository->getFulfillmentState();
+        $fulfilledState = $this->settingsRepository->getFulfilledState();
+        $fulfillmentErrorState = $this->settingsRepository->getFulfillmentErrorState();
+
+        $this->checkIfFulfillmentSettingExists($fulfillmentState, "Fulfillment State");
+        $this->checkIfFulfillmentSettingExists($fulfilledState, "Fulfilled State");
+        $this->checkIfFulfillmentSettingExists($fulfillmentErrorState, "Fulfillment Error State");
+
+        if ($fulfillmentState === $fulfilledState) {
+            $this->showWordpressAdminErrorMessage(
+                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfilled State are set to the same state.", self::$languageDomain)
+            );
+        }
+
+        if ($fulfillmentState === $fulfillmentErrorState) {
+            $this->showWordpressAdminErrorMessage(
+                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfillment Error State are set to the same state.", self::$languageDomain)
+            );
+        }
+
+        if ($fulfilledState === $fulfillmentErrorState) {
+            $this->showWordpressAdminErrorMessage(
+                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfilled State and Fulfillment Error State are set to the same state.", self::$languageDomain)
+            );
+        }
     }
 
     /**
@@ -324,7 +346,7 @@ final class GbWeiss extends Singleton
      * @param string $displayName The name of the setting to be shown in error messages.
      * @return void
      */
-    private function validateFulfillmentSetting(string $optionValue, string $displayName): void
+    private function checkIfFulfillmentSettingExists(string $optionValue, string $displayName): void
     {
         if (!$optionValue) {
             $this->showWordpressAdminErrorMessage(
