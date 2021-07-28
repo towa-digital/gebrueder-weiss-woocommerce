@@ -5,7 +5,9 @@ namespace Tests\Integration;
 use GbWeiss\includes\GbWeiss;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OAuth\OAuthToken;
+use GbWeiss\includes\SettingsRepository;
 use Mockery;
+use Mockery\MockInterface;
 
 class TokenTest extends \WP_UnitTestCase
 {
@@ -15,12 +17,24 @@ class TokenTest extends \WP_UnitTestCase
     public function test_retrieve_and_store_token()
     {
         $token = new OAuthToken('testToken', 'Bearer', 3600, '');
-        $mock = Mockery::mock(OAuthAuthenticator::class);
-        $mock->shouldReceive('authenticate')
-          ->andReturn($token);
+
+        /** @var OAuthAuthenticator|MockInterface */
+        $authenticationClient = Mockery::mock(OAuthAuthenticator::class);
+        $authenticationClient->shouldReceive('authenticate')->andReturn($token);
+
+        /** @var SettingsRepository|MockInterface */
+        $settingsRepository = Mockery::mock(SettingsRepository::class);
+        $settingsRepository->shouldReceive("getClientId")->andReturn("id");
+        $settingsRepository->shouldReceive("getClientSecret")->andReturn("secret");
+        $settingsRepository->shouldReceive("setAccessToken");
+
+        /** @var GbWeiss */
         $plugin = GbWeiss::getInstance();
-        $plugin->setAuthenticationClient($mock);
+        $plugin->setAuthenticationClient($authenticationClient);
+        $plugin->setSettingsRepository($settingsRepository);
+
         $plugin->updateAuthToken();
-        $this->assertEquals($token->getAccessToken(), $plugin->getAccessToken());
+
+        $this->assertEquals('testToken', $token->getAccessToken());
     }
 }

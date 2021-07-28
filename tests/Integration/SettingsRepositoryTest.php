@@ -59,4 +59,14 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
 
         $this->assertSame("test", $settingsRepository->getFulfillmentErrorState());
     }
+
+    public function test_it_can_set_the_auth_token()
+    {
+        $settingsRepository = new SettingsRepository();
+
+        $token = "token";
+        $settingsRepository->setAccessToken($token);
+
+        $this->assertSame($token, get_option("gbw_accessToken"));
+    }
 }

@@ -49,6 +49,17 @@ class SettingsRepository
     }
 
     /**
+     * Updates the access token in the wordpress options.
+     *
+     * @param string $token The access token.
+     * @return void
+     */
+    public function setAccessToken(string $token): void
+    {
+        $this->setOption("accessToken", $token);
+    }
+
+    /**
      * Reads the fulfillment state from the wordpress options
      *
      * @return string|null
@@ -87,5 +98,17 @@ class SettingsRepository
     private function getOption(string $name): ?string
     {
         return \get_option(Option::OPTIONS_PREFIX . $name, null);
+    }
+
+    /**
+     * Sets an wordpress option
+     *
+     * @param string $name Name of the option.
+     * @param mixed  $value New value for the option.
+     * @return void
+     */
+    private function setOption(string $name, $value): void
+    {
+        \update_option(Option::OPTIONS_PREFIX . $name, $value);
     }
 }

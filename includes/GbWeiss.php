@@ -121,8 +121,8 @@ final class GbWeiss extends Singleton
      */
     public function validateCredentials(): void
     {
-        $clientId = get_option('gbw_client_id', false);
-        $clientSecret = get_option('gbw_client_secret', false);
+        $clientId = $this->settingsRepository->getClientId();
+        $clientSecret = $this->settingsRepository->getClientSecret();
 
         try {
             $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
@@ -142,33 +142,14 @@ final class GbWeiss extends Singleton
      *
      *  @throws \Exception If the token could not be saved.
      */
-    public function updateAuthToken(): bool
+    public function updateAuthToken(): void
     {
-        $clientId = get_option('gbw_client_id', false);
-        $clientSecret = get_option('gbw_client_secret', false);
+        $clientId = $this->settingsRepository->getClientId();
+        $clientSecret = $this->settingsRepository->getClientSecret();
 
-        return $this->updateTokenInDatabase($this->authenticationClient->authenticate($clientId, $clientSecret));
-    }
+        $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
 
-    /**
-     * Returns the currently stored Access token.
-     *
-     * @return string
-     */
-    public function getAccessToken(): string
-    {
-        return get_option('gbw_accessToken', false);
-    }
-
-    /**
-     * Updates the access token in the database.
-     *
-     * @param OAuthToken $token the token to store.
-     * @return bool
-     */
-    private function updateTokenInDatabase(OAuthToken $token): bool
-    {
-        return update_option('gbw_accessToken', $token->getAccessToken());
+        $this->settingsRepository->setAccessToken($token->getAccessToken());
     }
 
     /**
@@ -203,9 +184,9 @@ final class GbWeiss extends Singleton
      */
     public function showErrorMessageIfSelectedOrderStatesDoNotExist(): void
     {
-        $this->validateFulfillmentSetting("gbw_fulfillmentState", "Fulfillment State");
-        $this->validateFulfillmentSetting("gbw_fulfilledState", "Fulfilled State");
-        $this->validateFulfillmentSetting("gbw_fulfillmentErrorState", "Fulfillment Error State");
+        $this->validateFulfillmentSetting($this->settingsRepository->getFulfillmentState(), "Fulfillment State");
+        $this->validateFulfillmentSetting($this->settingsRepository->getFulfilledState(), "Fulfilled State");
+        $this->validateFulfillmentSetting($this->settingsRepository->getFulfillmentErrorState(), "Fulfillment Error State");
     }
 
     /**
@@ -329,14 +310,12 @@ final class GbWeiss extends Singleton
     /**
      * Checks if the configured value for the given fulfillment setting is valid.
      *
-     * @param string $optionName The name of the WordPress option.
+     * @param string $optionValue The value of the fulfillment option.
      * @param string $displayName The name of the setting to be shown in error messages.
      * @return void
      */
-    private function validateFulfillmentSetting(string $optionName, string $displayName): void
+    private function validateFulfillmentSetting(string $optionValue, string $displayName): void
     {
-        $optionValue = \get_option($optionName);
-
         if (!$optionValue) {
             $this->showWordpressAdminErrorMessage(
                 __("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".", self::$languageDomain)
