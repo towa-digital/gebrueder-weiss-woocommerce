@@ -32,7 +32,7 @@ class TokenTest extends \WP_UnitTestCase
         $settingsRepository = Mockery::mock(SettingsRepository::class);
         $settingsRepository->shouldReceive("getClientId")->andReturn("id");
         $settingsRepository->shouldReceive("getClientSecret")->andReturn("secret");
-        $settingsRepository->shouldReceive("setAccessToken")->once();
+        $settingsRepository->shouldReceive("setAccessToken")->once()->withArgs([$token->getAccessToken()]);
 
         /** @var GbWeiss */
         $plugin = GbWeiss::getInstance();
