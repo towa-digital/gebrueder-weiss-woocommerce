@@ -11,6 +11,12 @@ use Mockery\MockInterface;
 
 class TokenTest extends \WP_UnitTestCase
 {
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        Mockery::close();
+    }
+
     /**
      * Test if an Access Token can be retrieved and stored in the options table.
      */
@@ -20,13 +26,13 @@ class TokenTest extends \WP_UnitTestCase
 
         /** @var OAuthAuthenticator|MockInterface */
         $authenticationClient = Mockery::mock(OAuthAuthenticator::class);
-        $authenticationClient->shouldReceive('authenticate')->andReturn($token);
+        $authenticationClient->shouldReceive('authenticate')->once()->andReturn($token);
 
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
         $settingsRepository->shouldReceive("getClientId")->andReturn("id");
         $settingsRepository->shouldReceive("getClientSecret")->andReturn("secret");
-        $settingsRepository->shouldReceive("setAccessToken");
+        $settingsRepository->shouldReceive("setAccessToken")->once();
 
         /** @var GbWeiss */
         $plugin = GbWeiss::getInstance();
