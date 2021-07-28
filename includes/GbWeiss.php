@@ -200,6 +200,16 @@ final class GbWeiss extends Singleton
      */
     public function wooCommerceOrderStatusChanged(int $orderId, string $from, string $to, object $order)
     {
+        $fulfillmentState = $this->settingsRepository->getFulfillmentState();
+
+        // The WooCommerce order states need to have a wc- prefix. The prefix is missing when it gets passed to this function.
+        $prefixedTargetState = "wc-" . $to;
+
+        if (is_null($fulfillmentState) || $fulfillmentState !== $prefixedTargetState) {
+            return;
+        }
+
+        // Send request.
     }
 
     /**
