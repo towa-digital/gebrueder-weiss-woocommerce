@@ -116,23 +116,4 @@ class WooCommerceOrderStatusChangedTest extends TestCase
 
         $order->shouldNotHaveReceived("save");
     }
-
-    public function test_it_does_not_update_the_order_state_after_a_failed_network_request()
-    {
-        /** @var MockInterface|WriteApi */
-        $writeApi = Mockery::mock(WriteApi::class);
-        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Unauthenticated", 401));
-        $writeApi->allows(["getConfig" => new Configuration()]);
-
-        $this->plugin->setWriteApiClient($writeApi);
-
-        /** @var MockInterface|stdClass */
-        $order = Mockery::mock("WC_Order");
-        $order->allows("set_status");
-        $order->allows("save");
-
-        $this->plugin->createLogisticsOrderAndUpdateOrderState($order);
-
-        $order->shouldNotHaveReceived("save");
-    }
 }
