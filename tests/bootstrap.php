@@ -32,6 +32,9 @@ require_once "{$_tests_dir}/includes/functions.php";
 function _manually_load_plugin(): void
 {
     require dirname(dirname(__FILE__)) . '/gebrueder-weiss-woocommerce.php';
+
+    // Load the WooCommerce plugin so we can use its classes in our WooCommerce Payments plugin.
+    require_once WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
 }
 
 tests_add_filter('muplugins_loaded', '_manually_load_plugin');

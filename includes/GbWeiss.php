@@ -13,7 +13,8 @@ defined('ABSPATH') || exit;
 
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
-use GbWeiss\includes\OAuth\OAuthToken;
+use Towa\GebruederWeissSDK\Api\WriteApi;
+use Towa\GebruederWeissSDK\ApiException;
 
 /**
  * Main GbWeiss class
@@ -66,6 +67,13 @@ final class GbWeiss extends Singleton
      * @var SettingsRepository
      */
     private $settingsRepository = null;
+
+    /**
+     * Client for writing to the Gebrueder Weiss API.
+     *
+     * @var WriteApi
+     */
+    private $writeApiClient = null;
 
     /**
      * Initializes the plugin.
@@ -231,7 +239,39 @@ final class GbWeiss extends Singleton
             return;
         }
 
-        // Send request.
+        $this->updateAuthToken();
+        $this->createLogisticsOrderAndUpdateOrderState($order);
+    }
+
+    /**
+     * Creates a logistics order using the Gebrueder Weiss API and updates the status of the WooCommerce order.
+     *
+     * @param object $order The WooCommerce order.
+     * @return void
+     */
+    public function createLogisticsOrderAndUpdateOrderState(object $order)
+    {
+        $logisticsOrder = LogisticsOrderFactory::buildFromWooCommerceOrder($order);
+        $authToken = $this->settingsRepository->getAccessToken();
+        $this->writeApiClient->getConfig()->setAccessToken($authToken);
+
+        try {
+            $this->writeApiClient->logisticsOrderPost($logisticsOrder);
+            $order->set_status("on-hold");
+            $order->save();
+        } catch (ApiException $exception) {
+            if ($exception->getCode() === 400) {
+                // handle faulty parameters.
+                return;
+            }
+
+            if ($exception->getCode() === 409) {
+                // handle conflict.
+                return;
+            }
+
+            // retry request.
+        }
     }
 
     /**
@@ -337,6 +377,17 @@ final class GbWeiss extends Singleton
     public function setSettingsRepository(SettingsRepository $settingsRepository): void
     {
         $this->settingsRepository = $settingsRepository;
+    }
+
+    /**
+     * Sets the client for writing to the Gebrueder Weiss API.
+     *
+     * @param WriteApi $client The client for writing to the api.
+     * @return void
+     */
+    public function setWriteApiClient(WriteApi $client): void
+    {
+        $this->writeApiClient = $client;
     }
 
     /**
