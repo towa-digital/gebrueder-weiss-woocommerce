@@ -7,6 +7,8 @@
 
 namespace GbWeiss\includes;
 
+defined('ABSPATH') || exit;
+
 /**
  * Repository for WooCommerce Order Statuses
  */

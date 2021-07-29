@@ -27,6 +27,7 @@ use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\SettingsRepository;
 use League\OAuth2\Client\Provider\GenericProvider;
+use Towa\GebruederWeissSDK\Api\WriteApi;
 
 /**
  * Use Dotenv to set required environment variables and load .env file in root
@@ -41,7 +42,7 @@ add_action("init", function () {
 
     $plugin = GbWeiss::getInstance();
 
-
+    $apiEndpoint = env('GEBRUEDER_WEISS_API_URL', 'https://apitest.gw-world.com:443/');
     $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://apitest.gw-world.com:443/token');
 
     $authProvider = new GenericProvider([
@@ -56,10 +57,13 @@ add_action("init", function () {
     ]);
     $authenticationClient = new OAuthAuthenticator($authProvider);
 
+    $writeApi = new WriteApi();
+    $writeApi->getConfig()->setHost($apiEndpoint);
 
     $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->setSettingsRepository(new SettingsRepository());
+    $plugin->setWriteApiClient($writeApi);
     $plugin->initialize();
 });
 

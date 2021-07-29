@@ -7,15 +7,12 @@ use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OAuth\OAuthToken;
 use GbWeiss\includes\SettingsRepository;
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
 
 class TokenTest extends \WP_UnitTestCase
 {
-    public function tearDown(): void
-    {
-        parent::tearDown();
-        Mockery::close();
-    }
+    use MockeryPHPUnitIntegration;
 
     /**
      * Test if an Access Token can be retrieved and stored in the options table.
