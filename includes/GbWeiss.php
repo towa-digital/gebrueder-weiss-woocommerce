@@ -75,6 +75,12 @@ final class GbWeiss extends Singleton
      */
     private $writeApiClient = null;
 
+    /** Order Controller to manipulate WooCommerce Orders.
+     *
+     * @var OrderController;
+     */
+     private $orderController = null;
+
     /**
      * Initializes the plugin.
      *
@@ -85,7 +91,10 @@ final class GbWeiss extends Singleton
         $this->initActions();
         $this->initOptionPage();
         $this->registerUninstallHook();
+        $this->orderController = new OrderController($this->settingsRepository);
     }
+
+
 
     /**
      * Initializes the option page.
