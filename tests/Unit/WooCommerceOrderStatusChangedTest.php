@@ -81,7 +81,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         $order->allows("set_status");
         $order->allows("save");
 
-        $this->plugin->createLogisticsOrderAndUpdateOrderState($order);
+        $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::SELECTED_FULFILLMENT_STATE, $order);
 
         $this->writeApi->shouldHaveReceived("logisticsOrderPost", [LogisticsOrder::class]);
     }
