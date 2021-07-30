@@ -30,7 +30,7 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
         $order->shouldHaveReceived('save');
     }
 
-    public function test_it_returns_on_callback_with_404()
+    public function test_it_returns_a_404_response_if_no_order_with_the_given_id_exists()
     {
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
@@ -41,7 +41,9 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
         $request->allows('get_params')->andReturn(['id' => 12]);
 
         $controller = new OrderController($settingsRepository);
-        $response = $controller->handleCallback($request);
+
+        $response = $controller->handleOrderUpdateRequest($request);
+
         $this->assertEquals(404, $response->status);
     }
 
@@ -58,7 +60,7 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
         $request->allows('get_params')->andReturn(['id' => $order->get_id()]);
 
         $controller = new OrderController($settingsRepository);
-        $response = $controller->handleCallback($request);
+        $response = $controller->handleOrderUpdateRequest($request);
         $this->assertEquals(200, $response->status);
     }
 }

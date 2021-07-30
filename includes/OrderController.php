@@ -38,7 +38,7 @@ class OrderController
         \add_action('rest_api_init', function () {
             register_rest_route(self::NAMESPACE, '/update/(?P<id>\d+)', array(
                 'methods' => 'POST',
-                'callback' => array($this, 'handleCallback')
+                'callback' => [$this, 'handleOrderUpdateRequest']
             ));
         });
     }
@@ -48,7 +48,7 @@ class OrderController
      *
      * @param \WP_REST_Request $request the post request.
      */
-    public function handleCallback(\WP_REST_Request $request): WP_REST_Response
+    public function handleOrderUpdateRequest(\WP_REST_Request $request): WP_REST_Response
     {
         $id = $request->get_params()['id'];
         try {
