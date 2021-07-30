@@ -25,7 +25,9 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
         $order->allows("save");
 
         $controller = new OrderController($settingsRepository);
+
         $controller->updateOrderStatus($order, 'wc-fulfilled');
+
         $order->shouldHaveReceived('set_status', ['wc-fulfilled']);
         $order->shouldHaveReceived('save');
     }
