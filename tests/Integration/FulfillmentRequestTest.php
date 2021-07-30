@@ -53,7 +53,7 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
         $this->assertEquals(404, $response->status);
     }
 
-    public function test_it_returns_on_callback_with_200()
+    public function test_it_returns_a_200_response_if_a_order_with_the_given_id_exists()
     {
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
