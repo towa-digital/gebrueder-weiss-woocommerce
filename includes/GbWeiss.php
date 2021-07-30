@@ -75,7 +75,7 @@ final class GbWeiss extends Singleton
      */
     private $writeApiClient = null;
 
-    /** Order Controller to manipulate WooCommerce Orders.
+    /** Order Controller that provides the callback handling.
      *
      * @var OrderController;
      */
