@@ -26,7 +26,9 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
 
         $controller = new OrderController($settingsRepository);
 
+
         $controller->updateOrderStatus($order, 'wc-fulfilled');
+
 
         $order->shouldHaveReceived('set_status', ['wc-fulfilled']);
         $order->shouldHaveReceived('save');
@@ -44,7 +46,9 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
 
         $controller = new OrderController($settingsRepository);
 
+
         $response = $controller->handleOrderUpdateRequest($request);
+
 
         $this->assertEquals(404, $response->status);
     }
@@ -62,7 +66,11 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
         $request->allows('get_params')->andReturn(['id' => $order->get_id()]);
 
         $controller = new OrderController($settingsRepository);
+
+
         $response = $controller->handleOrderUpdateRequest($request);
+
+
         $this->assertEquals(200, $response->status);
     }
 }
