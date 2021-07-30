@@ -75,6 +75,12 @@ final class GbWeiss extends Singleton
      */
     private $writeApiClient = null;
 
+    /** Order Controller that provides the callback handling.
+     *
+     * @var OrderController;
+     */
+     private $orderController = null;
+
     /**
      * Initializes the plugin.
      *
@@ -85,6 +91,7 @@ final class GbWeiss extends Singleton
         $this->initActions();
         $this->initOptionPage();
         $this->registerUninstallHook();
+        $this->orderController = new OrderController($this->settingsRepository);
     }
 
     /**
