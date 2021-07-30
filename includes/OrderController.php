@@ -2,7 +2,7 @@
 /**
  * Order Controller
  *
- * Used to manipulate WooCommerce Orders.
+ * Used to provide a callback used by the Gebrueder Weiss API.
  *
  * @package GbWeiss
  */
