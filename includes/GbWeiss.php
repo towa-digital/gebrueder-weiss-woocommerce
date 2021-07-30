@@ -94,8 +94,6 @@ final class GbWeiss extends Singleton
         $this->orderController = new OrderController($this->settingsRepository);
     }
 
-
-
     /**
      * Initializes the option page.
      *

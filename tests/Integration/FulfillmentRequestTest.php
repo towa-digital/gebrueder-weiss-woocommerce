@@ -8,7 +8,6 @@ use Mockery;
 use Mockery\MockInterface;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
-
 class FulfillmentRequestTest extends \WP_UnitTestCase
 {
     use MockeryPHPUnitIntegration;
@@ -17,9 +16,7 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
     {
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
-        $settingsRepository->allows([
-          'getFulfilledState' => 'wc-fulfilled'
-        ]);
+        $settingsRepository->allows(['getFulfilledState' => 'wc-fulfilled']);
 
         /** @var MockInterface|WC_Order */
         $order = Mockery::mock("WC_Order");
@@ -52,9 +49,7 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
     {
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
-        $settingsRepository->allows([
-          'getFulfilledState' => 'wc-fulfilled'
-        ]);
+        $settingsRepository->allows(['getFulfilledState' => 'wc-fulfilled']);
 
         $order = wc_create_order();
 

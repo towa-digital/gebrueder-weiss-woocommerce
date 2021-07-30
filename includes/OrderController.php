@@ -2,7 +2,7 @@
 /**
  * Order Controller
  *
- * Used to provide a callback used by the Gebrueder Weiss API.
+ * Used to provide the callback endpoint & handling.
  *
  * @package GbWeiss
  */
@@ -26,7 +26,6 @@ class OrderController
      * @var SettingsRepository
      */
     private $settings = null;
-
 
     /**
      * Constructor.
@@ -59,7 +58,6 @@ class OrderController
         }
 
         $this->updateOrderStatus($order, $this->settings->getFulfilledState());
-
         return new WP_REST_Response(null, 200, null);
     }
 
