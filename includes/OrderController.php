@@ -18,7 +18,7 @@ defined('ABSPATH') || exit;
  */
 class OrderController
 {
-    private const NAMESPACE = 'gebrueder-weiss-woocommerce';
+    private const NAMESPACE = 'gebrueder-weiss-woocommerce/v1';
 
     /**
      * The settings used by the OrderController instance.
@@ -51,13 +51,15 @@ class OrderController
      */
     public function handleCallback(\WP_REST_Request $request): WP_REST_Response
     {
+        $id = $request->get_params()['id'];
         try {
-            $id = $request->get_params()['id'];
-            $order = new \WC_order($id);
-            $this->updateOrderStatus($order, $this->settings->getFulfilledState());
+            $order = new \WC_Order($id);
         } catch (\Exception $e) {
             return new \WP_REST_Response(null, 404, null);
         }
+
+        $this->updateOrderStatus($order, $this->settings->getFulfilledState());
+
         return new WP_REST_Response(null, 200, null);
     }
 
@@ -68,7 +70,7 @@ class OrderController
      * @param string    $status the new order status.
      * @return void
      */
-    private function updateOrderStatus(\WC_Order $order, string $status)
+    public function updateOrderStatus(\WC_Order $order, string $status)
     {
         $order->set_status($status);
         $order->save();
