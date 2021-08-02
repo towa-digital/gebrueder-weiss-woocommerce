@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use Towa\GebruederWeissWooCommerce\Plugin;
+use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
@@ -34,6 +35,9 @@ class WooCommerceOrderStatusChangedTest extends TestCase
     /** @var MockInterface|OAuthAuthenticator */
     private $authenticator;
 
+    /** @var MockInterface|LogisticsOrderFactory */
+    private $logisticsOrderFactory;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -54,6 +58,13 @@ class WooCommerceOrderStatusChangedTest extends TestCase
             "getClientSecret" => "secret",
             "setAccessToken" => null,
             "getAccessToken" => "token",
+            "getSiteUrl" => "http://test.com",
+        ]);
+
+        /** @var MockInterface|LogisticsOrderFactory */
+        $this->logisticsOrderFactory = Mockery::mock(LogisticsOrderFactory::class);
+        $this->logisticsOrderFactory->allows([
+            "buildFromWooCommerceOrder" => new LogisticsOrder(),
         ]);
 
         /** @var MockInterface|OAuthAuthenticator */
@@ -65,6 +76,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         $this->plugin->setWriteApiClient($this->writeApi);
         $this->plugin->setSettingsRepository($this->settingsRepository);
         $this->plugin->setAuthenticationClient($this->authenticator);
+        $this->plugin->setLogisticsOrderFactory($this->logisticsOrderFactory);
     }
 
     public function test_it_does_not_call_the_api_if_fulfillment_state_does_not_match_the_selection()

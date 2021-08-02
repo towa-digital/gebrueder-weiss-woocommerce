@@ -23,6 +23,7 @@ defined('ABSPATH') || exit;
 require __DIR__ . '/vendor/autoload.php';
 
 use Towa\GebruederWeissWooCommerce\Plugin;
+use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
@@ -60,10 +61,14 @@ add_action("init", function () {
     $writeApi = new WriteApi();
     $writeApi->getConfig()->setHost($apiEndpoint);
 
+    $settingsRepository = new SettingsRepository();
+    $logisticsOrderFactory = new LogisticsOrderFactory($settingsRepository);
+
     $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
-    $plugin->setSettingsRepository(new SettingsRepository());
+    $plugin->setSettingsRepository($settingsRepository);
     $plugin->setWriteApiClient($writeApi);
+    $plugin->setLogisticsOrderFactory($logisticsOrderFactory);
     $plugin->initialize();
 });
 

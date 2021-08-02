@@ -92,12 +92,32 @@ class SettingsRepository
     }
 
     /**
+     * Reads the customer id from the plugin settings.
+     *
+     * @return integer|null
+     */
+    public function getCustomerId(): ?int
+    {
+        return $this->getOption("customer_id");
+    }
+
+    /**
+     * Reads the wordpress site URL from the options.
+     *
+     * @return string|null
+     */
+    public function getSiteUrl(): ?string
+    {
+        return \get_site_url();
+    }
+
+    /**
      * Reads the plugin option with the passed name from the wordpress options
      *
      * @param string $name The name of the option.
-     * @return string|null
+     * @return mixed
      */
-    private function getOption(string $name): ?string
+    private function getOption(string $name)
     {
         return \get_option(Option::OPTIONS_PREFIX . $name, null);
     }

@@ -87,6 +87,13 @@ final class Plugin extends Singleton
      private $orderController = null;
 
     /**
+     * Factory for building logistics orders.
+     *
+     * @var LogisticsOrderFactory
+     */
+    private $logisticsOrderFactory = null;
+
+    /**
      * Initializes the plugin.
      *
      * @return void
@@ -266,7 +273,7 @@ final class Plugin extends Singleton
      */
     public function createLogisticsOrderAndUpdateOrderState(object $order)
     {
-        $logisticsOrder = LogisticsOrderFactory::buildFromWooCommerceOrder($order);
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($order);
         $authToken = $this->settingsRepository->getAccessToken();
         $this->writeApiClient->getConfig()->setAccessToken($authToken);
 
@@ -398,6 +405,17 @@ final class Plugin extends Singleton
     public function setWriteApiClient(WriteApi $client): void
     {
         $this->writeApiClient = $client;
+    }
+
+    /**
+     * Sets the factory for creating logistics orders.
+     *
+     * @param LogisticsOrderFactory LogisticsOrderFactory $logisticsOrderFactory The factory.
+     * @return void
+     */
+    public function setLogisticsOrderFactory(LogisticsOrderFactory $logisticsOrderFactory): void
+    {
+        $this->logisticsOrderFactory = $logisticsOrderFactory;
     }
 
     /**
