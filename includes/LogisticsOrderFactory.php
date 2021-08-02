@@ -56,7 +56,7 @@ class LogisticsOrderFactory
 
         $logisticsOrder->setLogisticsAddresses([
             $this->createConsigneeAddress($wooCommerceOrder),
-            $this->createOrderByAddress()
+            $this->createOrderbyAddress()
         ]);
 
         $logisticsOrder->setOrderLines(
@@ -95,18 +95,18 @@ class LogisticsOrderFactory
         $contact->setName($fullName);
         $contact->setEmail($wooCommerceOrder->get_billing_email());
         $contact->setPhone($wooCommerceOrder->get_billing_phone());
-        $contact->setLanguage("de-De");
+        $contact->setLanguage("de-DE");
         $logisticsAddress->setContact($contact);
 
         return $logisticsAddress;
     }
 
     /**
-     * Creates the order by address from
+     * Creates the order by address
      *
      * @return LogisticsAddress
      */
-    private function createOrderByAddress(): LogisticsAddress
+    private function createOrderbyAddress(): LogisticsAddress
     {
         $logisticsAddress = new LogisticsAddress();
         $logisticsAddress->setAddressType("orderby");
