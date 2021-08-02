@@ -2,7 +2,7 @@
 /**
  * Can Render interface
  *
- * @package GbWeissInterfaces
+ * @package Contracts
  */
 
 namespace Towa\GebruederWeissWooCommerce;

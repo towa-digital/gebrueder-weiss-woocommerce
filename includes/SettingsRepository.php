@@ -4,7 +4,7 @@
  *
  * Reads plugin options from the wordpress options
  *
- * @package GbWeiss
+ * @package Plugin
  */
 
 namespace Towa\GebruederWeissWooCommerce;

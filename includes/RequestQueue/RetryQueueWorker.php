@@ -4,7 +4,7 @@
  *
  * Manages the items of FailedRequestRepository
  *
- * @package GbWeissOptions
+ * @package RequestQueue
  */
 
 namespace Towa\GebruederWeissWooCommerce\RequestQueue;

@@ -4,7 +4,7 @@
  *
  * Used to instatiate Options Page
  *
- * @package GbWeissOptions
+ * @package Options
  */
 
 namespace Towa\GebruederWeissWooCommerce;

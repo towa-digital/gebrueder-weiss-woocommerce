@@ -2,7 +2,7 @@
 /**
  * Repository for WooCommerce Order States
  *
- * @package GbWeissOptions
+ * @package Plugin
  */
 
 namespace Towa\GebruederWeissWooCommerce;

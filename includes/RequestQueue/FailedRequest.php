@@ -4,7 +4,7 @@
  *
  * Holds all information on a failed request against the Gebrueder Weiss API.
  *
- * @package GbWeissOptions
+ * @package RequestQueue
  */
 
 namespace Towa\GebruederWeissWooCommerce;

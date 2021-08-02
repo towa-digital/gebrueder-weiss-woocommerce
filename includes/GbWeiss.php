@@ -2,7 +2,7 @@
 /**
  * GbWeiss Setup
  *
- * @package GbWeiss
+ * @package Plugin
  * @author Towa Digital <developer@towa.at>
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  */

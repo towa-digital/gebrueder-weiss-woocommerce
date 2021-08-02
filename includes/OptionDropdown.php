@@ -2,7 +2,7 @@
 /**
  * Dropdown for option pages
  *
- * @package GbWeissOptions
+ * @package Options
  */
 
 namespace Towa\GebruederWeissWooCommerce;

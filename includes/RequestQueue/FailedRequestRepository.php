@@ -4,7 +4,7 @@
  *
  * Holds FailedRequests.
  *
- * @package GbWeissOptions
+ * @package RequestQueue
  */
 
 namespace Towa\GebruederWeissWooCommerce;

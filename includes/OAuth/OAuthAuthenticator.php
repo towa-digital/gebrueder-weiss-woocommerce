@@ -4,7 +4,7 @@
  * Retrieves the Access Token.
  * Uses league/oauth2-client
  *
- * @package GbWeiss
+ * @package OAuth
  * @author Towa Digital <developer@towa.at>
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  */

@@ -4,7 +4,7 @@
  *
  * Parent class used to instatiate Singletons
  *
- * @package GbWeissHelpers
+ * @package Support
  */
 
 namespace Towa\GebruederWeissWooCommerce;

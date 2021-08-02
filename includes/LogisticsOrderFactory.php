@@ -2,7 +2,7 @@
 /**
  * Factory for creating Logistics Orders
  *
- * @package GbWeiss
+ * @package Plugin
  */
 
 namespace Towa\GebruederWeissWooCommerce;

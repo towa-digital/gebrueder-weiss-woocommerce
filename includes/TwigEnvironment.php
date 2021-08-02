@@ -2,7 +2,7 @@
 /**
  * Twig Environment for GbWeiss Plugin
  *
- * @package GbWeissTwig
+ * @package Support
  */
 
 namespace Towa\GebruederWeissWooCommerce;

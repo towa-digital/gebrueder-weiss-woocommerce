@@ -4,7 +4,7 @@
  *
  * Used to instatiate a Tab on an Optionspage
  *
- * @package GbWeissOptions
+ * @package Options
  */
 
 namespace Towa\GebruederWeissWooCommerce;

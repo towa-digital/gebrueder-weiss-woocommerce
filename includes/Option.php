@@ -4,7 +4,7 @@
  *
  * Class to instatiate an Option
  *
- * @package GbWeissOptions
+ * @package Options
  */
 
 namespace Towa\GebruederWeissWooCommerce;

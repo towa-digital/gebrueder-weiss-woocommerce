@@ -2,7 +2,7 @@
 /**
  * Fulfillment Options Tab
  *
- * @package GbWeissOptions
+ * @package Options
  */
 
 namespace Towa\GebruederWeissWooCommerce;
