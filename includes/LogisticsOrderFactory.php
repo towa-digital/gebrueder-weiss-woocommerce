@@ -53,6 +53,7 @@ class LogisticsOrderFactory
         $logisticsOrder = new LogisticsOrder();
         $logisticsOrder->setUrl($this->settingsRepository->getSiteUrl() . "/wp-json/gebrueder-weiss-woocommerce/v1/update/" . $wooCommerceOrder->get_id());
         $logisticsOrder->setCreationDateTime($wooCommerceOrder->get_date_created());
+        $logisticsOrder->setOwnerId($this->settingsRepository->getCustomerId());
 
         $logisticsOrder->setLogisticsAddresses([
             $this->createConsigneeAddress($wooCommerceOrder),
@@ -113,7 +114,7 @@ class LogisticsOrderFactory
 
         $addressReference = new AddressReference();
         $addressReference->setQualifier("gwcustomerid");
-        $addressReference->setReference($this->settingsRepository->getCustomerId());
+        $addressReference->setReference(strval($this->settingsRepository->getCustomerId()));
         $logisticsAddress->setAddressReferences([$addressReference]);
 
         return $logisticsAddress;

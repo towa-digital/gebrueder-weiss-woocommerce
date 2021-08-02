@@ -32,7 +32,7 @@ class LogisticsOrderFactoryTest extends TestCase
         $this->settingsRepository = Mockery::mock(SettingsRepository::class);
         $this->settingsRepository->allows([
             "getSiteUrl" => "http://test.com",
-            "getCustomerId" => "42",
+            "getCustomerId" => 420000,
         ]);
 
         $this->logisticsOrderFactory = new LogisticsOrderFactory($this->settingsRepository);
@@ -50,11 +50,11 @@ class LogisticsOrderFactoryTest extends TestCase
         ];
 
         /** @var MockInterface|stdClass */
-        $orderItem1 = Mockery::mock("WC_Order");
+        $orderItem1 = Mockery::mock("WC_Order_Item_Product");
         $orderItem1->allows($orderItemMethods);
 
         /** @var MockInterface|stdClass */
-        $orderItem2 = Mockery::mock("WC_Order");
+        $orderItem2 = Mockery::mock("WC_Order_Item_Product");
         $orderItem2->allows($orderItemMethods);
 
         // WooCommerce returns the order items as array<string, WC_Order_Item>
@@ -94,6 +94,13 @@ class LogisticsOrderFactoryTest extends TestCase
         $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
 
         $this->assertSame("2021-07-29T14:53:52+00:00", $logisticsOrder->getCreationDateTime()->format(DateTimeInterface::RFC3339));
+    }
+
+    public function test_it_adds_the_owner_id_to_the_logistics_order()
+    {
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+
+        $this->assertSame(420000, $logisticsOrder->getOwnerId());
     }
 
     public function test_it_correctly_adds_the_consignee_address()
@@ -157,7 +164,7 @@ class LogisticsOrderFactoryTest extends TestCase
         $logisticsOrder->getLogisticsAddresses();
         $address = $logisticsOrder->getLogisticsAddresses()[1];
 
-        $this->assertSame("42", $address->getAddressReferences()[0]->getReference());
+        $this->assertSame("420000", $address->getAddressReferences()[0]->getReference());
     }
 
     public function test_it_adds_the_custom_id_to_the_orderby_address()
