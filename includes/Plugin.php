@@ -500,6 +500,7 @@ final class Plugin extends Singleton
     private static function removePluginOptions(): void
     {
         $plugin = self::getInstance();
+        $plugin->setOrderStateRepository(new OrderStateRepository());
         $plugin->initOptionPage();
 
         foreach ($plugin->optionsPage->getTabs() as $tab) {
