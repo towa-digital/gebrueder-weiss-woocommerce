@@ -82,10 +82,10 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
 
     public function test_it_can_retrieve_the_customer_id()
     {
-        update_option("gbw_customer_id", "42");
+        update_option("gbw_customer_id", 42);
 
         $settingsRepository = new SettingsRepository();
 
-        $this->assertSame("42", $settingsRepository->getCustomerId());
+        $this->assertSame(42, $settingsRepository->getCustomerId());
     }
 }

@@ -94,7 +94,7 @@ class SettingsRepository
      *
      * @return integer|null
      */
-    public function getCustomerId(): ?string
+    public function getCustomerId(): ?int
     {
         return $this->getOption("customer_id");
     }
