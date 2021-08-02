@@ -2,10 +2,10 @@
 /**
  * Can Render interface
  *
- * @package GbWeissInterfaces
+ * @package Contracts
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce\Contracts;
 
 defined('ABSPATH') || exit;
 

@@ -1,11 +1,11 @@
 <?php
 /**
- * Twig Environment for GbWeiss Plugin
+ * Twig Environment for Plugin Plugin
  *
- * @package GbWeissTwig
+ * @package Support
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce\Support;
 
 defined('ABSPATH') || exit;
 
@@ -14,6 +14,7 @@ use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFunction;
+use Towa\GebruederWeissWooCommerce\Plugin;
 
 /**
  * Twig Environment Singleton
@@ -39,28 +40,11 @@ class TwigEnvironment extends Singleton
      */
     public function __construct()
     {
-        $this->loader = new FilesystemLoader(__DIR__ . '/../templates/');
+        $this->loader = new FilesystemLoader(__DIR__ . '/../../templates/');
         $this->twig = new Environment($this->loader, [
           'debug' => true
         ]);
         $this->addTwigExtensions();
-    }
-
-    /**
-     * Prevent the instance from being cloned (which would create a second instance of it)
-     */
-    protected function __clone()
-    {
-    }
-
-    /**
-     * Prevent from being unserialized (which would create a second instance of it)
-     *
-     * @throws Exception If tried to unserialize.
-     */
-    public function __wakeup()
-    {
-        throw new Exception("Cannot unserialize singleton");
     }
 
     /**
@@ -79,7 +63,7 @@ class TwigEnvironment extends Singleton
         $this->twig->addFunction(new TwigFunction('do_settings_sections', function ($group) {
             \do_settings_sections($group);
         }));
-        $this->twig->addFunction(new TwigFunction('do_settings_fields', function ($section, $page = GbWeiss::OPTIONPAGESLUG) {
+        $this->twig->addFunction(new TwigFunction('do_settings_fields', function ($section, $page = Plugin::OPTIONPAGESLUG) {
             \do_settings_fields($page, $section);
         }));
         $this->twig->addFunction(new TwigFunction('esc_attr', function ($attribute) {

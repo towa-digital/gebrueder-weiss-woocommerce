@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use GbWeiss\includes\OAuth\OAuthAuthenticator;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Mockery;
 use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Token\AccessToken;

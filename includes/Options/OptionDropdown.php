@@ -2,10 +2,10 @@
 /**
  * Dropdown for option pages
  *
- * @package GbWeissOptions
+ * @package Options
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce\Options;
 
 /**
  * Dropdown for option pages

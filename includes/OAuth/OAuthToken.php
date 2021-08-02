@@ -2,12 +2,12 @@
 /**
  * OAuthToken
  *
- * @package GbWeiss
+ * @package OAuth
  * @author Towa Digital <developer@towa.at>
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  */
 
-namespace GbWeiss\includes\OAuth;
+namespace Towa\GebruederWeissWooCommerce\OAuth;
 
 defined('ABSPATH') || exit;
 /**

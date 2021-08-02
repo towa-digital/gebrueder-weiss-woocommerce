@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use DateTimeInterface;
-use GbWeiss\includes\LogisticsOrderFactory;
-use GbWeiss\includes\SettingsRepository;
+use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;

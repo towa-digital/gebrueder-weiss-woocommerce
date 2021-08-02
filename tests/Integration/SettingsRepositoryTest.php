@@ -2,7 +2,7 @@
 
 namespace Tests\Integration;
 
-use GbWeiss\includes\SettingsRepository;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
 class SettingsRepositoryTest extends \WP_UnitTestCase
 {

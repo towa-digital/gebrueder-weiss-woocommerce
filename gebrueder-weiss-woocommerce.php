@@ -2,7 +2,7 @@
 /**
  * Gebrüder Weiss Woocommere
  *
- * @package GbWeiss
+ * @package Plugin
  * @author Towa Digital <developer@towa.at>
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  *
@@ -22,11 +22,11 @@ defined('ABSPATH') || exit;
 
 require __DIR__ . '/vendor/autoload.php';
 
-use GbWeiss\includes\GbWeiss;
-use GbWeiss\includes\LogisticsOrderFactory;
-use GbWeiss\includes\OAuth\OAuthAuthenticator;
-use GbWeiss\includes\OrderStateRepository;
-use GbWeiss\includes\SettingsRepository;
+use Towa\GebruederWeissWooCommerce\Plugin;
+use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
+use Towa\GebruederWeissWooCommerce\OrderStateRepository;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use League\OAuth2\Client\Provider\GenericProvider;
 use Towa\GebruederWeissSDK\Api\WriteApi;
 
@@ -37,11 +37,11 @@ $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad();
 
 add_action("init", function () {
-    if (!GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
+    if (!Plugin::checkPluginCompatabilityAndPrintErrorMessages()) {
         return;
     };
 
-    $plugin = GbWeiss::getInstance();
+    $plugin = Plugin::getInstance();
 
     $apiEndpoint = env('GEBRUEDER_WEISS_API_URL', 'https://apitest.gw-world.com:443/');
     $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://apitest.gw-world.com:443/token');
@@ -71,6 +71,9 @@ add_action("init", function () {
     $plugin->setLogisticsOrderFactory($logisticsOrderFactory);
     $plugin->initialize();
 });
+
+register_activation_hook(__FILE__, [Plugin::class, "onActivation"]);
+register_uninstall_hook(__FILE__, [Plugin::class, "onUninstall"]);
 
 if (!function_exists('env')) {
     /**

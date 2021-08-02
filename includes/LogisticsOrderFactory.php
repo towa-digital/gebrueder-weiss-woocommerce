@@ -2,10 +2,10 @@
 /**
  * Factory for creating Logistics Orders
  *
- * @package GbWeiss
+ * @package Plugin
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 

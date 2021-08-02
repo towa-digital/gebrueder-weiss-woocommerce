@@ -4,14 +4,14 @@
  *
  * Used to provide the callback endpoint & handling.
  *
- * @package GbWeiss
+ * @package Plugin
  */
 
-namespace GbWeiss\includes;
-
-use WP_REST_Response;
+namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
+
+use WP_REST_Response;
 
 /**
  * OptionsPage Class

@@ -4,12 +4,16 @@
  *
  * Used to instatiate Options Page
  *
- * @package GbWeissOptions
+ * @package Options
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce\Options;
 
 defined('ABSPATH') || exit;
+
+use Towa\GebruederWeissWooCommerce\Contracts\CanRender;
+use Towa\GebruederWeissWooCommerce\Support\TwigEnvironment;
+
 
 /**
  * OptionsPage Class

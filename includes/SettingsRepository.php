@@ -4,12 +4,14 @@
  *
  * Reads plugin options from the wordpress options
  *
- * @package GbWeiss
+ * @package Plugin
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
+
+use Towa\GebruederWeissWooCommerce\Options\Option;
 
 /**
  * Settings Repository

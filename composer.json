@@ -33,8 +33,7 @@
     "minimum-stability": "stable",
     "autoload": {
       "psr-4": {
-        "GbWeiss\\lib\\": "lib/",
-        "GbWeiss\\includes\\": "includes/"
+        "Towa\\GebruederWeissWooCommerce\\": "includes/"
       }
     },
     "repositories": [

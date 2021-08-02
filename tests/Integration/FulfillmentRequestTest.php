@@ -2,8 +2,8 @@
 
 namespace Tests\Integration;
 
-use GbWeiss\includes\OrderController;
-use GbWeiss\includes\SettingsRepository;
+use Towa\GebruederWeissWooCommerce\OrderController;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use Mockery;
 use Mockery\MockInterface;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;

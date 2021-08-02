@@ -4,10 +4,10 @@
  *
  * Parent class used to instatiate Singletons
  *
- * @package GbWeissHelpers
+ * @package Support
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce\Support;
 
 defined('ABSPATH') || exit;
 

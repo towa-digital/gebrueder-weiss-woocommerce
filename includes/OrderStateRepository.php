@@ -2,10 +2,10 @@
 /**
  * Repository for WooCommerce Order States
  *
- * @package GbWeissOptions
+ * @package Plugin
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 

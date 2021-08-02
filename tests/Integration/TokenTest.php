@@ -2,10 +2,10 @@
 
 namespace Tests\Integration;
 
-use GbWeiss\includes\GbWeiss;
-use GbWeiss\includes\OAuth\OAuthAuthenticator;
-use GbWeiss\includes\OAuth\OAuthToken;
-use GbWeiss\includes\SettingsRepository;
+use Towa\GebruederWeissWooCommerce\Plugin;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
@@ -31,8 +31,8 @@ class TokenTest extends \WP_UnitTestCase
         $settingsRepository->shouldReceive("getClientSecret")->andReturn("secret");
         $settingsRepository->shouldReceive("setAccessToken")->once()->withArgs([$token->getAccessToken()]);
 
-        /** @var GbWeiss */
-        $plugin = GbWeiss::getInstance();
+        /** @var Plugin */
+        $plugin = Plugin::getInstance();
         $plugin->setAuthenticationClient($authenticationClient);
         $plugin->setSettingsRepository($settingsRepository);
 

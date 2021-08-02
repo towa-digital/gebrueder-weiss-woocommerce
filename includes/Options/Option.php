@@ -4,12 +4,16 @@
  *
  * Class to instatiate an Option
  *
- * @package GbWeissOptions
+ * @package Options
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce\Options;
 
 defined('ABSPATH') || exit;
+
+use Towa\GebruederWeissWooCommerce\Contracts\CanRender;
+use Towa\GebruederWeissWooCommerce\Support\TwigEnvironment;
+use Towa\GebruederWeissWooCommerce\Plugin;
 
 /**
  * Option Class
@@ -153,7 +157,7 @@ class Option implements CanRender
             $this->slug,
             $this->name,
             [$this, 'render'],
-            GbWeiss::OPTIONPAGESLUG,
+            Plugin::OPTIONPAGESLUG,
             $this->group,
         );
     }
