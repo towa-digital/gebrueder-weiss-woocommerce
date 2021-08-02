@@ -114,6 +114,7 @@ class LogisticsOrderFactory
         $addressReference = new AddressReference();
         $addressReference->setQualifier("gwcustomerid");
         $addressReference->setReference($this->settingsRepository->getCustomerId());
+        $logisticsAddress->setAddressReferences([$addressReference]);
 
         return $logisticsAddress;
     }

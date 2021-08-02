@@ -150,6 +150,26 @@ class LogisticsOrderFactoryTest extends TestCase
         $this->assertSame("orderby", $address->getAddressType());
     }
 
+    public function test_it_adds_the_correct_qualifier_to_the_orderby_address()
+    {
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+
+        $logisticsOrder->getLogisticsAddresses();
+        $address = $logisticsOrder->getLogisticsAddresses()[1];
+
+        $this->assertSame(42, $address->getAddressReferences()[0]->getReference());
+    }
+
+    public function test_it_adds_the_custom_id_to_the_orderby_address()
+    {
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+
+        $logisticsOrder->getLogisticsAddresses();
+        $address = $logisticsOrder->getLogisticsAddresses()[1];
+
+        $this->assertSame("gwcustomerid", $address->getAddressReferences()[0]->getQualifier());
+    }
+
     public function test_it_builds_an_order_line_for_each_article()
     {
         $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
