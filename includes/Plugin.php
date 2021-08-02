@@ -80,6 +80,12 @@ final class Plugin extends Singleton
      */
     private $writeApiClient = null;
 
+    /** Order Controller that provides the callback handling.
+     *
+     * @var OrderController;
+     */
+     private $orderController = null;
+
     /**
      * Initializes the plugin.
      *
@@ -89,6 +95,7 @@ final class Plugin extends Singleton
     {
         $this->initActions();
         $this->initOptionPage();
+        $this->orderController = new OrderController($this->settingsRepository);
     }
 
     /**
@@ -135,6 +142,10 @@ final class Plugin extends Singleton
     {
         $clientId = $this->settingsRepository->getClientId();
         $clientSecret = $this->settingsRepository->getClientSecret();
+
+        if (empty($clientId) || empty($clientSecret)) {
+            return;
+        }
 
         try {
             $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
@@ -392,11 +403,11 @@ final class Plugin extends Singleton
     /**
      * Checks if the configured value for the given fulfillment setting is valid.
      *
-     * @param string $optionValue The value of the fulfillment option.
+     * @param string|null $optionValue The value of the fulfillment option.
      * @param string $displayName The name of the setting to be shown in error messages.
      * @return void
      */
-    private function checkIfFulfillmentSettingExists(string $optionValue, string $displayName): void
+    private function checkIfFulfillmentSettingExists(?string $optionValue, string $displayName): void
     {
         if (!$optionValue) {
             $this->showWordpressAdminErrorMessage(
