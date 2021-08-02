@@ -7,7 +7,7 @@
  * @package GbWeissOptions
  */
 
-namespace GbWeiss\includes\RequestQueue;
+namespace Towa\GebruederWeissWooCommerce\RequestQueue;
 
 
 defined('ABSPATH') || exit;

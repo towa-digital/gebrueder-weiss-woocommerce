@@ -5,7 +5,7 @@
  * @package GbWeissOptions
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce;
 
 /**
  * Dropdown for option pages

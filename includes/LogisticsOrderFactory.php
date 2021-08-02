@@ -5,7 +5,7 @@
  * @package GbWeiss
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 

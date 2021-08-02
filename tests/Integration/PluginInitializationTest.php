@@ -2,8 +2,8 @@
 
 namespace Tests\Integration;
 
-use GbWeiss\includes\GbWeiss;
-use GbWeiss\includes\OrderStateRepository;
+use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Mockery;
 
 class PluginInitializationTest extends \WP_UnitTestCase

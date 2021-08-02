@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use GbWeiss\includes\FulfillmentOptionsTab;
+use Towa\GebruederWeissWooCommerce\FulfillmentOptionsTab;
 
 /**
  * Fulfillment Settings Test.

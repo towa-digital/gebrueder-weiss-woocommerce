@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use GbWeiss\includes\GbWeiss;
-use GbWeiss\includes\OAuth\OAuthAuthenticator;
-use GbWeiss\includes\OAuth\OAuthToken;
-use GbWeiss\includes\SettingsRepository;
+use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;

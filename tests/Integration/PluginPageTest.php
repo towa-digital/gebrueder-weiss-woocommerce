@@ -2,9 +2,9 @@
 
 namespace Tests\Integration;
 
-use GbWeiss\includes\GbWeiss;
-use GbWeiss\includes\Option;
-use GbWeiss\includes\OptionPage;
+use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\Option;
+use Towa\GebruederWeissWooCommerce\OptionPage;
 
 class PluginPageTest extends \WP_UnitTestCase
 {

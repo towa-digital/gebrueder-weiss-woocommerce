@@ -22,10 +22,10 @@ defined('ABSPATH') || exit;
 
 require __DIR__ . '/vendor/autoload.php';
 
-use GbWeiss\includes\GbWeiss;
-use GbWeiss\includes\OAuth\OAuthAuthenticator;
-use GbWeiss\includes\OrderStateRepository;
-use GbWeiss\includes\SettingsRepository;
+use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
+use Towa\GebruederWeissWooCommerce\OrderStateRepository;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use League\OAuth2\Client\Provider\GenericProvider;
 use Towa\GebruederWeissSDK\Api\WriteApi;
 

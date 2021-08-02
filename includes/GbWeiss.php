@@ -7,12 +7,12 @@
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  */
 
-namespace GbWeiss\includes;
+namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
-use GbWeiss\includes\OrderStateRepository;
-use GbWeiss\includes\OAuth\OAuthAuthenticator;
+use Towa\GebruederWeissWooCommerce\OrderStateRepository;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\ApiException;
 
