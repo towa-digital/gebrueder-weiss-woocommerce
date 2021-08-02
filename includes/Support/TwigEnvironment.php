@@ -48,23 +48,6 @@ class TwigEnvironment extends Singleton
     }
 
     /**
-     * Prevent the instance from being cloned (which would create a second instance of it)
-     */
-    protected function __clone()
-    {
-    }
-
-    /**
-     * Prevent from being unserialized (which would create a second instance of it)
-     *
-     * @throws Exception If tried to unserialize.
-     */
-    public function __wakeup()
-    {
-        throw new Exception("Cannot unserialize singleton");
-    }
-
-    /**
      * Add Twig Extensions
      *
      * @return void
