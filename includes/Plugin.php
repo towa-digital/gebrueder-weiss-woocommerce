@@ -404,7 +404,7 @@ final class Plugin extends Singleton
      * Checks if the configured value for the given fulfillment setting is valid.
      *
      * @param string|null $optionValue The value of the fulfillment option.
-     * @param string $displayName The name of the setting to be shown in error messages.
+     * @param string      $displayName The name of the setting to be shown in error messages.
      * @return void
      */
     private function checkIfFulfillmentSettingExists(?string $optionValue, string $displayName): void
