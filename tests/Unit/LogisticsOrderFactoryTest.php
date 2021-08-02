@@ -32,7 +32,7 @@ class LogisticsOrderFactoryTest extends TestCase
         $this->settingsRepository = Mockery::mock(SettingsRepository::class);
         $this->settingsRepository->allows([
             "getSiteUrl" => "http://test.com",
-            "getCustomerId" => 42,
+            "getCustomerId" => "42",
         ]);
 
         $this->logisticsOrderFactory = new LogisticsOrderFactory($this->settingsRepository);
@@ -157,7 +157,7 @@ class LogisticsOrderFactoryTest extends TestCase
         $logisticsOrder->getLogisticsAddresses();
         $address = $logisticsOrder->getLogisticsAddresses()[1];
 
-        $this->assertSame(42, $address->getAddressReferences()[0]->getReference());
+        $this->assertSame("42", $address->getAddressReferences()[0]->getReference());
     }
 
     public function test_it_adds_the_custom_id_to_the_orderby_address()
