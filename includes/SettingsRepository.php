@@ -11,6 +11,8 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
+use Towa\GebruederWeissWooCommerce\Options\Option;
+
 /**
  * Settings Repository
  *

@@ -5,7 +5,7 @@
  * @package Support
  */
 
-namespace Towa\GebruederWeissWooCommerce;
+namespace Towa\GebruederWeissWooCommerce\Support;
 
 defined('ABSPATH') || exit;
 
@@ -14,6 +14,7 @@ use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFunction;
+use Towa\GebruederWeissWooCommerce\GbWeiss;
 
 /**
  * Twig Environment Singleton
@@ -39,7 +40,7 @@ class TwigEnvironment extends Singleton
      */
     public function __construct()
     {
-        $this->loader = new FilesystemLoader(__DIR__ . '/../templates/');
+        $this->loader = new FilesystemLoader(__DIR__ . '/../../templates/');
         $this->twig = new Environment($this->loader, [
           'debug' => true
         ]);

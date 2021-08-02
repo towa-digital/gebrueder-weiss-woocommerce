@@ -3,8 +3,8 @@
 namespace Tests\Integration;
 
 use Towa\GebruederWeissWooCommerce\GbWeiss;
-use Towa\GebruederWeissWooCommerce\Option;
-use Towa\GebruederWeissWooCommerce\OptionPage;
+use Towa\GebruederWeissWooCommerce\Options\Option;
+use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 
 class PluginPageTest extends \WP_UnitTestCase
 {

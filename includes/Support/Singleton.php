@@ -7,7 +7,7 @@
  * @package Support
  */
 
-namespace Towa\GebruederWeissWooCommerce;
+namespace Towa\GebruederWeissWooCommerce\Support;
 
 defined('ABSPATH') || exit;
 

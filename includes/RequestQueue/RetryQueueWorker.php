@@ -9,8 +9,8 @@
 
 namespace Towa\GebruederWeissWooCommerce\RequestQueue;
 
-
 defined('ABSPATH') || exit;
+
 
 /**
  * FailedRequest Class
@@ -63,7 +63,6 @@ class RetryQueueWorker
      */
     public function increaseCounter(FailedRequest $request)
     {
-        $request->increment();
         // implement increaseCounter functionality.
     }
 }

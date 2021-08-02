@@ -7,7 +7,7 @@
  * @package RequestQueue
  */
 
-namespace Towa\GebruederWeissWooCommerce;
+namespace Towa\GebruederWeissWooCommerce\RequestQueue;
 
 defined('ABSPATH') || exit;
 

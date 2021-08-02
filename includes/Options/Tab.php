@@ -7,9 +7,13 @@
  * @package Options
  */
 
-namespace Towa\GebruederWeissWooCommerce;
+namespace Towa\GebruederWeissWooCommerce\Options;
 
 defined('ABSPATH') || exit;
+
+use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\Contracts\CanRender;
+
 
 /**
  * Tab Class

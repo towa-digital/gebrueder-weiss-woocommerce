@@ -13,6 +13,11 @@ defined('ABSPATH') || exit;
 
 use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
+use Towa\GebruederWeissWooCommerce\Options\FulfillmentOptionsTab;
+use Towa\GebruederWeissWooCommerce\Options\Option;
+use Towa\GebruederWeissWooCommerce\Options\OptionPage;
+use Towa\GebruederWeissWooCommerce\Options\Tab;
+use Towa\GebruederWeissWooCommerce\Support\Singleton;
 use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\ApiException;
 

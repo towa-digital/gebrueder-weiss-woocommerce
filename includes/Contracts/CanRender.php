@@ -5,7 +5,7 @@
  * @package Contracts
  */
 
-namespace Towa\GebruederWeissWooCommerce;
+namespace Towa\GebruederWeissWooCommerce\Contracts;
 
 defined('ABSPATH') || exit;
 
