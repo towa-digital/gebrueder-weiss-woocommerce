@@ -2,7 +2,7 @@
 /**
  * Gebrüder Weiss Woocommere
  *
- * @package GbWeiss
+ * @package Plugin
  * @author Towa Digital <developer@towa.at>
  * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  *
@@ -22,7 +22,7 @@ defined('ABSPATH') || exit;
 
 require __DIR__ . '/vendor/autoload.php';
 
-use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
@@ -70,11 +70,11 @@ register_activation_hook(__FILE__, 'onActivation');
 register_uninstall_hook(__FILE__, 'onUninstall');
 
 add_action("init", function () {
-    if (!GbWeiss::checkPluginCompatabilityAndPrintErrorMessages()) {
+    if (!Plugin::checkPluginCompatabilityAndPrintErrorMessages()) {
         return;
     };
 
-    $plugin = GbWeiss::getInstance();
+    $plugin = Plugin::getInstance();
 
     $apiEndpoint = env('GEBRUEDER_WEISS_API_URL', 'https://apitest.gw-world.com:443/');
     $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://apitest.gw-world.com:443/token');

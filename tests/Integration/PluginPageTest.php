@@ -2,7 +2,7 @@
 
 namespace Tests\Integration;
 
-use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 
@@ -43,7 +43,7 @@ class PluginPageTest extends \WP_UnitTestCase
 
     public function test_if_page_renders()
     {
-        $optionsPage = (new OptionPage('test', GbWeiss::OPTIONPAGESLUG));
+        $optionsPage = (new OptionPage('test', Plugin::OPTIONPAGESLUG));
 
         \ob_start();
         $optionsPage->render();

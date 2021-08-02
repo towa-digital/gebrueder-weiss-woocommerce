@@ -11,7 +11,7 @@ namespace Towa\GebruederWeissWooCommerce\Options;
 
 defined('ABSPATH') || exit;
 
-use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\Contracts\CanRender;
 
 
@@ -79,7 +79,7 @@ class Tab implements CanRender
      * @param array  $options Options which should be displayed on the tab.
      * @param string $page Slug of the options page where the tab should be displayed.
      */
-    public function __construct(string $name, string $slug, array $options = [], string $page = GbWeiss::OPTIONPAGESLUG)
+    public function __construct(string $name, string $slug, array $options = [], string $page = Plugin::OPTIONPAGESLUG)
     {
         $this->name = $name;
         $this->slug = $slug;

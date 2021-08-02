@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
@@ -22,7 +22,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
     private const SELECTED_FULFILLMENT_STATE = "selected-state";
     private const PREFIXED_SELECTED_FULFILLMENT_STATE = "wc-selected-state";
 
-    /** @var GbWeiss */
+    /** @var Plugin */
     private $plugin;
 
     /** @var MockInterface|WriteApi */
@@ -38,8 +38,8 @@ class WooCommerceOrderStatusChangedTest extends TestCase
     {
         parent::setUp();
 
-        /** @var GbWeiss */
-        $this->plugin = GbWeiss::getInstance();
+        /** @var Plugin */
+        $this->plugin = Plugin::getInstance();
 
         /** @var MockInterface|WriteApi */
         $this->writeApi = Mockery::mock(WriteApi::class);

@@ -9,7 +9,7 @@ namespace Towa\GebruederWeissWooCommerce\Options;
 
 defined('ABSPATH') || exit;
 
-use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\Plugin;
 
 /**
  * Fulfillment Options Tab
@@ -24,10 +24,10 @@ class FulfillmentOptionsTab extends Tab
      */
     public function __construct(array $orderStates)
     {
-        parent::__construct(__('Fulfillment', GbWeiss::$languageDomain), 'fulfillment');
+        parent::__construct(__('Fulfillment', Plugin::$languageDomain), 'fulfillment');
         $this
-            ->addOption(new OptionDropdown('Fulfillment State', 'fulfillmentState', __('Fulfillment State', GbWeiss::$languageDomain), 'fulfillment', $orderStates))
-            ->addOption(new OptionDropdown('Fulfilled State', 'fulfilledState', __('Fulfilled State', GbWeiss::$languageDomain), 'fulfillment', $orderStates))
-            ->addOption(new OptionDropdown('Fulfillment Error State', 'fulfillmentErrorState', __('Fulfillment Error State', GbWeiss::$languageDomain), 'fulfillment', $orderStates));
+            ->addOption(new OptionDropdown('Fulfillment State', 'fulfillmentState', __('Fulfillment State', Plugin::$languageDomain), 'fulfillment', $orderStates))
+            ->addOption(new OptionDropdown('Fulfilled State', 'fulfilledState', __('Fulfilled State', Plugin::$languageDomain), 'fulfillment', $orderStates))
+            ->addOption(new OptionDropdown('Fulfillment Error State', 'fulfillmentErrorState', __('Fulfillment Error State', Plugin::$languageDomain), 'fulfillment', $orderStates));
     }
 }

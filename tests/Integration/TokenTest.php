@@ -2,7 +2,7 @@
 
 namespace Tests\Integration;
 
-use Towa\GebruederWeissWooCommerce\GbWeiss;
+use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
@@ -31,8 +31,8 @@ class TokenTest extends \WP_UnitTestCase
         $settingsRepository->shouldReceive("getClientSecret")->andReturn("secret");
         $settingsRepository->shouldReceive("setAccessToken")->once()->withArgs([$token->getAccessToken()]);
 
-        /** @var GbWeiss */
-        $plugin = GbWeiss::getInstance();
+        /** @var Plugin */
+        $plugin = Plugin::getInstance();
         $plugin->setAuthenticationClient($authenticationClient);
         $plugin->setSettingsRepository($settingsRepository);
 

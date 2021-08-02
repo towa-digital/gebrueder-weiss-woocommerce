@@ -1,6 +1,6 @@
 <?php
 /**
- * GbWeiss Setup
+ * Plugin Setup
  *
  * @package Plugin
  * @author Towa Digital <developer@towa.at>
@@ -22,9 +22,9 @@ use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\ApiException;
 
 /**
- * Main GbWeiss class
+ * Main Plugin class
  */
-final class GbWeiss extends Singleton
+final class Plugin extends Singleton
 {
     /**
      * Option Page Slug
@@ -34,7 +34,7 @@ final class GbWeiss extends Singleton
     /**
      * The single instance of the class.
      *
-     * @var GbWeiss
+     * @var Plugin
      */
     protected static $instance = null;
 
