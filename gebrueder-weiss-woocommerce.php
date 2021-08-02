@@ -35,40 +35,6 @@ use Towa\GebruederWeissSDK\Api\WriteApi;
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad();
 
-/**
- * If the gbw_request_retry_queue table does not exist (first activation) it gets created.
- *
- * @return void
- */
-function onActivation()
-{
-    global $wpdb;
-    $charset_collate = $wpdb->get_charset_collate();
-
-    $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->base_prefix}gbw_request_retry_queue` (
-      orderID int NOT NULL,
-      status varchar(50) NOT NULL,
-      counter int UNSIGNED NOT NULL,
-      PRIMARY KEY  (orderID)
-    ) $charset_collate;";
-    $wpdb->query($sql);
-}
-
-/**
- * When the plugin gets uninstalled the gbw_request_retry_queue table is dropped.
- *
- * @return void
- */
-function onUninstall()
-{
-    global $wpdb;
-    $sql = "DROP TABLE IF EXISTS `{$wpdb->base_prefix}gbw_request_retry_queue`";
-    $wpdb->query($sql);
-}
-
-register_activation_hook(__FILE__, 'onActivation');
-register_uninstall_hook(__FILE__, 'onUninstall');
-
 add_action("init", function () {
     if (!Plugin::checkPluginCompatabilityAndPrintErrorMessages()) {
         return;
@@ -100,6 +66,9 @@ add_action("init", function () {
     $plugin->setWriteApiClient($writeApi);
     $plugin->initialize();
 });
+
+register_activation_hook(__FILE__, [Plugin::class, "onActivation"]);
+register_uninstall_hook(__FILE__, [Plugin::class, "onUninstall"]);
 
 if (!function_exists('env')) {
     /**

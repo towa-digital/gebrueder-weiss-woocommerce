@@ -89,7 +89,6 @@ final class Plugin extends Singleton
     {
         $this->initActions();
         $this->initOptionPage();
-        $this->registerUninstallHook();
     }
 
     /**
@@ -306,29 +305,24 @@ final class Plugin extends Singleton
     }
 
     /**
-     * Register uninstall hook
+     * Runs all actions that are required when uninstalling the plugin
      *
      * @return void
      */
-    public function registerUninstallHook(): void
+    public static function onUninstall(): void
     {
-        \register_uninstall_hook(__FILE__, 'uninstall');
+        self::removePluginOptions();
+        self::removeRequestQueueTable();
     }
 
     /**
-     * Uninstall Plugin
+     * Runs all actions that are required when activating the plugin
      *
      * @return void
      */
-    public static function uninstall(): void
+    public static function onActivation(): void
     {
-        $plugin = self::getInstance();
-
-        foreach ($plugin->optionsPage->getTabs() as $tab) {
-            foreach ($tab->options as $option) {
-                delete_option($option->slug);
-            }
-        }
+        self::createRequestQueueTable();
     }
 
     /**
@@ -496,5 +490,56 @@ final class Plugin extends Singleton
                 <?php
             }
         );
+    }
+
+    /**
+     * Removes all options that are registered with the plugin from the WordPress options.
+     *
+     * @return void
+     */
+    private static function removePluginOptions(): void
+    {
+        $plugin = self::getInstance();
+        $plugin->initOptionPage();
+
+        foreach ($plugin->optionsPage->getTabs() as $tab) {
+            foreach ($tab->options as $option) {
+                delete_option($option->slug);
+            }
+        }
+    }
+
+    /**
+     * Creates the table for the request retry queue
+     *
+     * @return void
+     */
+    private static function createRequestQueueTable(): void
+    {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->base_prefix}gbw_request_retry_queue` (
+          id int NOT NULL AUTO_INCREMENT,
+          order_id int NOT NULL,
+          status varchar(50) NOT NULL,
+          failed_attempts int UNSIGNED NOT NULL,
+          PRIMARY KEY (id),
+          UNIQUE (order_id)
+        ) $charset_collate;";
+
+        $wpdb->query($sql);
+    }
+
+    /**
+     * Removes the table for the request retry queue
+     *
+     * @return void
+     */
+    private static function removeRequestQueueTable(): void
+    {
+        global $wpdb;
+        $sql = "DROP TABLE IF EXISTS `{$wpdb->base_prefix}gbw_request_retry_queue`";
+        $wpdb->query($sql);
     }
 }
