@@ -23,6 +23,7 @@ defined('ABSPATH') || exit;
 require __DIR__ . '/vendor/autoload.php';
 
 use GbWeiss\includes\GbWeiss;
+use GbWeiss\includes\LogisticsOrderFactory;
 use GbWeiss\includes\OAuth\OAuthAuthenticator;
 use GbWeiss\includes\OrderStateRepository;
 use GbWeiss\includes\SettingsRepository;
@@ -60,10 +61,14 @@ add_action("init", function () {
     $writeApi = new WriteApi();
     $writeApi->getConfig()->setHost($apiEndpoint);
 
+    $settingsRepository = new SettingsRepository();
+    $logisticsOrderFactory = new LogisticsOrderFactory($settingsRepository);
+
     $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
-    $plugin->setSettingsRepository(new SettingsRepository());
+    $plugin->setSettingsRepository($settingsRepository);
     $plugin->setWriteApiClient($writeApi);
+    $plugin->setLogisticsOrderFactory($logisticsOrderFactory);
     $plugin->initialize();
 });
 
