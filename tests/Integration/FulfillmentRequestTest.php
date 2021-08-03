@@ -1,14 +1,15 @@
 <?php
 
-namespace Tests\Integration;
+namespace Tests\Unit;
 
 use Towa\GebruederWeissWooCommerce\OrderController;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use Mockery;
 use Mockery\MockInterface;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use PHPUnit\Framework\TestCase;
 
-class FulfillmentRequestTest extends \WP_UnitTestCase
+class FulfillmentRequestTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 
@@ -18,7 +19,7 @@ class FulfillmentRequestTest extends \WP_UnitTestCase
         $settingsRepository = Mockery::mock(SettingsRepository::class);
         $settingsRepository->allows(['getFulfilledState' => 'wc-fulfilled']);
 
-        /** @var MockInterface|WC_Order */
+        /** @var MockInterface|\WC_Order */
         $order = Mockery::mock("WC_Order");
         $order->allows("set_status");
         $order->allows("get_status");
