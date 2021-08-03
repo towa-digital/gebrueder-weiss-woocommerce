@@ -16,6 +16,25 @@ defined('ABSPATH') || exit;
  */
 class FailedRequestRepository
 {
+    public function findOneToRetry(): ?FailedRequest
+    {
+        global $wpdb;
+
+        $statement = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}gbw_request_retry_queue WHERE status = \"%s\" AND failed_attempts < %d LIMIT 1", [FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS]);
+        $row = $wpdb->get_row($statement);
+
+        if (is_null($row)) {
+            return null;
+        }
+
+        return new FailedRequest(
+            $row->id,
+            $row->order_id,
+            $row->status,
+            $row->failed_attempts
+        );
+    }
+
     /**
      * Creates a failed request based on the passed data
      *
@@ -85,7 +104,7 @@ class FailedRequestRepository
     {
         global $wpdb;
 
-        $statement = $wpdb->prepare("DELETE FROM {$wpdb->prefix}gbw_request_retry_queue WHERE status = \"%s\" OR failed_attempts >= %d", [FailedRequest::SUCCESS_STATUS, 3]);
+        $statement = $wpdb->prepare("DELETE FROM {$wpdb->prefix}gbw_request_retry_queue WHERE status = \"%s\" OR failed_attempts >= %d", [FailedRequest::SUCCESS_STATUS, FailedRequest::MAX_ATTEMPTS]);
         $wpdb->get_results($statement);
     }
 }

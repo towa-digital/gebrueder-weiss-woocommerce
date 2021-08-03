@@ -20,6 +20,8 @@ class FailedRequest
 
     public const SUCCESS_STATUS = "success";
 
+    public const MAX_ATTEMPTS = 3;
+
     /**
      * The id of the corresponding woo-commerce order.
      *

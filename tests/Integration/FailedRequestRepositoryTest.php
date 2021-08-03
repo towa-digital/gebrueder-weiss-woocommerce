@@ -3,8 +3,8 @@
 namespace Tests\Integration;
 
 use Towa\GebruederWeissWooCommerce\Plugin;
-use Towa\GebruederWeissWooCommerce\RequestQueue\FailedRequest;
-use Towa\GebruederWeissWooCommerce\RequestQueue\FailedRequestRepository;
+use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequest;
+use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 
 class FailedRequestRepositoryTest extends \WP_UnitTestCase
 {
@@ -49,5 +49,29 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
 
         $numberOfRows = $wpdb->get_var("SELECT count(*) FROM {$wpdb->prefix}gbw_request_retry_queue");
         $this->assertSame(0, intval($numberOfRows));
+    }
+
+    public function test_it_can_find_a_request_to_retry()
+    {
+        Plugin::onActivation();
+
+        $repository = new FailedRequestRepository();
+        $repository->create(12, FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS - 1);
+
+        $request = $repository->findOneToRetry();
+
+        $this->assertSame(12, $request->getOrderId());
+        $this->assertSame(FailedRequest::FAILED_STATUS, $request->getStatus());
+        $this->assertSame(2, $request->getFailedAttempts());
+    }
+
+    public function test_it_returns_null_when_no_request_to_retry_is_available()
+    {
+        $repository = new FailedRequestRepository();
+        $repository->create(12, FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS);
+
+        $request = $repository->findOneToRetry();
+
+        $this->assertNull($request);
     }
 }
