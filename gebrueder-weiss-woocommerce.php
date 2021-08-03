@@ -29,6 +29,7 @@ use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use League\OAuth2\Client\Provider\GenericProvider;
 use Towa\GebruederWeissSDK\Api\WriteApi;
+use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 
 /**
  * Use Dotenv to set required environment variables and load .env file in root
@@ -69,6 +70,7 @@ add_action("init", function () {
     $plugin->setSettingsRepository($settingsRepository);
     $plugin->setWriteApiClient($writeApi);
     $plugin->setLogisticsOrderFactory($logisticsOrderFactory);
+    $plugin->setFailedRequestRepository(new FailedRequestRepository());
     $plugin->initialize();
 });
 

@@ -13,6 +13,7 @@ defined('ABSPATH') || exit;
 
 use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\ApiException;
+use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 
 /**
  * Create Logistics Order Command
@@ -60,6 +61,7 @@ class CreateLogisticsOrderCommand
      * Executes the command
      *
      * @return void
+     * @throws CreateLogisticsOrderFailedException Thrown if something went wrong.
      */
     public function execute(): void
     {
@@ -69,18 +71,8 @@ class CreateLogisticsOrderCommand
             $this->writeApi->logisticsOrderPost($logisticsOrder);
             $this->wooCommerceOrder->set_status("on-hold");
             $this->wooCommerceOrder->save();
-        } catch (ApiException $exception) {
-            if ($exception->getCode() === 400) {
-                // handle faulty parameters.
-                return;
-            }
-
-            if ($exception->getCode() === 409) {
-                // handle conflict.
-                return;
-            }
-
-            // retry request.
+        } catch (ApiException $e) {
+            throw new CreateLogisticsOrderFailedException("Could not create logistics order: " . $e->getMessage());
         }
     }
 }

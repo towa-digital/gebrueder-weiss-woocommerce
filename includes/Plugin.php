@@ -19,7 +19,8 @@ use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 use Towa\GebruederWeissWooCommerce\Options\Tab;
 use Towa\GebruederWeissWooCommerce\Support\Singleton;
 use Towa\GebruederWeissSDK\Api\WriteApi;
-use Towa\GebruederWeissSDK\ApiException;
+use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
+use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 
 /**
  * Main Plugin class
@@ -92,6 +93,13 @@ final class Plugin extends Singleton
      * @var LogisticsOrderFactory
      */
     private $logisticsOrderFactory = null;
+
+    /**
+     * Failed Request Repository
+     *
+     * @var FailedRequestRepository
+     */
+    private $failedRequestRepository = null;
 
     /**
      * Initializes the plugin.
@@ -276,7 +284,11 @@ final class Plugin extends Singleton
         $authToken = $this->settingsRepository->getAccessToken();
         $this->writeApiClient->getConfig()->setAccessToken($authToken);
 
-        (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApiClient))->execute();
+        try {
+            (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApiClient))->execute();
+        } catch (CreateLogisticsOrderFailedException $e) {
+            $this->failedRequestRepository->create($order->get_id());
+        }
     }
 
     /**
@@ -399,6 +411,17 @@ final class Plugin extends Singleton
     public function setLogisticsOrderFactory(LogisticsOrderFactory $logisticsOrderFactory): void
     {
         $this->logisticsOrderFactory = $logisticsOrderFactory;
+    }
+
+    /**
+     * Sets the failed request repository
+     *
+     * @param FailedRequestRepository $failedRequestRepository The instance to be used by the plugin.
+     * @return void
+     */
+    public function setFailedRequestRepository(FailedRequestRepository $failedRequestRepository): void
+    {
+        $this->failedRequestRepository = $failedRequestRepository;
     }
 
     /**

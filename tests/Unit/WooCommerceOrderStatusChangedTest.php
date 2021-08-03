@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
@@ -38,6 +39,9 @@ class WooCommerceOrderStatusChangedTest extends TestCase
     /** @var MockInterface|LogisticsOrderFactory */
     private $logisticsOrderFactory;
 
+    /** @var MockInterface|FailedRequestRepository */
+    private $failedRequestRepository;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -73,10 +77,15 @@ class WooCommerceOrderStatusChangedTest extends TestCase
             "authenticate" => new OAuthToken("token", "Bearer", 3600)
         ]);
 
+        /** @var MockInterface|FailedRequestRepository */
+        $this->failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+        $this->failedRequestRepository->allows("create");
+
         $this->plugin->setWriteApiClient($this->writeApi);
         $this->plugin->setSettingsRepository($this->settingsRepository);
         $this->plugin->setAuthenticationClient($this->authenticator);
         $this->plugin->setLogisticsOrderFactory($this->logisticsOrderFactory);
+        $this->plugin->setFailedRequestRepository($this->failedRequestRepository);
     }
 
     public function test_it_does_not_call_the_api_if_fulfillment_state_does_not_match_the_selection()
@@ -96,5 +105,26 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::SELECTED_FULFILLMENT_STATE, $order);
 
         $this->writeApi->shouldHaveReceived("logisticsOrderPost", [LogisticsOrder::class]);
+    }
+
+    public function test_it_creates_a_failed_request_if_the_command_fails()
+    {
+        /** @var MockInterface|WriteApi */
+        $writeApi = Mockery::mock(WriteApi::class);
+        $writeApi->allows(["getConfig" => new Configuration()]);
+        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Unauthenticated", 401));
+        $this->plugin->setWriteApiClient($writeApi);
+
+        /** @var MockInterface|object */
+        $order = Mockery::mock("WC_Order");
+        $order->allows([
+            "set_status" => null,
+            "save" => null,
+            "get_id" => 42
+        ]);
+
+        $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::SELECTED_FULFILLMENT_STATE, $order);
+
+        $this->failedRequestRepository->shouldHaveReceived("create");
     }
 }

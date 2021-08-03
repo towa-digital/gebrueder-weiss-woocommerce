@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Exception;
 use Mockery;
 use Mockery\MockInterface;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
@@ -11,6 +12,7 @@ use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\CreateLogisticsOrderCommand;
+use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 
 class CreateLogisticsOrderCommandTest extends TestCase
 {
@@ -21,6 +23,9 @@ class CreateLogisticsOrderCommandTest extends TestCase
 
     /** @var MockInterface|LogisticsOrderFactory */
     private $logisticsOrderFactory;
+
+    /** @var MockInterface|stdClass */
+    private $order;
 
     public function setUp(): void
     {
@@ -35,19 +40,22 @@ class CreateLogisticsOrderCommandTest extends TestCase
         $this->logisticsOrderFactory->allows([
             "buildFromWooCommerceOrder" => new LogisticsOrder(),
         ]);
+
+        /** @var MockInterface|stdClass */
+        $this->order = Mockery::mock("WC_Order");
+        $this->order->allows([
+            "set_status" => null,
+            "save" => null,
+            "get_id" => 42
+        ]);
     }
 
 
     public function test_it_updates_the_order_state_after_a_successful_api_request()
     {
-        /** @var MockInterface|stdClass */
-        $order = Mockery::mock("WC_Order");
-        $order->allows("set_status");
-        $order->allows("save");
+        (new CreateLogisticsOrderCommand($this->order, $this->logisticsOrderFactory, $this->writeApi))->execute();
 
-        (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApi))->execute();
-
-        $order->shouldHaveReceived("save");
+        $this->order->shouldHaveReceived("save");
     }
 
     public function test_it_does_not_update_the_order_state_after_a_failed_request()
@@ -56,13 +64,22 @@ class CreateLogisticsOrderCommandTest extends TestCase
         $writeApi = Mockery::mock(WriteApi::class);
         $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Unauthenticated", 401));
 
-        /** @var MockInterface|stdClass */
-        $order = Mockery::mock("WC_Order");
-        $order->allows("set_status");
-        $order->allows("save");
+        try {
+            (new CreateLogisticsOrderCommand($this->order, $this->logisticsOrderFactory, $writeApi))->execute();
+        } catch (Exception $e) {
+        }
 
-        (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $writeApi))->execute();
+        $this->order->shouldNotHaveReceived("save");
+    }
 
-        $order->shouldNotHaveReceived("save");
+    public function test_it_throws_an_exception_if_the_api_call_fails()
+    {
+        $this->expectException(CreateLogisticsOrderFailedException::class);
+
+        /** @var MockInterface|WriteApi */
+        $writeApi = Mockery::mock(WriteApi::class);
+        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Unauthenticated", 401));
+
+        (new CreateLogisticsOrderCommand($this->order, $this->logisticsOrderFactory, $writeApi))->execute();
     }
 }
