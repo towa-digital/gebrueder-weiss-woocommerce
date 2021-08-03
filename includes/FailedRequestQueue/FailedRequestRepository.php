@@ -2,8 +2,6 @@
 /**
  * Failed Request Repository
  *
- * Holds FailedRequests.
- *
  * @package FailedRequestQueue
  */
 
@@ -16,6 +14,11 @@ defined('ABSPATH') || exit;
  */
 class FailedRequestRepository
 {
+    /**
+     * Returns the next request to retry
+     *
+     * @return FailedRequest|null
+     */
     public function findOneToRetry(): ?FailedRequest
     {
         global $wpdb;
@@ -63,7 +66,7 @@ class FailedRequestRepository
     /**
      * Updates a failed request.
      *
-     * This methods mirrors the values of the failed request object to the corresponding database row.
+     * This method stores the values of the failed request object in the corresponding database row.
      *
      * @param FailedRequest $failedRequest The failed request to be updated in the database.
      * @return void

@@ -23,7 +23,7 @@ class FailedRequest
     public const MAX_ATTEMPTS = 3;
 
     /**
-     * The id of the corresponding woo-commerce order.
+     * The id of the corresponding WooCommerce order.
      *
      * @var int $orderId id
      */
@@ -60,7 +60,7 @@ class FailedRequest
     }
 
     /**
-     * Increments the retry-counter and returns the updated value.
+     * Increments the failed attempts counter.
      *
      * @return void
      */
@@ -70,9 +70,9 @@ class FailedRequest
     }
 
     /**
-     * Updated the status of the instance.
+     * Updated the status of the failed request.
      *
-     * @param string $status new status.
+     * @param string $status The new status.
      * @return void
      */
     public function setStatus(string $status)
@@ -91,7 +91,7 @@ class FailedRequest
     }
 
     /**
-     * Returns the ID of the woo-commerce order.
+     * Returns the id of the WooCommerce order.
      *
      * @return integer
      */
