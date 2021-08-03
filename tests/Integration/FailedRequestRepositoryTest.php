@@ -8,10 +8,15 @@ use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 
 class FailedRequestRepositoryTest extends \WP_UnitTestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+        Plugin::onActivation();
+    }
+
     public function test_it_can_create_a_failed_request()
     {
         global $wpdb;
-        Plugin::onActivation();
 
         $repository = new FailedRequestRepository();
 
@@ -23,9 +28,6 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
 
     public function test_it_can_update_a_failed_request()
     {
-        global $wpdb;
-        Plugin::onActivation();
-
         $repository = new FailedRequestRepository();
         $request = $repository->create(12, FailedRequest::FAILED_STATUS, 2);
 
@@ -33,13 +35,11 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
         $request->incrementFailedAttempts();
         $repository->update($request);
 
-        $numberOfRows = $wpdb->get_var("SELECT count(*) FROM {$wpdb->prefix}gbw_request_retry_queue WHERE status = \"{$request->getStatus()}\" AND failed_attempts = {$request->getFailedAttempts()}");
-        $this->assertSame(1, intval($numberOfRows));
+        $this->assertSame(1, $this->getNumberOfFailedRequestsInDB());
     }
 
     public function test_it_deletes_requests_if_they_were_successful()
     {
-        global $wpdb;
         Plugin::onActivation();
 
         $repository = new FailedRequestRepository();
@@ -47,14 +47,11 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
 
         $repository->deleteWhereStale();
 
-        $numberOfRows = $wpdb->get_var("SELECT count(*) FROM {$wpdb->prefix}gbw_request_retry_queue");
-        $this->assertSame(0, intval($numberOfRows));
+        $this->assertSame(0, $this->getNumberOfFailedRequestsInDB());
     }
 
     public function test_it_can_find_a_request_to_retry()
     {
-        Plugin::onActivation();
-
         $repository = new FailedRequestRepository();
         $repository->create(12, FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS - 1);
 
@@ -73,5 +70,14 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
         $request = $repository->findOneToRetry();
 
         $this->assertNull($request);
+    }
+
+    private function getNumberOfFailedRequestsInDB(): int
+    {
+        global $wpdb;
+
+        $numberOfRows = $wpdb->get_var("SELECT count(*) FROM {$wpdb->prefix}gbw_request_retry_queue");
+
+        return intval($numberOfRows);
     }
 }
