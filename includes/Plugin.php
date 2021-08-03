@@ -273,27 +273,10 @@ final class Plugin extends Singleton
      */
     public function createLogisticsOrderAndUpdateOrderState(object $order)
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($order);
         $authToken = $this->settingsRepository->getAccessToken();
         $this->writeApiClient->getConfig()->setAccessToken($authToken);
 
-        try {
-            $this->writeApiClient->logisticsOrderPost($logisticsOrder);
-            $order->set_status("on-hold");
-            $order->save();
-        } catch (ApiException $exception) {
-            if ($exception->getCode() === 400) {
-                // handle faulty parameters.
-                return;
-            }
-
-            if ($exception->getCode() === 409) {
-                // handle conflict.
-                return;
-            }
-
-            // retry request.
-        }
+        (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApiClient))->execute();
     }
 
     /**
