@@ -554,6 +554,7 @@ final class Plugin extends Singleton
           order_id int NOT NULL,
           status varchar(50) NOT NULL,
           failed_attempts int UNSIGNED NOT NULL,
+          last_attempt_date DATETIME NOT NULL,
           PRIMARY KEY (id),
           UNIQUE (order_id)
         ) $charset_collate;";

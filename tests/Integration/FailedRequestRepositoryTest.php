@@ -2,6 +2,7 @@
 
 namespace Tests\Integration;
 
+use DateTime;
 use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequest;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
@@ -53,13 +54,24 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
     public function test_it_can_find_a_request_to_retry()
     {
         $repository = new FailedRequestRepository();
-        $repository->create(12, FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS - 1);
+        $oneHourAgo = DateTime::createFromFormat("U", time() - 3600);
+        $repository->create(12, FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS - 1, $oneHourAgo);
 
         $request = $repository->findOneToRetry();
 
         $this->assertSame(12, $request->getOrderId());
         $this->assertSame(FailedRequest::FAILED_STATUS, $request->getStatus());
         $this->assertSame(2, $request->getFailedAttempts());
+    }
+
+    public function test_it_does_not_return_requests_that_have_been_retried_less_then_five_minutes_ago()
+    {
+        $repository = new FailedRequestRepository();
+        $repository->create(12, FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS - 1, new DateTime());
+
+        $request = $repository->findOneToRetry();
+
+        $this->assertNull($request);
     }
 
     public function test_it_returns_null_when_no_request_to_retry_is_available()
