@@ -98,7 +98,7 @@ class RetryFailedRequestsQueueWorker
             }
 
             if ($failedRequest->getFailedAttempts() === FailedRequest::MAX_ATTEMPTS) {
-                Wordpress::sendErrorNotificationToAdmin("error", "placing logistics order failed");
+                Wordpress::sendMailToAdmin("error", "placing logistics order failed");
             }
 
             $this->failedRequestRepository->update($failedRequest);

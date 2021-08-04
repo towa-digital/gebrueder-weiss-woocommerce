@@ -126,6 +126,13 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $worker->start();
     }
 
+    /**
+     * We need to isolate this test to able to alias mock the
+     * WordPress class with our helper functions.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
     public function test_it_sends_a_mail_if_the_request_failed_for_the_third_time()
     {
         /** @var FailedRequest|MockInterface */
@@ -144,7 +151,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 
         /** @var MockInterface */
         $wordpressMock = Mockery::mock("alias:" . WordPress::class);
-        $wordpressMock->shouldReceive("sendErrorNotificationToAdmin")->once();
+        $wordpressMock->shouldReceive("sendMailToAdmin")->once();
 
         $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository);
         $worker->start();
