@@ -14,6 +14,7 @@ use Towa\GebruederWeissWooCommerce\CreateLogisticsOrderCommand;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\OrderRepository;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 /**
@@ -50,23 +51,33 @@ class RetryFailedRequestsQueueWorker
     private $orderRepository = null;
 
     /**
+     * Settings Repository
+     *
+     * @var SettingsRepository
+     */
+    private $settingsRepository = null;
+
+    /**
      * Constructor.
      *
      * @param FailedRequestRepository $failedRequestRepository Failed Requests Repository.
      * @param LogisticsOrderFactory   $logisticsOrderFactory Logistics Order Factory.
      * @param WriteApi                $writeApi Gebrueder Weiss Write API.
      * @param OrderRepository         $orderRepository WooCommerce Order Repository.
+     * @param SettingsRepository      $settingsRepository Settings Repository.
      */
     public function __construct(
         FailedRequestRepository $failedRequestRepository,
         LogisticsOrderFactory $logisticsOrderFactory,
         WriteApi $writeApi,
-        OrderRepository $orderRepository
+        OrderRepository $orderRepository,
+        SettingsRepository $settingsRepository
     ) {
         $this->failedRequestRepository = $failedRequestRepository;
         $this->writeApi = $writeApi;
         $this->logisticsOrderFactory = $logisticsOrderFactory;
         $this->orderRepository = $orderRepository;
+        $this->settingsRepository = $settingsRepository;
     }
 
     /**
@@ -98,6 +109,7 @@ class RetryFailedRequestsQueueWorker
             }
 
             if ($failedRequest->getFailedAttempts() === FailedRequest::MAX_ATTEMPTS) {
+                $order->set_status($this->settingsRepository->getFulfillmentErrorState());
                 Wordpress::sendMailToAdmin("error", "placing logistics order failed");
             }
 

@@ -14,6 +14,7 @@ use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\RetryFailedRequestsQueueWorker;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\OrderRepository;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 class RetryFailedRequestsQueueWorkerTest extends TestCase
@@ -28,6 +29,9 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 
     /** @var MockInterface|OrderRepository */
     private $orderRepository;
+
+    /** @var MockInterface|SettingsRepository */
+    private $settingsRepository;
 
     public function setUp(): void
     {
@@ -56,6 +60,10 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $this->orderRepository->allows([
             "findById" => $order
         ]);
+
+        /** @var SettingsRepository|MockInterface */
+        $this->settingsRepository = Mockery::mock(SettingsRepository::class);
+        $this->settingsRepository->allows(['getFulfillmentErrorState' => 'wc-failed']);
     }
 
     public function test_it_processes_all_requests_that_need_a_retry()
@@ -67,7 +75,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequestRepository->allows("update");
         $failedRequestRepository->shouldReceive("findOneToRetry")->times(2)->andReturn($failedRequest, null);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->writeApi, $this->orderRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->writeApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
     }
 
@@ -85,7 +93,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequestRepository->allows("update");
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest1, $failedRequest2, null);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
     }
 
@@ -100,7 +108,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequestRepository->shouldReceive("update")->once();
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->writeApi, $this->orderRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->writeApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
 
         $failedRequest->shouldHaveReceived("setStatus", [FailedRequest::SUCCESS_STATUS]);
@@ -122,7 +130,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $writeApi = Mockery::mock(WriteApi::class);
         $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("ups"));
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
     }
 
@@ -153,13 +161,56 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $wordpressMock = Mockery::mock("alias:" . WordPress::class);
         $wordpressMock->shouldReceive("sendMailToAdmin")->once();
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
     }
 
+    /**
+     * We need to isolate this test to able to alias mock the
+     * WordPress class with our helper functions.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
     public function test_it_sets_the_order_state_to_fulfillment_error_after_the_third_failed_try()
     {
-        $this->markTestIncomplete();
+        /** @var FailedRequest|MockInterface */
+        $failedRequest = Mockery::mock(FailedRequest::class);
+        $failedRequest->allows([ "getOrderId" => 4, "setStatus" => null, "incrementFailedAttempts" => null ]);
+        $failedRequest->shouldReceive("getFailedAttempts")->once()->andReturn(3);
+
+        /** @var FailedRequestRepository|MockInterface */
+        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+        $failedRequestRepository->shouldReceive("update")->once();
+        $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
+
+        /** @var MockInterface|WriteApi */
+        $writeApi = Mockery::mock(WriteApi::class);
+        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("ups"));
+
+        /** @var MockInterface */
+        $wordpressMock = Mockery::mock("alias:" . WordPress::class);
+        $wordpressMock->shouldReceive("sendMailToAdmin");
+
+        /** @var MockInterface|\WC_Order */
+        $order = Mockery::mock("WC_Order");
+        $order->allows([
+            "save" => null,
+            "get_id" => 42
+        ]);
+        $order->shouldReceive("set_status")->once()->andReturn(null);
+
+        /** @var MockInterface|OrderRepository */
+        $orderRepository = Mockery::mock(OrderRepository::class);
+        $orderRepository->allows([
+            "findById" => $order
+        ]);
+
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $orderRepository, $this->settingsRepository);
+        $worker->start();
+
+        // wc-failed is the value returned by the settings repository
+        $order->shouldHaveReceived("set_status", ["wc-failed"]);
     }
 
     public function test_it_ensures_that_the_requests_are_authenticated()
