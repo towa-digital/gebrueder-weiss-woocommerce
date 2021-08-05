@@ -6,7 +6,7 @@ use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 class WordPressTest extends \WP_UnitTestCase
 {
-    public function test_it_can_sen_error_notifications_to_the_admin()
+    public function test_it_can_send_error_notifications_to_the_admin()
     {
         global $phpmailer;
 
