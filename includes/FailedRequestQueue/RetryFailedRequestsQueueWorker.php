@@ -112,12 +112,14 @@ class RetryFailedRequestsQueueWorker
                 $failedRequest->setStatus(FailedRequest::SUCCESS_STATUS);
             } catch (CreateLogisticsOrderFailedException $e) {
                 $failedRequest->incrementFailedAttempts();
-            }
 
-            if ($failedRequest->getFailedAttempts() === FailedRequest::MAX_ATTEMPTS) {
-                $order->set_status($this->settingsRepository->getFulfillmentErrorState());
-                $order->save();
-                Wordpress::sendMailToAdmin("error", "placing logistics order failed");
+                if ($failedRequest->getFailedAttempts() === FailedRequest::MAX_ATTEMPTS) {
+                    $order->set_status($this->settingsRepository->getFulfillmentErrorState());
+                    $order->save();
+
+                    $orderId = $order->get_id();
+                    Wordpress::sendMailToAdmin("Gebrueder Weiss Fulfillment Failed for Order #$orderId", "Creating the Gebrueder Weiss logistics order for the WooCommerce order #$orderId failed with the following error:\n\n{$e->getMessage()}");
+                }
             }
 
             $this->failedRequestRepository->update($failedRequest);
