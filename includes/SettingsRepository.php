@@ -11,6 +11,7 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
@@ -44,20 +45,21 @@ class SettingsRepository
     /**
      * Reads the access token form the wordpress options
      *
-     * @return string|null
+     * @return OAuthToken|null
      */
-    public function getAccessToken(): ?string
+    public function getAccessToken(): ?OAuthToken
     {
-        return $this->getOption("accessToken");
+        $serialized = $this->getOption("accessToken");
+        return unserialize($serialized);
     }
 
     /**
      * Updates the access token in the wordpress options.
      *
-     * @param string $token The access token.
+     * @param OAuthToken $token The access token.
      * @return void
      */
-    public function setAccessToken(string $token): void
+    public function setAccessToken(OAuthToken $token): void
     {
         $this->setOption("accessToken", $token);
     }

@@ -10,6 +10,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
 /**
@@ -89,6 +90,6 @@ class OAuthAuthenticatorTest extends TestCase
 
         $authenticator->updateAuthToken();
 
-        $settingsRepository->shouldHaveReceived("setAccessToken", ["MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"]);
+        $settingsRepository->shouldHaveReceived("setAccessToken", [OAuthToken::class]);
     }
 }

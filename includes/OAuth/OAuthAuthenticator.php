@@ -81,6 +81,6 @@ class OAuthAuthenticator
     {
         $token = $this->authenticate();
 
-        $this->settingsRepository->setAccessToken($token->getAccessToken());
+        $this->settingsRepository->setAccessToken($token);
     }
 }

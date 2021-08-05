@@ -2,6 +2,7 @@
 
 namespace Tests\Integration;
 
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
 class SettingsRepositoryTest extends \WP_UnitTestCase
@@ -26,11 +27,12 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
 
     public function test_it_can_retrieve_the_access_token()
     {
-        update_option("gbw_accessToken", "test");
+        $token = new OAuthToken("test", time());
+        update_option("gbw_accessToken", $token);
 
         $settingsRepository = new SettingsRepository();
 
-        $this->assertSame("test", $settingsRepository->getAccessToken());
+        $this->assertSame($token->getAccessToken(), $settingsRepository->getAccessToken()->getAccessToken());
     }
 
     public function test_it_can_retrieve_the_fulfillment_state()
@@ -64,10 +66,10 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
     {
         $settingsRepository = new SettingsRepository();
 
-        $token = "token";
+        $token = new OAuthToken("token", time());
         $settingsRepository->setAccessToken($token);
 
-        $this->assertSame($token, get_option("gbw_accessToken"));
+        $this->assertSame(serialize($token), get_option("gbw_accessToken"));
     }
 
     public function test_it_can_retrieve_the_site_url()

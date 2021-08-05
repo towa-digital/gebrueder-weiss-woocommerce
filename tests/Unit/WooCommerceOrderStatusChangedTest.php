@@ -15,6 +15,7 @@ use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\ApiException;
 use Towa\GebruederWeissSDK\Configuration;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 
 class WooCommerceOrderStatusChangedTest extends TestCase
 {
@@ -60,7 +61,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
             "getClientId" => "id",
             "getClientSecret" => "secret",
             "setAccessToken" => null,
-            "getAccessToken" => "token",
+            "getAccessToken" => new OAuthToken("test", time() + 3600),
             "getSiteUrl" => "http://test.com",
         ]);
 

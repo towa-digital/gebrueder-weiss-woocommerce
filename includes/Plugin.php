@@ -266,7 +266,7 @@ final class Plugin extends Singleton
     public function createLogisticsOrderAndUpdateOrderState(object $order)
     {
         $authToken = $this->settingsRepository->getAccessToken();
-        $this->writeApiClient->getConfig()->setAccessToken($authToken);
+        $this->writeApiClient->getConfig()->setAccessToken($authToken->getAccessToken());
 
         try {
             (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApiClient))->execute();
