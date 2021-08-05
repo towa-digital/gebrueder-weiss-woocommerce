@@ -9,7 +9,7 @@ use Mockery\MockInterface;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 
-class FulfillmentRequestTest extends TestCase
+class OrderControllerTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 
