@@ -10,6 +10,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
+use Towa\GebruederWeissWooCommerce\Exceptions\AuthenticationFailedException;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
@@ -48,6 +49,8 @@ class OAuthAuthenticatorTest extends TestCase
 
     public function test_failed_authentication()
     {
+        $this->expectException(AuthenticationFailedException::class);
+
         /** @var GenericProvider|MockInterface */
         $authProvider = Mockery::mock(GenericProvider::class);
         $authProvider->shouldReceive('getAccessToken')->andThrow(new IdentityProviderException('Invalid parameters.', 500, ''));
@@ -58,12 +61,7 @@ class OAuthAuthenticatorTest extends TestCase
 
         $authenticator = new OAuthAuthenticator($authProvider, $settingsRepository);
 
-        try {
-            $authenticator->authenticate();
-            $this->assertEquals(true, false);
-        } catch (\Exception $e) {
-            $this->assertStringContainsString('Authentication failed', $e->getMessage());
-        }
+        $authenticator->authenticate();
     }
 
     public function test_it_can_update_the_auth_token()

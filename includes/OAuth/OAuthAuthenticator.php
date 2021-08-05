@@ -15,6 +15,7 @@ defined('ABSPATH') || exit;
 
 use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Towa\GebruederWeissWooCommerce\Exceptions\AuthenticationFailedException;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
 /**
@@ -51,7 +52,7 @@ class OAuthAuthenticator
     /**
      * Returns the access token
      *
-     * @throws \Exception With message.
+     * @throws AuthenticationFailedException Thrown if an error occurred.
      * @return string
      */
     public function authenticate(): OAuthToken
@@ -67,7 +68,7 @@ class OAuthAuthenticator
                 $leagueToken->getExpires(),
             );
         } catch (IdentityProviderException $e) {
-            throw new \Exception('Authentication failed: ' . $e->getMessage());
+            throw new AuthenticationFailedException('Authentication failed: ' . $e->getMessage());
         }
     }
 
@@ -75,7 +76,7 @@ class OAuthAuthenticator
      * Checks whether the currently stored auth token is valid and requests
      * a new token if the current one is not valid.
      *
-     *  @throws \Exception If the token could not be saved.
+     *  @throws AuthenticationException Thrown if an error occurred.
      */
     public function updateAuthTokenIfNecessary(): void
     {
