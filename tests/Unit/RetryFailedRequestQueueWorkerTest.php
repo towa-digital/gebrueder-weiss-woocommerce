@@ -195,7 +195,6 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         /** @var MockInterface|\WC_Order */
         $order = Mockery::mock("WC_Order");
         $order->allows([
-            "save" => null,
             "get_id" => 42
         ]);
         $order->shouldReceive("set_status")->once()->andReturn(null);

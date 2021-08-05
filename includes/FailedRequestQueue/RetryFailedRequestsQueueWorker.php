@@ -116,6 +116,7 @@ class RetryFailedRequestsQueueWorker
 
             if ($failedRequest->getFailedAttempts() === FailedRequest::MAX_ATTEMPTS) {
                 $order->set_status($this->settingsRepository->getFulfillmentErrorState());
+                $order->save();
                 Wordpress::sendMailToAdmin("error", "placing logistics order failed");
             }
 
