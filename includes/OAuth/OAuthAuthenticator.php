@@ -22,17 +22,11 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 class OAuthAuthenticator
 {
     /**
-     * The endpoint used to authenticate against.
-     *
-     * @var string
-     */
-    private $authenticationEndpoint = null;
-
-    /**
      * Client Provider Object.
      *
-     * @param GenericProvider $authProvider the oAuth authProvider.
+     * @var GenericProvider $authProvider The oAuth authProvider.
      */
+    private $authProvider = null;
 
     /**
      * Constructor.
@@ -42,17 +36,6 @@ class OAuthAuthenticator
     public function __construct(GenericProvider $authProvider)
     {
         $this->authProvider = $authProvider;
-    }
-
-    /**
-     * Sets the authentication endpoint.
-     *
-     * @param string $endpoint The endpoint used to authenticate against.
-     * @return void
-     */
-    public function setAuthenticationEndpoint(string $endpoint)
-    {
-        $this->authenticationEndpoint = $endpoint;
     }
 
     /**
