@@ -21,7 +21,7 @@ class OAuthToken implements Serializable
      *
      * @var string
      */
-    private $accessToken = null;
+    private $token = null;
 
     /**
      * Expires timestamp
@@ -33,12 +33,12 @@ class OAuthToken implements Serializable
     /**
      * Constructor.
      *
-     * @param string $accessToken The access token.
+     * @param string $token The access token.
      * @param int    $expires expires The expiration timestamp.
      */
-    public function __construct(string $accessToken, int $expires)
+    public function __construct(string $token, int $expires)
     {
-        $this->accessToken = $accessToken;
+        $this->token = $token;
         $this->expires = $expires;
     }
 
@@ -47,9 +47,9 @@ class OAuthToken implements Serializable
      *
      * @return string
      */
-    public function getAccessToken(): string
+    public function getToken(): string
     {
-        return $this->accessToken;
+        return $this->token;
     }
 
     /**
@@ -69,7 +69,7 @@ class OAuthToken implements Serializable
      */
     public function isValid(): bool
     {
-        return $this->accessToken && ($this->expires > time());
+        return $this->token && ($this->expires > time());
     }
 
     /**
@@ -79,7 +79,7 @@ class OAuthToken implements Serializable
      */
     public function serialize()
     {
-        return serialize([$this->accessToken, $this->expires]);
+        return serialize([$this->token, $this->expires]);
     }
 
     /**
@@ -90,6 +90,6 @@ class OAuthToken implements Serializable
      */
     public function unserialize($data)
     {
-        list($this->accessToken, $this->expires) = unserialize($data);
+        list($this->token, $this->expires) = unserialize($data);
     }
 }

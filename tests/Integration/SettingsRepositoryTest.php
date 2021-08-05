@@ -32,7 +32,7 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
 
         $settingsRepository = new SettingsRepository();
 
-        $this->assertSame($token->getAccessToken(), $settingsRepository->getAccessToken()->getAccessToken());
+        $this->assertSame($token->getToken(), $settingsRepository->getAccessToken()->getToken());
     }
 
     public function test_it_can_retrieve_the_fulfillment_state()

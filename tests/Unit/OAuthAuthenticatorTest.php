@@ -44,7 +44,7 @@ class OAuthAuthenticatorTest extends TestCase
 
         $authenticationToken = $authenticator->authenticate();
 
-        $this->assertEquals('MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3', $authenticationToken->getAccessToken());
+        $this->assertEquals('MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3', $authenticationToken->getToken());
     }
 
     public function test_failed_authentication()

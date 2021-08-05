@@ -11,7 +11,7 @@ class OAuthTokenTest extends TestCase
     {
         $token = new OAuthToken("test", time() + 3600);
 
-        $this->assertSame("test", $token->getAccessToken());
+        $this->assertSame("test", $token->getToken());
     }
 
     public function test_it_can_retrieve_the_expires_in_time()
@@ -43,7 +43,7 @@ class OAuthTokenTest extends TestCase
 
         $newToken->unserialize($serialized);
 
-        $this->assertSame("test", $newToken->getAccessToken());
+        $this->assertSame("test", $newToken->getToken());
         $this->assertSame(1628168570 - time(), $newToken->getExpiresIn());
     }
 }
