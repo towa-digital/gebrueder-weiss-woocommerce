@@ -81,12 +81,6 @@ final class Plugin extends Singleton
      */
     private $writeApiClient = null;
 
-    /** Order Controller that provides the callback handling.
-     *
-     * @var OrderController;
-     */
-     private $orderController = null;
-
     /**
      * Factory for building logistics orders.
      *
@@ -117,7 +111,7 @@ final class Plugin extends Singleton
     {
         $this->initActions();
         $this->initOptionPage();
-        $this->orderController = new OrderController($this->settingsRepository, $this->orderRepository);
+        $this->initRestApi();
     }
 
     /**
@@ -155,6 +149,16 @@ final class Plugin extends Singleton
         \add_action('admin_init', [$this, 'validateSelectedFulfillmentStates']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
         \add_action('woocommerce_order_status_changed', [$this, "wooCommerceOrderStatusChanged"], 10, 4);
+    }
+
+    /**
+     * Initializes the Plugin Rest Api
+     *
+     * @return void
+     */
+    public function initRestApi(): void
+    {
+        new OrderController($this->settingsRepository, $this->orderRepository);
     }
 
     /**
