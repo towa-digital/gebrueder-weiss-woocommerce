@@ -7,12 +7,14 @@
 
 namespace Towa\GebruederWeissWooCommerce\OAuth;
 
+use Serializable;
+
 defined('ABSPATH') || exit;
 
 /**
  * OAuth Token
  */
-class OAuthToken
+class OAuthToken implements Serializable
 {
     /**
      * Access Token
@@ -68,5 +70,26 @@ class OAuthToken
     public function isValid(): bool
     {
         return $this->accessToken && ($this->expires > time());
+    }
+
+    /**
+     * Serializes the token
+     *
+     * @return string
+     */
+    public function serialize()
+    {
+        return serialize([$this->accessToken, $this->expires]);
+    }
+
+    /**
+     * Restores the token from serialized data
+     *
+     * @param string $data Serialized token data.
+     * @return void
+     */
+    public function unserialize($data)
+    {
+        list($this->accessToken, $this->expires) = unserialize($data);
     }
 }
