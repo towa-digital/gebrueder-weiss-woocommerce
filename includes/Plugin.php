@@ -102,6 +102,13 @@ final class Plugin extends Singleton
     private $failedRequestRepository = null;
 
     /**
+     * WooCommerce Order Repository
+     *
+     * @var OrderRepository
+     */
+    private $orderRepository = null;
+
+    /**
      * Initializes the plugin.
      *
      * @return void
@@ -110,7 +117,7 @@ final class Plugin extends Singleton
     {
         $this->initActions();
         $this->initOptionPage();
-        $this->orderController = new OrderController($this->settingsRepository);
+        $this->orderController = new OrderController($this->settingsRepository, $this->orderRepository);
     }
 
     /**
@@ -368,6 +375,17 @@ final class Plugin extends Singleton
     public function setOrderStateRepository(OrderStateRepository $orderStateRepository)
     {
         $this->orderStateRepository = $orderStateRepository;
+    }
+
+    /**
+     * WooCommerce Order Repository
+     *
+     * @param OrderRepository $orderRepository The order repository.
+     * @return void
+     */
+    public function setOrderRepository(OrderRepository $orderRepository)
+    {
+        $this->orderRepository = $orderRepository;
     }
 
     /**

@@ -8,6 +8,7 @@ use Mockery;
 use Mockery\MockInterface;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
+use Towa\GebruederWeissWooCommerce\OrderRepository;
 
 class OrderControllerTest extends TestCase
 {
@@ -15,6 +16,10 @@ class OrderControllerTest extends TestCase
 
     public function test_it_does_update_the_woocommerce_order_status()
     {
+        /** @var \WP_REST_Request|MockInterface */
+        $request = Mockery::mock(\WP_REST_Request::class);
+        $request->allows('get_params')->andReturn(['id' => 12]);
+
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
         $settingsRepository->allows(['getFulfilledState' => 'wc-fulfilled']);
@@ -25,10 +30,16 @@ class OrderControllerTest extends TestCase
         $order->allows("get_status");
         $order->allows("save");
 
-        $controller = new OrderController($settingsRepository);
+        /** @var MockInterface|OrderRepository */
+        $orderRepository = Mockery::mock(OrderRepository::class);
+        $orderRepository->allows([
+            "findById" => $order
+        ]);
+
+        $controller = new OrderController($settingsRepository, $orderRepository);
 
 
-        $controller->updateOrderStatus($order, 'wc-fulfilled');
+        $controller->handleOrderUpdateRequest($request);
 
 
         $order->shouldHaveReceived('set_status', ['wc-fulfilled']);
@@ -45,7 +56,13 @@ class OrderControllerTest extends TestCase
         $request = Mockery::mock(\WP_REST_Request::class);
         $request->allows('get_params')->andReturn(['id' => 12]);
 
-        $controller = new OrderController($settingsRepository);
+        /** @var MockInterface|OrderRepository */
+        $orderRepository = Mockery::mock(OrderRepository::class);
+        $orderRepository->allows([
+            "findById" => null
+        ]);
+
+        $controller = new OrderController($settingsRepository, $orderRepository);
 
 
         $response = $controller->handleOrderUpdateRequest($request);
@@ -60,13 +77,23 @@ class OrderControllerTest extends TestCase
         $settingsRepository = Mockery::mock(SettingsRepository::class);
         $settingsRepository->allows(['getFulfilledState' => 'wc-fulfilled']);
 
-        $order = wc_create_order();
+        /** @var MockInterface|\WC_Order */
+        $order = Mockery::mock("WC_Order");
+        $order->allows("set_status");
+        $order->allows("get_status");
+        $order->allows("save");
+
+        /** @var MockInterface|OrderRepository */
+        $orderRepository = Mockery::mock(OrderRepository::class);
+        $orderRepository->allows([
+            "findById" => $order
+        ]);
 
         /** @var \WP_REST_Request|MockInterface */
         $request = Mockery::mock(\WP_REST_Request::class);
-        $request->allows('get_params')->andReturn(['id' => $order->get_id()]);
+        $request->allows('get_params')->andReturn(['id' => 12]);
 
-        $controller = new OrderController($settingsRepository);
+        $controller = new OrderController($settingsRepository, $orderRepository);
 
 
         $response = $controller->handleOrderUpdateRequest($request);

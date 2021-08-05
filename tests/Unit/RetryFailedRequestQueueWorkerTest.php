@@ -217,4 +217,9 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
     {
         $this->markTestIncomplete();
     }
+
+    public function test_it_marks_the_failed_request_as_successful_if_the_order_cannot_be_found()
+    {
+        $this->markTestIncomplete();
+    }
 }

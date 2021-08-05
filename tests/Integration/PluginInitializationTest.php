@@ -5,6 +5,8 @@ namespace Tests\Integration;
 use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Mockery;
+use Mockery\MockInterface;
+use Towa\GebruederWeissWooCommerce\OrderRepository;
 
 class PluginInitializationTest extends \WP_UnitTestCase
 {
@@ -42,12 +44,18 @@ class PluginInitializationTest extends \WP_UnitTestCase
     public function test_it_registers_an_action_for_woocommerce_order_status()
     {
         global $wp_filter;
-        $mock = Mockery::mock(OrderStateRepository::class);
-        $mock->shouldReceive("getAllOrderStates")->andReturn([]);
+
+        /** @var MockInterface|OrderStateRepository */
+        $orderStateRepository = Mockery::mock(OrderStateRepository::class);
+        $orderStateRepository->shouldReceive("getAllOrderStates")->andReturn([]);
+
+        /** @var MockInterface|OrderRepository */
+        $orderRepository = Mockery::mock(OrderRepository::class);
 
         /** @var Plugin */
         $plugin = Plugin::getInstance();
-        $plugin->setOrderStateRepository($mock);
+        $plugin->setOrderStateRepository($orderStateRepository);
+        $plugin->setOrderRepository($orderRepository);
         $plugin->initialize();
 
         $numberOfInitFiltersAfterCheck = count($wp_filter['woocommerce_order_status_changed'][10]);

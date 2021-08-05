@@ -2,7 +2,6 @@
 
 namespace Tests\Integration;
 
-use Towa\GebruederWeissWooCommerce\Exceptions\OrderNotFoundException;
 use Towa\GebruederWeissWooCommerce\OrderRepository;
 
 class OrderRepositoryTest extends \WP_UnitTestCase
@@ -19,12 +18,12 @@ class OrderRepositoryTest extends \WP_UnitTestCase
         $this->assertNotNull($order);
     }
 
-    public function test_it_throws_an_exception_if_the_order_was_not_found()
+    public function test_it_returns_null_if_the_order_was_not_found()
     {
-        $this->expectException(OrderNotFoundException::class);
-
         $repository = new OrderRepository();
 
-        $repository->findById(42);
+        $order = $repository->findById(42);
+
+        $this->assertNull($order);
     }
 }
