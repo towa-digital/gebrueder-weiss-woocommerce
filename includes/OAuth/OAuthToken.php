@@ -22,13 +22,6 @@ class OAuthToken
     private $accessToken = null;
 
     /**
-     * Token Type
-     *
-     * @var string
-     */
-    private $tokenType = null;
-
-    /**
      * Expires timestamp
      *
      * @var int
@@ -39,13 +32,11 @@ class OAuthToken
      * Constructor.
      *
      * @param string $accessToken The access token.
-     * @param string $tokenType The token type.
      * @param int    $expires expires The expiration timestamp.
      */
-    public function __construct(string $accessToken, string $tokenType, int $expires)
+    public function __construct(string $accessToken, int $expires)
     {
         $this->accessToken = $accessToken;
-        $this->tokenType = $tokenType;
         $this->expires = $expires;
     }
 
@@ -57,16 +48,6 @@ class OAuthToken
     public function getAccessToken(): string
     {
         return $this->accessToken;
-    }
-
-    /**
-     * Retrieves the Token Type.
-     *
-     * @return string
-     */
-    public function getTokenType(): string
-    {
-        return $this->tokenType;
     }
 
     /**

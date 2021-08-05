@@ -64,9 +64,7 @@ class OAuthAuthenticator
 
             return new OAuthToken(
                 $leagueToken->getToken(),
-                'Bearer',
                 $leagueToken->getExpires(),
-                $leagueToken->getRefreshToken()
             );
         } catch (IdentityProviderException $e) {
             throw new \Exception('Authentication failed: ' . $e->getMessage());
