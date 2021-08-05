@@ -150,7 +150,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 
         /** @var FailedRequestRepository|MockInterface */
         $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository->shouldReceive("update")->once();
+        $failedRequestRepository->shouldReceive("update");
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
 
         /** @var MockInterface|WriteApi */
@@ -181,7 +181,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 
         /** @var FailedRequestRepository|MockInterface */
         $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository->shouldReceive("update")->once();
+        $failedRequestRepository->shouldReceive("update");
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
 
         /** @var MockInterface|WriteApi */
@@ -199,6 +199,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
             "get_id" => 42
         ]);
         $order->shouldReceive("set_status")->once()->andReturn(null);
+        $order->shouldReceive("save")->once();
 
         /** @var MockInterface|OrderRepository */
         $orderRepository = Mockery::mock(OrderRepository::class);

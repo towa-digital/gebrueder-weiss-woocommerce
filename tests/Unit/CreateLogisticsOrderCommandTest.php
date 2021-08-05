@@ -55,6 +55,7 @@ class CreateLogisticsOrderCommandTest extends TestCase
     {
         (new CreateLogisticsOrderCommand($this->order, $this->logisticsOrderFactory, $this->writeApi))->execute();
 
+        $this->order->shouldHaveReceived("set_status", ["on-hold"]);
         $this->order->shouldHaveReceived("save");
     }
 
