@@ -253,7 +253,7 @@ final class Plugin extends Singleton
             return;
         }
 
-        $this->authenticationClient->updateAuthToken();
+        $this->authenticationClient->updateAuthTokenIfNecessary();
         $this->createLogisticsOrderAndUpdateOrderState($order);
     }
 

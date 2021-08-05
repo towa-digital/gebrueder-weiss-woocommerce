@@ -73,7 +73,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
 
         /** @var MockInterface|OAuthAuthenticator */
         $this->authenticator = Mockery::mock(OAuthAuthenticator::class);
-        $this->authenticator->allows("updateAuthToken");
+        $this->authenticator->allows("updateAuthTokenIfNecessary");
 
         /** @var MockInterface|FailedRequestRepository */
         $this->failedRequestRepository = Mockery::mock(FailedRequestRepository::class);

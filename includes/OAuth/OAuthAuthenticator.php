@@ -72,15 +72,21 @@ class OAuthAuthenticator
     }
 
     /**
-     *  Requests a new OAuthToken and stores the accessToken in
-     *  the ws_options table
+     * Checks whether the currently stored auth token is valid and requests
+     * a new token if the current one is not valid.
      *
      *  @throws \Exception If the token could not be saved.
      */
-    public function updateAuthToken(): void
+    public function updateAuthTokenIfNecessary(): void
     {
-        $token = $this->authenticate();
+        $currentToken = $this->settingsRepository->getAccessToken();
 
-        $this->settingsRepository->setAccessToken($token);
+        if ($currentToken->isValid()) {
+            return;
+        }
+
+        $freshToken = $this->authenticate();
+
+        $this->settingsRepository->setAccessToken($freshToken);
     }
 }

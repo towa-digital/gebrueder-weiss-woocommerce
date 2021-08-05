@@ -81,15 +81,47 @@ class OAuthAuthenticatorTest extends TestCase
               ])
           );
 
+        /** @var OAuthToken|MockInterface */
+        $token = Mockery::mock(OAuthToken::class);
+        $token->allows(["isValid" => false]);
+
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
-        $settingsRepository->allows(['getClientId' => 'client-id', "getClientSecret" => "client-secret"]);
+        $settingsRepository->allows([
+          'getClientId' => 'client-id',
+          "getClientSecret" => "client-secret",
+          "getAccessToken" => $token,
+        ]);
         $settingsRepository->shouldReceive("setAccessToken");
 
         $authenticator = new OAuthAuthenticator($authProvider, $settingsRepository);
 
-        $authenticator->updateAuthToken();
+        $authenticator->updateAuthTokenIfNecessary();
 
         $settingsRepository->shouldHaveReceived("setAccessToken", [OAuthToken::class]);
+    }
+
+    public function test_it_does_not_update_the_auth_token_if_not_necessary()
+    {
+        /** @var GenericProvider|MockInterface */
+        $authProvider = Mockery::mock(GenericProvider::class);
+
+        /** @var OAuthToken|MockInterface */
+        $token = Mockery::mock(OAuthToken::class);
+        $token->allows(["isValid" => true]);
+
+        /** @var SettingsRepository|MockInterface */
+        $settingsRepository = Mockery::mock(SettingsRepository::class);
+        $settingsRepository->allows([
+          'getClientId' => 'client-id',
+          "getClientSecret" => "client-secret",
+          "getAccessToken" => $token,
+        ]);
+
+        $authenticator = new OAuthAuthenticator($authProvider, $settingsRepository);
+
+        $authenticator->updateAuthTokenIfNecessary();
+
+        $settingsRepository->shouldNotHaveReceived("setAccessToken", [OAuthToken::class]);
     }
 }
