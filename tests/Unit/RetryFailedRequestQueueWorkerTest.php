@@ -220,6 +220,25 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 
     public function test_it_marks_the_failed_request_as_successful_if_the_order_cannot_be_found()
     {
-        $this->markTestIncomplete();
+        /** @var FailedRequest|MockInterface */
+        $failedRequest = Mockery::mock(FailedRequest::class);
+        $failedRequest->allows([ "getOrderId" => 4, "setStatus" => null, "getFailedAttempts" => 1 ]);
+
+        /** @var FailedRequestRepository|MockInterface */
+        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+        $failedRequestRepository->shouldReceive("update")->once();
+        $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
+
+        /** @var MockInterface|OrderRepository */
+        $orderRepository = Mockery::mock(OrderRepository::class);
+        $orderRepository->allows([
+            "findById" => null
+        ]);
+
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->writeApi, $orderRepository, $this->settingsRepository);
+        $worker->start();
+
+        $failedRequest->shouldHaveReceived("setStatus", [FailedRequest::SUCCESS_STATUS]);
+        $failedRequestRepository->shouldHaveReceived("update", [$failedRequest]);
     }
 }

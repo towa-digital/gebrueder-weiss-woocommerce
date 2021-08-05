@@ -96,6 +96,12 @@ class RetryFailedRequestsQueueWorker
 
             $order = $this->orderRepository->findById($failedRequest->getOrderId());
 
+            if (is_null($order)) {
+                $failedRequest->setStatus(FailedRequest::SUCCESS_STATUS);
+                $this->failedRequestRepository->update($failedRequest);
+                return;
+            }
+
             try {
                 (new CreateLogisticsOrderCommand(
                     $order,
