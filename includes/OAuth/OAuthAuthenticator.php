@@ -15,6 +15,7 @@ defined('ABSPATH') || exit;
 
 use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
 /**
  * OAuthAuthenticator Class
@@ -29,29 +30,36 @@ class OAuthAuthenticator
     private $authProvider = null;
 
     /**
+     * Repository to retrieve plugin settings.
+     *
+     * @var SettingsRepository
+     */
+    private $settingsRepository = null;
+
+    /**
      * Constructor.
      *
-     * @param GenericProvider $authProvider client object.
+     * @param GenericProvider    $authProvider client object.
+     * @param SettingsRepository $settingsRepository Repository for reading plugin settings.
      */
-    public function __construct(GenericProvider $authProvider)
+    public function __construct(GenericProvider $authProvider, SettingsRepository $settingsRepository)
     {
         $this->authProvider = $authProvider;
+        $this->settingsRepository = $settingsRepository;
     }
 
     /**
      * Returns the access token
      *
-     * @param string $clientId the id of the client.
-     * @param string $clientSecret the secret key of the client.
      * @throws \Exception With message.
      * @return string
      */
-    public function authenticate(string $clientId, string $clientSecret): OAuthToken
+    public function authenticate(): OAuthToken
     {
         try {
             $leagueToken = $this->authProvider->getAccessToken('client_credentials', [
-                'clientId' => $clientId,
-                'clientSecret' => $clientSecret,
+                'clientId' => $this->settingsRepository->getClientId(),
+                'clientSecret' => $this->settingsRepository->getClientSecret(),
             ]);
 
             return new OAuthToken(
@@ -63,5 +71,18 @@ class OAuthAuthenticator
         } catch (IdentityProviderException $e) {
             throw new \Exception('Authentication failed: ' . $e->getMessage());
         }
+    }
+
+    /**
+     *  Requests a new OAuthToken and stores the accessToken in
+     *  the ws_options table
+     *
+     *  @throws \Exception If the token could not be saved.
+     */
+    public function updateAuthToken(): void
+    {
+        $token = $this->authenticate();
+
+        $this->settingsRepository->setAccessToken($token->getAccessToken());
     }
 }
