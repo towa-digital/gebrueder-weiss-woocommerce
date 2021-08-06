@@ -164,15 +164,8 @@ final class Plugin extends Singleton
      */
     public function validateCredentials(): void
     {
-        $clientId = $this->settingsRepository->getClientId();
-        $clientSecret = $this->settingsRepository->getClientSecret();
-
-        if (empty($clientId) || empty($clientSecret)) {
-            return;
-        }
-
         try {
-            $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
+            $token = $this->authenticationClient->authenticate();
             if ($token && $token->isValid()) {
                 self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
             } else {
@@ -181,22 +174,6 @@ final class Plugin extends Singleton
         } catch (\Exception $e) {
             self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed.", self::$languageDomain));
         }
-    }
-
-    /**
-     *  Requests a new OAuthToken and stores the accessToken in
-     *  the ws_options table
-     *
-     *  @throws \Exception If the token could not be saved.
-     */
-    public function updateAuthToken(): void
-    {
-        $clientId = $this->settingsRepository->getClientId();
-        $clientSecret = $this->settingsRepository->getClientSecret();
-
-        $token = $this->authenticationClient->authenticate($clientId, $clientSecret);
-
-        $this->settingsRepository->setAccessToken($token->getAccessToken());
     }
 
     /**
@@ -278,7 +255,7 @@ final class Plugin extends Singleton
             return;
         }
 
-        $this->updateAuthToken();
+        $this->authenticationClient->updateAuthTokenIfNecessary();
         $this->createLogisticsOrderAndUpdateOrderState($order);
     }
 
@@ -291,7 +268,7 @@ final class Plugin extends Singleton
     public function createLogisticsOrderAndUpdateOrderState(object $order)
     {
         $authToken = $this->settingsRepository->getAccessToken();
-        $this->writeApiClient->getConfig()->setAccessToken($authToken);
+        $this->writeApiClient->getConfig()->setAccessToken($authToken->getToken());
 
         try {
             (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApiClient))->execute();

@@ -36,7 +36,9 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
         $request->incrementFailedAttempts();
         $repository->update($request);
 
-        $this->assertSame(1, $this->getNumberOfFailedRequestsInDB());
+        $row = $this->getFirstFailedRequest();
+        $this->assertSame(FailedRequest::SUCCESS_STATUS, $row->status);
+        $this->assertSame("3", $row->failed_attempts);
     }
 
     public function test_it_deletes_requests_if_they_were_successful()
@@ -91,5 +93,12 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
         $numberOfRows = $wpdb->get_var("SELECT count(*) FROM {$wpdb->prefix}gbw_request_retry_queue");
 
         return intval($numberOfRows);
+    }
+
+    private function getFirstFailedRequest(): object
+    {
+        global $wpdb;
+
+        return $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gbw_request_retry_queue LIMIT 1");
     }
 }

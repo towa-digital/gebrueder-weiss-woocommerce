@@ -6,7 +6,6 @@ use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
-use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use PHPUnit\Framework\TestCase;
 use Mockery;
@@ -17,6 +16,7 @@ use Towa\GebruederWeissSDK\ApiException;
 use Towa\GebruederWeissSDK\Configuration;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
+use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 
 class WooCommerceOrderStatusChangedTest extends TestCase
 {
@@ -62,7 +62,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
             "getClientId" => "id",
             "getClientSecret" => "secret",
             "setAccessToken" => null,
-            "getAccessToken" => "token",
+            "getAccessToken" => new OAuthToken("test", time() + 3600),
             "getSiteUrl" => "http://test.com",
         ]);
 
@@ -74,9 +74,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
 
         /** @var MockInterface|OAuthAuthenticator */
         $this->authenticator = Mockery::mock(OAuthAuthenticator::class);
-        $this->authenticator->allows([
-            "authenticate" => new OAuthToken("token", "Bearer", 3600)
-        ]);
+        $this->authenticator->allows("updateAuthTokenIfNecessary");
 
         /** @var MockInterface|FailedRequestRepository */
         $this->failedRequestRepository = Mockery::mock(FailedRequestRepository::class);

@@ -88,6 +88,8 @@ class RetryFailedRequestsQueueWorker
      */
     public function start(): void
     {
+        $this->writeApi->getConfig()->setAccessToken($this->settingsRepository->getAccessToken()->getToken());
+
         while (true) {
             $failedRequest = $this->failedRequestRepository->findOneToRetry();
 

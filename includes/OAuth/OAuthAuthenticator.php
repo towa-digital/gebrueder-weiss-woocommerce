@@ -15,6 +15,8 @@ defined('ABSPATH') || exit;
 
 use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Towa\GebruederWeissWooCommerce\Exceptions\AuthenticationFailedException;
+use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
 /**
  * OAuthAuthenticator Class
@@ -22,63 +24,70 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 class OAuthAuthenticator
 {
     /**
-     * The endpoint used to authenticate against.
-     *
-     * @var string
-     */
-    private $authenticationEndpoint = null;
-
-    /**
      * Client Provider Object.
      *
-     * @param GenericProvider $authProvider the oAuth authProvider.
+     * @var GenericProvider $authProvider The oAuth authProvider.
      */
+    private $authProvider = null;
+
+    /**
+     * Repository to retrieve plugin settings.
+     *
+     * @var SettingsRepository
+     */
+    private $settingsRepository = null;
 
     /**
      * Constructor.
      *
-     * @param GenericProvider $authProvider client object.
+     * @param GenericProvider    $authProvider client object.
+     * @param SettingsRepository $settingsRepository Repository for reading plugin settings.
      */
-    public function __construct(GenericProvider $authProvider)
+    public function __construct(GenericProvider $authProvider, SettingsRepository $settingsRepository)
     {
         $this->authProvider = $authProvider;
-    }
-
-    /**
-     * Sets the authentication endpoint.
-     *
-     * @param string $endpoint The endpoint used to authenticate against.
-     * @return void
-     */
-    public function setAuthenticationEndpoint(string $endpoint)
-    {
-        $this->authenticationEndpoint = $endpoint;
+        $this->settingsRepository = $settingsRepository;
     }
 
     /**
      * Returns the access token
      *
-     * @param string $clientId the id of the client.
-     * @param string $clientSecret the secret key of the client.
-     * @throws \Exception With message.
+     * @throws AuthenticationFailedException Thrown if an error occurred.
      * @return string
      */
-    public function authenticate(string $clientId, string $clientSecret): OAuthToken
+    public function authenticate(): OAuthToken
     {
         try {
             $leagueToken = $this->authProvider->getAccessToken('client_credentials', [
-                'clientId' => $clientId,
-                'clientSecret' => $clientSecret,
+                'clientId' => $this->settingsRepository->getClientId(),
+                'clientSecret' => $this->settingsRepository->getClientSecret(),
             ]);
 
             return new OAuthToken(
                 $leagueToken->getToken(),
-                'Bearer',
                 $leagueToken->getExpires(),
-                $leagueToken->getRefreshToken()
             );
         } catch (IdentityProviderException $e) {
-            throw new \Exception('Authentication failed: ' . $e->getMessage());
+            throw new AuthenticationFailedException('Authentication failed: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Checks whether the currently stored auth token is valid and requests
+     * a new token if the current one is not valid.
+     *
+     *  @throws AuthenticationException Thrown if an error occurred.
+     */
+    public function updateAuthTokenIfNecessary(): void
+    {
+        $currentToken = $this->settingsRepository->getAccessToken();
+
+        if ($currentToken->isValid()) {
+            return;
+        }
+
+        $freshToken = $this->authenticate();
+
+        $this->settingsRepository->setAccessToken($freshToken);
     }
 }

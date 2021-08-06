@@ -58,13 +58,13 @@ add_action("init", function () {
         'urlAccessToken'          => $tokenEndpoint,
         'urlResourceOwnerDetails' => null
     ]);
-    $authenticationClient = new OAuthAuthenticator($authProvider);
 
     $writeApi = new WriteApi();
     $writeApi->getConfig()->setHost($apiEndpoint);
 
     $settingsRepository = new SettingsRepository();
     $logisticsOrderFactory = new LogisticsOrderFactory($settingsRepository);
+    $authenticationClient = new OAuthAuthenticator($authProvider, $settingsRepository);
 
     $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
