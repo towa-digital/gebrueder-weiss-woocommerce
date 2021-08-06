@@ -21,6 +21,7 @@ use Towa\GebruederWeissWooCommerce\Support\Singleton;
 use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
+use Towa\GebruederWeissWooCommerce\FailedRequestQueue\RetryFailedRequestsQueueWorker;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 /**
@@ -297,6 +298,15 @@ final class Plugin extends Singleton
      */
     public function runRetryFailedRequestsWorker(): void
     {
+        $this->authenticationClient->updateAuthTokenIfNecessary();
+
+        (new RetryFailedRequestsQueueWorker(
+            $this->failedRequestRepository,
+            $this->logisticsOrderFactory,
+            $this->writeApiClient,
+            $this->orderRepository,
+            $this->settingsRepository
+        ))->start();
     }
 
     /**
