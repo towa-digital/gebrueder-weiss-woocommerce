@@ -12,6 +12,7 @@ namespace Towa\GebruederWeissWooCommerce;
 defined('ABSPATH') || exit;
 
 use Towa\GebruederWeissWooCommerce\Options\Option;
+use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 /**
  * Settings Repository
@@ -108,7 +109,7 @@ class SettingsRepository
      */
     public function getSiteUrl(): ?string
     {
-        return \get_site_url();
+        return WordPress::getSiteUrl();
     }
 
     /**
@@ -119,11 +120,11 @@ class SettingsRepository
      */
     private function getOption(string $name)
     {
-        return \get_option(Option::OPTIONS_PREFIX . $name, null);
+        return WordPress::getOption(Option::OPTIONS_PREFIX . $name, null);
     }
 
     /**
-     * Sets an wordpress option
+     * Sets a plugin option in the WordPress options
      *
      * @param string $name Name of the option.
      * @param mixed  $value New value for the option.
@@ -131,6 +132,6 @@ class SettingsRepository
      */
     private function setOption(string $name, $value): void
     {
-        \update_option(Option::OPTIONS_PREFIX . $name, $value);
+        WordPress::updateOption(Option::OPTIONS_PREFIX . $name, $value);
     }
 }

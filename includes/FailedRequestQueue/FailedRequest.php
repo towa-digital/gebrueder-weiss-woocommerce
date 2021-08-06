@@ -11,6 +11,8 @@ namespace Towa\GebruederWeissWooCommerce\FailedRequestQueue;
 
 defined('ABSPATH') || exit;
 
+use DateTime;
+
 /**
  * FailedRequest Class
  */
@@ -44,19 +46,28 @@ class FailedRequest
     private $failedAttempts;
 
     /**
+     * Date of the last attempt of sending the request
+     *
+     * @var DateTime
+     */
+    private $lastAttemptDate;
+
+    /**
      * The constructor.
      *
-     * @param integer $id id for the request.
-     * @param integer $orderId WooCommerce order id.
-     * @param string  $status 'failed' or 'success'.
-     * @param integer $failedAttempts initially 0.
+     * @param integer  $id id for the request.
+     * @param integer  $orderId WooCommerce order id.
+     * @param string   $status 'failed' or 'success'.
+     * @param integer  $failedAttempts initially 0.
+     * @param DateTime $lastAttemptDate initially now.
      */
-    public function __construct(int $id, int $orderId, string $status = 'failed', int $failedAttempts = 0)
+    public function __construct(int $id, int $orderId, string $status = 'failed', int $failedAttempts = 0, DateTime $lastAttemptDate = null)
     {
         $this->id = $id;
         $this->orderId = $orderId;
         $this->status = $status;
         $this->failedAttempts = $failedAttempts;
+        $this->lastAttemptDate = $lastAttemptDate ?? new DateTime();
     }
 
     /**
@@ -67,6 +78,16 @@ class FailedRequest
     public function incrementFailedAttempts(): void
     {
         $this->failedAttempts++;
+    }
+
+    /**
+     * Sets the last attempted date to now.
+     *
+     * @return void
+     */
+    public function setLastAttemptedDateToNow(): void
+    {
+        $this->lastAttemptDate = new DateTime();
     }
 
     /**
@@ -118,5 +139,15 @@ class FailedRequest
     public function getFailedAttempts(): int
     {
         return $this->failedAttempts;
+    }
+
+    /**
+     * Returns the date when the last attempt for sending the request happened.
+     *
+     * @return DateTime
+     */
+    public function getLastAttemptDate(): DateTime
+    {
+        return $this->lastAttemptDate;
     }
 }

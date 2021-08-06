@@ -11,6 +11,7 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
+use WP_REST_Request;
 use WP_REST_Response;
 
 /**
@@ -28,13 +29,23 @@ class OrderController
     private $settings = null;
 
     /**
+     * WooCommerce Order Repository
+     *
+     * @var OrderRepository
+     */
+    private $orderRepository = null;
+
+    /**
      * Constructor.
      *
      * @param SettingsRepository $settings the states.
+     * @param OrderRepository    $orderRepository WooCommerce Order Repository.
      */
-    public function __construct(SettingsRepository $settings)
+    public function __construct(SettingsRepository $settings, OrderRepository $orderRepository)
     {
         $this->settings = $settings;
+        $this->orderRepository = $orderRepository;
+
         \add_action('rest_api_init', function () {
             register_rest_route(self::NAMESPACE, '/update/(?P<id>\d+)', array(
                 'methods' => 'POST',
@@ -46,31 +57,21 @@ class OrderController
     /**
      * The callback handler.
      *
-     * @param \WP_REST_Request $request the post request.
+     * @param WP_REST_Request $request the post request.
      */
-    public function handleOrderUpdateRequest(\WP_REST_Request $request): WP_REST_Response
+    public function handleOrderUpdateRequest(WP_REST_Request $request): WP_REST_Response
     {
         $id = $request->get_params()['id'];
-        try {
-            $order = new \WC_Order($id);
-        } catch (\Exception $e) {
-            return new \WP_REST_Response(null, 404, null);
+
+        $order = $this->orderRepository->findById($id);
+
+        if (is_null($order)) {
+            return new WP_REST_Response(null, 404, null);
         }
 
-        $this->updateOrderStatus($order, $this->settings->getFulfilledState());
-        return new WP_REST_Response(null, 200, null);
-    }
-
-    /**
-     * Sets the new WooCommerce Order Status.
-     *
-     * @param \WC_Order $order the woo commerce order.
-     * @param string    $status the new order status.
-     * @return void
-     */
-    public function updateOrderStatus(\WC_Order $order, string $status)
-    {
-        $order->set_status($status);
+        $order->set_status($this->settings->getFulfilledState());
         $order->save();
+
+        return new WP_REST_Response(null, 200, null);
     }
 }

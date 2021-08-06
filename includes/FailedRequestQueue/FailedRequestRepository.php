@@ -9,6 +9,8 @@ namespace Towa\GebruederWeissWooCommerce\FailedRequestQueue;
 
 defined('ABSPATH') || exit;
 
+use DateTime;
+
 /**
  * FailedRequest Class
  */
@@ -23,7 +25,16 @@ class FailedRequestRepository
     {
         global $wpdb;
 
-        $statement = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}gbw_request_retry_queue WHERE status = \"%s\" AND failed_attempts < %d LIMIT 1", [FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS]);
+        $statement = $wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}gbw_request_retry_queue
+             WHERE
+                status = \"%s\" AND
+                failed_attempts < %d AND
+                last_attempt_date < CURRENT_TIME - INTERVAL 5 MINUTE
+             LIMIT 1",
+            [FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS]
+        );
+
         $row = $wpdb->get_row($statement);
 
         if (is_null($row)) {
@@ -41,16 +52,19 @@ class FailedRequestRepository
     /**
      * Creates a failed request based on the passed data
      *
-     * @param integer $orderId The related WooCommerce order id.
-     * @param string  $status Status of the request, defaults to failed.
-     * @param integer $failedAttempts The number of failed attempts, defaults to 1.
+     * @param integer  $orderId The related WooCommerce order id.
+     * @param string   $status Status of the request, defaults to failed.
+     * @param integer  $failedAttempts The number of failed attempts, defaults to 1.
+     * @param DateTime $lastAttemptedDate The date when the request was last attempted.
      * @return FailedRequest
      */
-    public function create(int $orderId, string $status = FailedRequest::FAILED_STATUS, int $failedAttempts = 1): FailedRequest
+    public function create(int $orderId, string $status = FailedRequest::FAILED_STATUS, int $failedAttempts = 1, DateTime $lastAttemptedDate = null): FailedRequest
     {
         global $wpdb;
 
-        $statement = $wpdb->prepare("INSERT INTO {$wpdb->prefix}gbw_request_retry_queue (order_id, status, failed_attempts) VALUES (%d, \"%s\", %d)", [$orderId, $status, $failedAttempts]);
+        $lastAttemptedDate = $lastAttemptedDate ?? new DateTime();
+
+        $statement = $wpdb->prepare("INSERT INTO {$wpdb->prefix}gbw_request_retry_queue (order_id, status, failed_attempts, last_attempt_date) VALUES (%d, \"%s\", %d, \"%s\")", [$orderId, $status, $failedAttempts, $lastAttemptedDate->format("Y-m-d H:i:s")]);
         $wpdb->query($statement);
 
         $failedRequest = new FailedRequest(
@@ -79,11 +93,12 @@ class FailedRequestRepository
             "order_id" => $failedRequest->getOrderId(),
             "failed_attempts" => $failedRequest->getFailedAttempts(),
             "status" => $failedRequest->getStatus(),
+            "last_attempt_date" => $failedRequest->getLastAttemptDate()->format("Y-m-d H:i:s"),
         ];
 
         $where = [ "id" => $failedRequest->getId() ];
 
-        $format = [ "%d", "%d", "%s"];
+        $format = [ "%d", "%d", "%s", "%s"];
 
         $whereFormat = [ "%d" ];
 

@@ -19,7 +19,8 @@ use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 use Towa\GebruederWeissWooCommerce\Options\Tab;
 use Towa\GebruederWeissWooCommerce\Support\Singleton;
 use Towa\GebruederWeissSDK\Api\WriteApi;
-use Towa\GebruederWeissSDK\ApiException;
+use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
+use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 
 /**
  * Main Plugin class
@@ -94,6 +95,20 @@ final class Plugin extends Singleton
     private $logisticsOrderFactory = null;
 
     /**
+     * Failed Request Repository
+     *
+     * @var FailedRequestRepository
+     */
+    private $failedRequestRepository = null;
+
+    /**
+     * WooCommerce Order Repository
+     *
+     * @var OrderRepository
+     */
+    private $orderRepository = null;
+
+    /**
      * Initializes the plugin.
      *
      * @return void
@@ -102,7 +117,7 @@ final class Plugin extends Singleton
     {
         $this->initActions();
         $this->initOptionPage();
-        $this->orderController = new OrderController($this->settingsRepository);
+        $this->orderController = new OrderController($this->settingsRepository, $this->orderRepository);
     }
 
     /**
@@ -273,26 +288,13 @@ final class Plugin extends Singleton
      */
     public function createLogisticsOrderAndUpdateOrderState(object $order)
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($order);
         $authToken = $this->settingsRepository->getAccessToken();
         $this->writeApiClient->getConfig()->setAccessToken($authToken);
 
         try {
-            $this->writeApiClient->logisticsOrderPost($logisticsOrder);
-            $order->set_status("on-hold");
-            $order->save();
-        } catch (ApiException $exception) {
-            if ($exception->getCode() === 400) {
-                // handle faulty parameters.
-                return;
-            }
-
-            if ($exception->getCode() === 409) {
-                // handle conflict.
-                return;
-            }
-
-            // retry request.
+            (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApiClient))->execute();
+        } catch (CreateLogisticsOrderFailedException $e) {
+            $this->failedRequestRepository->create($order->get_id());
         }
     }
 
@@ -376,6 +378,17 @@ final class Plugin extends Singleton
     }
 
     /**
+     * WooCommerce Order Repository
+     *
+     * @param OrderRepository $orderRepository The order repository.
+     * @return void
+     */
+    public function setOrderRepository(OrderRepository $orderRepository)
+    {
+        $this->orderRepository = $orderRepository;
+    }
+
+    /**
      * Sets the OAuthAuthentication client
      *
      * @param OAuthAuthenticator $client used for oauth authentication.
@@ -416,6 +429,17 @@ final class Plugin extends Singleton
     public function setLogisticsOrderFactory(LogisticsOrderFactory $logisticsOrderFactory): void
     {
         $this->logisticsOrderFactory = $logisticsOrderFactory;
+    }
+
+    /**
+     * Sets the failed request repository
+     *
+     * @param FailedRequestRepository $failedRequestRepository The instance to be used by the plugin.
+     * @return void
+     */
+    public function setFailedRequestRepository(FailedRequestRepository $failedRequestRepository): void
+    {
+        $this->failedRequestRepository = $failedRequestRepository;
     }
 
     /**
@@ -554,6 +578,7 @@ final class Plugin extends Singleton
           order_id int NOT NULL,
           status varchar(50) NOT NULL,
           failed_attempts int UNSIGNED NOT NULL,
+          last_attempt_date DATETIME NOT NULL,
           PRIMARY KEY (id),
           UNIQUE (order_id)
         ) $charset_collate;";
