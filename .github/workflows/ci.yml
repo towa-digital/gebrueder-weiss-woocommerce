@@ -59,6 +59,7 @@ jobs:
   staging_deployment:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
+    needs: [linting, tests]
 
     steps:
       - uses: actions/checkout@v2
