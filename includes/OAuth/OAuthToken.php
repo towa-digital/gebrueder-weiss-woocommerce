@@ -3,69 +3,43 @@
  * OAuthToken
  *
  * @package OAuth
- * @author Towa Digital <developer@towa.at>
- * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPL-3.0-or-later
  */
 
 namespace Towa\GebruederWeissWooCommerce\OAuth;
 
+use Serializable;
+
 defined('ABSPATH') || exit;
+
 /**
- * OAuthAuthenticator Class
+ * OAuth Token
  */
-class OAuthToken
+class OAuthToken implements Serializable
 {
     /**
-     * Access_token
+     * Access Token
      *
-     * @var string $access_token Token.
+     * @var string
      */
-    private $access_token = null;
+    private $token = null;
 
     /**
-     * Token_type
+     * Expires timestamp
      *
-     * @var string $token_type Token Type.
+     * @var int
      */
-    private $token_type = null;
-
-    /**
-     * Expires_in
-     *
-     * @var string $expires_in Expires in.
-     */
-    private $expires_in = null;
-
-    /**
-     * Refresh_token
-     *
-     * @var string $refresh_token Refresh Token.
-     */
-    private $refresh_token = null;
-
-    /**
-     * Scope
-     *
-     * @var string $scope Scope.
-     */
-    private $scope = null;
+    private $expires = null;
 
     /**
      * Constructor.
      *
-     * @param string $access_token access_token.
-     * @param string $token_type token_type.
-     * @param int    $expires expires timestamp.
-     * @param string $refresh_token refresh_token.
-     * @param string $scope scope.
+     * @param string $token The access token.
+     * @param int    $expires expires The expiration timestamp.
      */
-    public function __construct(string $access_token, string $token_type, int $expires, string $refresh_token = null, string $scope = null)
+    public function __construct(string $token, int $expires)
     {
-        $this->access_token = $access_token;
-        $this->token_type = $token_type;
+        $this->token = $token;
         $this->expires = $expires;
-        $this->refresh_token = $refresh_token;
-        $this->scope = $scope;
     }
 
     /**
@@ -73,49 +47,19 @@ class OAuthToken
      *
      * @return string
      */
-    public function getAccessToken(): string
+    public function getToken(): string
     {
-        return $this->access_token;
-    }
-
-    /**
-     * Retrieves the Token Type.
-     *
-     * @return string
-     */
-    public function getTokenType(): string
-    {
-        return $this->token_type;
+        return $this->token;
     }
 
     /**
      * Retrieves the Time until the token is expired.
      *
-     * @return string
+     * @return int
      */
-    public function getExpiresIn(): string
+    public function getExpiresIn(): int
     {
-        return $this->expires;
-    }
-
-    /**
-     * Retrieves the Refresh token.
-     *
-     * @return string
-     */
-    public function getRefreshToken(): string
-    {
-        return $this->refresh_token;
-    }
-
-    /**
-     * Retrieves the Scope.
-     *
-     * @return string
-     */
-    public function getScope(): string
-    {
-        return $this->scope;
+        return $this->expires - time();
     }
 
     /**
@@ -125,6 +69,27 @@ class OAuthToken
      */
     public function isValid(): bool
     {
-        return $this->access_token && ($this->expires > time());
+        return $this->token && ($this->expires > time());
+    }
+
+    /**
+     * Serializes the token
+     *
+     * @return string
+     */
+    public function serialize()
+    {
+        return serialize([$this->token, $this->expires]);
+    }
+
+    /**
+     * Restores the token from serialized data
+     *
+     * @param string $data Serialized token data.
+     * @return void
+     */
+    public function unserialize($data)
+    {
+        list($this->token, $this->expires) = unserialize($data);
     }
 }
