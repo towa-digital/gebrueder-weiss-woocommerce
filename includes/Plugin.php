@@ -307,6 +307,8 @@ final class Plugin extends Singleton
             $this->orderRepository,
             $this->settingsRepository
         ))->start();
+
+        $this->failedRequestRepository->deleteWhereStale();
     }
 
     /**
