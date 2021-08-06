@@ -81,6 +81,16 @@ class FailedRequest
     }
 
     /**
+     * Marks the failed job to not be retried again.
+     *
+     * @return void
+     */
+    public function doNotRetry(): void
+    {
+        $this->failedAttempts = self::MAX_ATTEMPTS;
+    }
+
+    /**
      * Sets the last attempted date to now.
      *
      * @return void

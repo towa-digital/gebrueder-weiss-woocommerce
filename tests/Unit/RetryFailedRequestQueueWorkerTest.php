@@ -213,6 +213,54 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $order->shouldHaveReceived("set_status", ["wc-failed"]);
     }
 
+    /**
+     * We need to isolate this test to able to alias mock the
+     * WordPress class with our helper functions.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test_it_does_not_queue_a_request_for_retry_again_if_there_was_a_conflict_error()
+    {
+        /** @var FailedRequest|MockInterface */
+        $failedRequest = Mockery::mock(FailedRequest::class);
+        $failedRequest->allows([ "getOrderId" => 4, "getFailedAttempts" => 1 ]);
+        $failedRequest->shouldReceive("doNotRetry")->times(1);
+
+        /** @var FailedRequestRepository|MockInterface */
+        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+        $failedRequestRepository->shouldReceive("update");
+        $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
+
+        /** @var MockInterface|WriteApi */
+        $writeApi = Mockery::mock(WriteApi::class);
+        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Conflict", 409));
+
+        /** @var MockInterface */
+        $wordpressMock = Mockery::mock("alias:" . WordPress::class);
+        $wordpressMock->shouldReceive("sendMailToAdmin")->once();
+
+        /** @var MockInterface|\WC_Order */
+        $order = Mockery::mock("WC_Order");
+        $order->allows([
+            "get_id" => 42
+        ]);
+        $order->shouldReceive("set_status")->once()->andReturn(null);
+        $order->shouldReceive("save")->once();
+
+        /** @var MockInterface|OrderRepository */
+        $orderRepository = Mockery::mock(OrderRepository::class);
+        $orderRepository->allows([
+            "findById" => $order
+        ]);
+
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $orderRepository, $this->settingsRepository);
+        $worker->start();
+
+        // wc-failed is the value returned by the settings repository
+        $order->shouldHaveReceived("set_status", ["wc-failed"]);
+    }
+
     public function test_it_ensures_that_the_requests_are_authenticated()
     {
         $this->markTestIncomplete();

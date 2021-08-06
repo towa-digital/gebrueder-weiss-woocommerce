@@ -16,6 +16,7 @@ use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\ApiException;
 use Towa\GebruederWeissSDK\Configuration;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
+use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 class WooCommerceOrderStatusChangedTest extends TestCase
 {
@@ -126,5 +127,50 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::SELECTED_FULFILLMENT_STATE, $order);
 
         $this->failedRequestRepository->shouldHaveReceived("create");
+    }
+
+    /**
+     * We need to isolate this test to able to alias mock the
+     * WordPress class with our helper functions.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test_it_handles_conflict_errors()
+    {
+        /** @var MockInterface */
+        $wordpressMock = Mockery::mock("alias:" . WordPress::class);
+        $wordpressMock->shouldReceive("sendMailToAdmin")->once();
+
+        /** @var MockInterface|WriteApi */
+        $writeApi = Mockery::mock(WriteApi::class);
+        $writeApi->allows(["getConfig" => new Configuration()]);
+        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Conflict", 409));
+        $this->plugin->setWriteApiClient($writeApi);
+
+        /** @var MockInterface|SettingsRepository */
+        $settingsRepository = Mockery::mock(SettingsRepository::class);
+        $settingsRepository->allows([
+            "getFulfillmentState" => self::PREFIXED_SELECTED_FULFILLMENT_STATE,
+            "getFulfillmentErrorState" => "wc-error",
+            "getClientId" => "id",
+            "getClientSecret" => "secret",
+            "setAccessToken" => null,
+            "getAccessToken" => "token",
+            "getSiteUrl" => "http://test.com",
+        ]);
+        $this->plugin->setSettingsRepository($settingsRepository);
+
+        /** @var MockInterface|stdClass */
+        $order = Mockery::mock("WC_Order");
+        $order->allows([
+            "get_id" => 42
+        ]);
+        $order->shouldReceive("set_status")->once()->withArgs(["wc-error"]);
+        $order->shouldReceive("save")->once();
+
+        $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::SELECTED_FULFILLMENT_STATE, $order);
+
+        $this->failedRequestRepository->shouldNotHaveReceived("create");
     }
 }
