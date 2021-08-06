@@ -12,7 +12,14 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/develop' }}
 
     steps:
+      - name: debug
+        env:
+          TRIGGER_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: echo $TRIGGER_BRANCH
+
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
