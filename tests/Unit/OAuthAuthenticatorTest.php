@@ -99,6 +99,37 @@ class OAuthAuthenticatorTest extends TestCase
         $settingsRepository->shouldHaveReceived("setAccessToken", [OAuthToken::class]);
     }
 
+    public function test_it_updates_the_token_if_no_token_is_available()
+    {
+        /** @var GenericProvider|MockInterface */
+        $authProvider = Mockery::mock(GenericProvider::class);
+        $authProvider->shouldReceive('getAccessToken')
+          ->times(1)
+          ->andReturn(
+              new AccessToken([
+                'access_token' => 'MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3',
+                'refresh_token' => 'testRefreshToken',
+                'expires_in' => 3600,
+                'resource_owner_id' => '1',
+              ])
+          );
+
+        /** @var SettingsRepository|MockInterface */
+        $settingsRepository = Mockery::mock(SettingsRepository::class);
+        $settingsRepository->allows([
+          'getClientId' => 'client-id',
+          "getClientSecret" => "client-secret",
+          "getAccessToken" => null,
+        ]);
+        $settingsRepository->shouldReceive("setAccessToken");
+
+        $authenticator = new OAuthAuthenticator($authProvider, $settingsRepository);
+
+        $authenticator->updateAuthTokenIfNecessary();
+
+        $settingsRepository->shouldHaveReceived("setAccessToken", [OAuthToken::class]);
+    }
+
     public function test_it_does_not_update_the_auth_token_if_not_necessary()
     {
         /** @var GenericProvider|MockInterface */
