@@ -252,6 +252,9 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 
         /** @var MockInterface|WriteApi */
         $writeApi = Mockery::mock(WriteApi::class);
+        $writeApi->allows([
+            "getConfig" => new Configuration(),
+        ]);
         $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Conflict", 409));
 
         /** @var MockInterface */

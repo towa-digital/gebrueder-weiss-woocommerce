@@ -154,7 +154,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
             "getClientId" => "id",
             "getClientSecret" => "secret",
             "setAccessToken" => null,
-            "getAccessToken" => "token",
+            "getAccessToken" => new OAuthToken("token", time() + 3600),
             "getSiteUrl" => "http://test.com",
         ]);
         $this->plugin->setSettingsRepository($settingsRepository);
