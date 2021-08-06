@@ -47,10 +47,11 @@ class OrderController
         $this->orderRepository = $orderRepository;
 
         \add_action('rest_api_init', function () {
-            register_rest_route(self::NAMESPACE, '/update/(?P<id>\d+)', array(
+            register_rest_route(self::NAMESPACE, '/update/(?P<id>\d+)', [
                 'methods' => 'POST',
-                'callback' => [$this, 'handleOrderUpdateRequest']
-            ));
+                'callback' => [$this, 'handleOrderUpdateRequest'],
+                'permission_callback' => '__return_true'
+            ]);
         });
     }
 
