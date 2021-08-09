@@ -142,7 +142,7 @@ class OAuthAuthenticatorTest extends TestCase
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
         $settingsRepository->allows([
-          'getClientId' => 'client-id',
+          "getClientId" => "client-id",
           "getClientSecret" => "client-secret",
           "getAccessToken" => $token,
         ]);
