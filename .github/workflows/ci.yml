@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -56,3 +56,30 @@ jobs:
 
       - name: Execute PHPUnit
         run: vendor/bin/phpunit
+  staging_deployment:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    needs: [linting, tests]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Install Composer Dependencies
+        run: composer install
+
+      - name: Setup SSH
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.DEPLOYMENT_SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.STAGING_KNOWN_HOSTS }}
+
+      - name: Deploy Plugin
+        env:
+          HOST: ${{ secrets.STAGING_HOST }}
+          USER: ${{ secrets.STAGING_USER }}
+        run: rsync -zrS --exclude=".*" . $USER@$HOST:/var/www/vhosts/towa-online.at/gebrueder-weiss-woocommerce.towa-online.at/wp-content/plugins/gebrueder-weiss-woocommerce
