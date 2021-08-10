@@ -22,6 +22,7 @@ use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
+use Towa\GebruederWeissWooCommerce\FailedRequestQueue\RetryFailedRequestsQueueWorker;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 /**
@@ -34,12 +35,9 @@ final class Plugin extends Singleton
      */
     const OPTIONPAGESLUG = 'gbw-woocommerce';
 
-    /**
-     * The single instance of the class.
-     *
-     * @var Plugin
-     */
-    protected static $instance = null;
+    const RETRY_REQUESTS_CRON_JOB = "gbw_retry_failed_requests";
+
+    const CRON_EVERY_FIVE_MINUTES = "gbw_every_five_minutes";
 
     /**
      * Plugin Language Domain
@@ -83,12 +81,6 @@ final class Plugin extends Singleton
      */
     private $writeApiClient = null;
 
-    /** Order Controller that provides the callback handling.
-     *
-     * @var OrderController;
-     */
-     private $orderController = null;
-
     /**
      * Factory for building logistics orders.
      *
@@ -119,7 +111,8 @@ final class Plugin extends Singleton
     {
         $this->initActions();
         $this->initOptionPage();
-        $this->orderController = new OrderController($this->settingsRepository, $this->orderRepository);
+        $this->initRestApi();
+        $this->initCronJobs();
     }
 
     /**
@@ -157,6 +150,28 @@ final class Plugin extends Singleton
         \add_action('admin_init', [$this, 'validateSelectedFulfillmentStates']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
         \add_action('woocommerce_order_status_changed', [$this, "wooCommerceOrderStatusChanged"], 10, 4);
+    }
+
+    /**
+     * Initializes the Plugin Rest Api
+     *
+     * @return void
+     */
+    public function initRestApi(): void
+    {
+        new OrderController($this->settingsRepository, $this->orderRepository);
+    }
+
+    /**
+     * Initializes the plugin cronjobs
+     *
+     * @return void
+     */
+    public function initCronJobs(): void
+    {
+        self::addCronIntervals();
+
+        WordPress::addCronjobAction(self::RETRY_REQUESTS_CRON_JOB, [$this, "runRetryFailedRequestsWorker"]);
     }
 
     /**
@@ -284,6 +299,26 @@ final class Plugin extends Singleton
     }
 
     /**
+     * Retries all requests to Gebrueder Weiss that need a retry
+     *
+     * @return void
+     */
+    public function runRetryFailedRequestsWorker(): void
+    {
+        $this->authenticationClient->updateAuthTokenIfNecessary();
+
+        (new RetryFailedRequestsQueueWorker(
+            $this->failedRequestRepository,
+            $this->logisticsOrderFactory,
+            $this->writeApiClient,
+            $this->orderRepository,
+            $this->settingsRepository
+        ))->start();
+
+        $this->failedRequestRepository->deleteWhereStale();
+    }
+
+    /**
      * Render Option Page
      *
      * @return void
@@ -318,6 +353,8 @@ final class Plugin extends Singleton
     {
         self::removePluginOptions();
         self::removeRequestQueueTable();
+
+        WordPress::clearScheduledHook(self::RETRY_REQUESTS_CRON_JOB);
     }
 
     /**
@@ -328,6 +365,9 @@ final class Plugin extends Singleton
     public static function onActivation(): void
     {
         self::createRequestQueueTable();
+        self::addCronIntervals();
+
+        WordPress::scheduleCronjob(self::RETRY_REQUESTS_CRON_JOB, time(), self::CRON_EVERY_FIVE_MINUTES);
     }
 
     /**
@@ -489,6 +529,16 @@ final class Plugin extends Singleton
                 get_option('active_plugins')
             )
         );
+    }
+
+    /**
+     * Registers the plugin cron intervals.
+     *
+     * @return void
+     */
+    private static function addCronIntervals(): void
+    {
+        WordPress::addCronInterval(self::CRON_EVERY_FIVE_MINUTES, 300, __("Every 5 minutes"));
     }
 
 

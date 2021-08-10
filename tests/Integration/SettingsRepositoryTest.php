@@ -35,6 +35,24 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
         $this->assertSame($token->getToken(), $settingsRepository->getAccessToken()->getToken());
     }
 
+    public function test_it_returns_null_if_deserializing_the_token_fails()
+    {
+        update_option("gbw_accessToken", "not-a-serialized-token");
+
+        $settingsRepository = new SettingsRepository();
+
+        $this->assertNull($settingsRepository->getAccessToken());
+    }
+
+    public function test_it_returns_null_if_the_deserialized_class_is_not_a_token()
+    {
+        update_option("gbw_accessToken", serialize(["not", "a", "token"]));
+
+        $settingsRepository = new SettingsRepository();
+
+        $this->assertNull($settingsRepository->getAccessToken());
+    }
+
     public function test_it_can_retrieve_the_fulfillment_state()
     {
         update_option("gbw_fulfillmentState", "test");

@@ -53,6 +53,18 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
         $this->assertSame(0, $this->getNumberOfFailedRequestsInDB());
     }
 
+    public function test_it_deletes_requests_if_they_have_been_tried_three_times()
+    {
+        Plugin::onActivation();
+
+        $repository = new FailedRequestRepository();
+        $repository->create(12, FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS);
+
+        $repository->deleteWhereStale();
+
+        $this->assertSame(0, $this->getNumberOfFailedRequestsInDB());
+    }
+
     public function test_it_can_find_a_request_to_retry()
     {
         $repository = new FailedRequestRepository();

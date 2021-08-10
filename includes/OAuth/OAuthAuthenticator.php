@@ -82,7 +82,7 @@ class OAuthAuthenticator
     {
         $currentToken = $this->settingsRepository->getAccessToken();
 
-        if ($currentToken->isValid()) {
+        if (!is_null($currentToken) && $currentToken->isValid()) {
             return;
         }
 
