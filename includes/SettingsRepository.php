@@ -11,6 +11,7 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
+use Exception;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
@@ -50,7 +51,20 @@ class SettingsRepository
     public function getAccessToken(): ?OAuthToken
     {
         $serialized = $this->getOption("accessToken");
-        return unserialize($serialized);
+
+        try {
+            $token = unserialize($serialized, [
+                "allowed_classes" => [OAuthToken::class]
+            ]);
+        } catch (Exception $e) {
+            return null;
+        }
+
+        if (!$token || !($token instanceof OAuthToken)) {
+            return null;
+        }
+
+        return $token;
     }
 
     /**

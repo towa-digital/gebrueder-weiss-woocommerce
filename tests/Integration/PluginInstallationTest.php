@@ -25,4 +25,11 @@ class PluginInstallationTest extends \WP_UnitTestCase
         $wpdb->get_var("select count(*) from {$wpdb->prefix}gbw_request_retry_queue");
         $this->assertEmpty($wpdb->last_error);
     }
+
+    public function test_it_adds_the_retry_requests_cron_job()
+    {
+        Plugin::onActivation();
+
+        $this->assertSame(Plugin::CRON_EVERY_FIVE_MINUTES, \wp_get_schedule(Plugin::RETRY_REQUESTS_CRON_JOB));
+    }
 }

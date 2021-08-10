@@ -61,4 +61,15 @@ class PluginInitializationTest extends \WP_UnitTestCase
         $numberOfInitFiltersAfterCheck = count($wp_filter['woocommerce_order_status_changed'][10]);
         $this->assertSame(1, $numberOfInitFiltersAfterCheck);
     }
+
+    public function test_it_registers_an_action_for_the_retry_requests_cron_job()
+    {
+        global $wp_filter;
+
+        /** @var Plugin */
+        $plugin = Plugin::getInstance();
+        $plugin->initialize();
+
+        $this->assertSame(1, count($wp_filter[Plugin::RETRY_REQUESTS_CRON_JOB][10]));
+    }
 }
