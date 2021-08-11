@@ -19,6 +19,7 @@ use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 use Towa\GebruederWeissWooCommerce\Options\Tab;
 use Towa\GebruederWeissWooCommerce\Support\Singleton;
 use Towa\GebruederWeissSDK\Api\WriteApi;
+use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\RetryFailedRequestsQueueWorker;
@@ -286,6 +287,12 @@ final class Plugin extends Singleton
 
         try {
             (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApiClient))->execute();
+        } catch (CreateLogisticsOrderConflictException $e) {
+            $order->set_status($this->settingsRepository->getFulfillmentErrorState());
+            $order->save();
+
+            $orderId = $order->get_id();
+            WordPress::sendMailToAdmin("Gebrueder Weiss Fulfillment Failed for Order #$orderId", "Creating the Gebrueder Weiss logistics order for the WooCommerce order #$orderId failed due to a conflict with the following error:\n\n{$e->getMessage()}");
         } catch (CreateLogisticsOrderFailedException $e) {
             $this->failedRequestRepository->create($order->get_id());
         }

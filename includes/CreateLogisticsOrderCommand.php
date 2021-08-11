@@ -13,6 +13,7 @@ defined('ABSPATH') || exit;
 
 use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\ApiException;
+use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 
 /**
@@ -61,6 +62,7 @@ class CreateLogisticsOrderCommand
      * Executes the command
      *
      * @return void
+     * @throws CreateLogisticsOrderConflictException Thrown if there was a conflict while creating the order.
      * @throws CreateLogisticsOrderFailedException Thrown if something went wrong.
      */
     public function execute(): void
@@ -72,6 +74,10 @@ class CreateLogisticsOrderCommand
             $this->wooCommerceOrder->set_status("on-hold");
             $this->wooCommerceOrder->save();
         } catch (ApiException $e) {
+            if ($e->getCode() === 409) {
+                throw new CreateLogisticsOrderConflictException("Could not create logistics order due to conflict: " . $e->getMessage());
+            }
+
             throw new CreateLogisticsOrderFailedException("Could not create logistics order: " . $e->getMessage());
         }
     }

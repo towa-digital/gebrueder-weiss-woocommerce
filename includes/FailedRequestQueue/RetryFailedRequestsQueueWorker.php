@@ -11,6 +11,7 @@ defined('ABSPATH') || exit;
 
 use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissWooCommerce\CreateLogisticsOrderCommand;
+use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\OrderRepository;
@@ -112,6 +113,14 @@ class RetryFailedRequestsQueueWorker
                 ))->execute();
 
                 $failedRequest->setStatus(FailedRequest::SUCCESS_STATUS);
+            } catch (CreateLogisticsOrderConflictException $e) {
+                $failedRequest->doNotRetry();
+
+                $order->set_status($this->settingsRepository->getFulfillmentErrorState());
+                $order->save();
+
+                $orderId = $order->get_id();
+                Wordpress::sendMailToAdmin("Gebrueder Weiss Fulfillment Failed for Order #$orderId", "Creating the Gebrueder Weiss logistics order for the WooCommerce order #$orderId failed due to a conflict with the following error:\n\n{$e->getMessage()}");
             } catch (CreateLogisticsOrderFailedException $e) {
                 $failedRequest->incrementFailedAttempts();
 

@@ -12,6 +12,7 @@ use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\CreateLogisticsOrderCommand;
+use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 
 class CreateLogisticsOrderCommandTest extends TestCase
@@ -80,6 +81,17 @@ class CreateLogisticsOrderCommandTest extends TestCase
         /** @var MockInterface|WriteApi */
         $writeApi = Mockery::mock(WriteApi::class);
         $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Unauthenticated", 401));
+
+        (new CreateLogisticsOrderCommand($this->order, $this->logisticsOrderFactory, $writeApi))->execute();
+    }
+
+    public function test_it_throws_a_conflict_exception_if_the_api_returns_a_conflict()
+    {
+        $this->expectException(CreateLogisticsOrderConflictException::class);
+
+        /** @var MockInterface|WriteApi */
+        $writeApi = Mockery::mock(WriteApi::class);
+        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Conflict", 409));
 
         (new CreateLogisticsOrderCommand($this->order, $this->logisticsOrderFactory, $writeApi))->execute();
     }
