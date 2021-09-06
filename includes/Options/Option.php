@@ -157,7 +157,7 @@ class Option implements CanRender
             $this->slug,
             $this->name,
             [$this, 'render'],
-            Plugin::OPTIONPAGESLUG,
+            Plugin::OPTION_PAGE_SLUG,
             $this->group,
         );
     }

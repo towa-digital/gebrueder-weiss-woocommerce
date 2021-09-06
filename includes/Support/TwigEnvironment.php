@@ -63,7 +63,7 @@ class TwigEnvironment extends Singleton
         $this->twig->addFunction(new TwigFunction('do_settings_sections', function ($group) {
             \do_settings_sections($group);
         }));
-        $this->twig->addFunction(new TwigFunction('do_settings_fields', function ($section, $page = Plugin::OPTIONPAGESLUG) {
+        $this->twig->addFunction(new TwigFunction('do_settings_fields', function ($section, $page = Plugin::OPTION_PAGE_SLUG) {
             \do_settings_fields($page, $section);
         }));
         $this->twig->addFunction(new TwigFunction('esc_attr', function ($attribute) {

@@ -33,7 +33,7 @@ final class Plugin extends Singleton
     /**
      * Option Page Slug
      */
-    const OPTIONPAGESLUG = 'gbw-woocommerce';
+    const OPTION_PAGE_SLUG = 'gbw-woocommerce';
 
     const RETRY_REQUESTS_CRON_JOB = "gbw_retry_failed_requests";
 
@@ -122,7 +122,7 @@ final class Plugin extends Singleton
      */
     public function initOptionPage(): void
     {
-        $optionsPage = new OptionPage('options', self::OPTIONPAGESLUG);
+        $optionsPage = new OptionPage('options', self::OPTION_PAGE_SLUG);
         $accountTab = (new Tab(__('Account', self::LANGUAGE_DOMAIN), 'account'))->onTabInit([$this, 'validateCredentials']);
 
         $accountTab
@@ -339,7 +339,7 @@ final class Plugin extends Singleton
             __('options', 'gbw-woocommerce'),
             __('Gebrüder Weiss Woocommerce', 'gbw-woocommerce'),
             'manage_options',
-            self::OPTIONPAGESLUG,
+            self::OPTION_PAGE_SLUG,
             [$this, 'renderOptionPage']
         );
     }
