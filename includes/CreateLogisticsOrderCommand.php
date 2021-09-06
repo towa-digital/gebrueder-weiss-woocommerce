@@ -70,7 +70,7 @@ class CreateLogisticsOrderCommand
         $payload = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->wooCommerceOrder);
 
         try {
-            $this->gebruederWeissApi->logisticsOrderPost("de-DE", $payload);
+            $this->gebruederWeissApi->logisticsOrderPost("en-US", $payload);
             $this->wooCommerceOrder->set_status("on-hold");
             $this->wooCommerceOrder->save();
         } catch (ApiException $e) {

@@ -104,7 +104,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
 
         $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::SELECTED_FULFILLMENT_STATE, $order);
 
-        $this->gebruederWeissApi->shouldHaveReceived("logisticsOrderPost", ["de-DE", CreateLogisticsOrderPayload::class]);
+        $this->gebruederWeissApi->shouldHaveReceived("logisticsOrderPost", ["en-US", CreateLogisticsOrderPayload::class]);
     }
 
     public function test_it_creates_a_failed_request_if_the_command_fails()

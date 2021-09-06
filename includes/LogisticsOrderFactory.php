@@ -109,7 +109,7 @@ class LogisticsOrderFactory
         $contact->setName($fullName);
         $contact->setEmail($wooCommerceOrder->get_billing_email());
         $contact->setPhone($wooCommerceOrder->get_billing_phone());
-        $contact->setLanguage("de-DE");
+        $contact->setLanguage("en-US");
         $logisticsAddress->setContact($contact);
 
         return $logisticsAddress;
@@ -149,7 +149,7 @@ class LogisticsOrderFactory
             $orderLine->setQuantity($orderItem->get_quantity());
 
             $customerNote = new LingualText();
-            $customerNote->setLanguage("de-DE");
+            $customerNote->setLanguage("en-US");
             $customerNote->setText($wooCommerceOrder->get_customer_note());
 
             $logisticsRequirementNote = new OrderLineNote();

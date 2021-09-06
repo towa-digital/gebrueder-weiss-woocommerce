@@ -223,7 +223,7 @@ class LogisticsOrderFactoryTest extends TestCase
         $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
         $article = $logisticsOrder->getOrderLines()[0];
 
-        $this->assertSame("de-DE", $article->getNotes()[0]->getNoteText()->getLanguage());
+        $this->assertSame("en-US", $article->getNotes()[0]->getNoteText()->getLanguage());
         $this->assertSame("note", $article->getNotes()[0]->getNoteText()->getText());
     }
 
