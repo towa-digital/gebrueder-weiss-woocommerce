@@ -18,7 +18,7 @@ use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 use Towa\GebruederWeissWooCommerce\Options\Tab;
 use Towa\GebruederWeissWooCommerce\Support\Singleton;
-use Towa\GebruederWeissSDK\Api\WriteApi;
+use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
@@ -70,9 +70,9 @@ final class Plugin extends Singleton
     /**
      * Client for writing to the Gebrueder Weiss API.
      *
-     * @var WriteApi
+     * @var DefaultApi
      */
-    private $writeApiClient = null;
+    private $gebruederWeissApiClient = null;
 
     /**
      * Factory for building logistics orders.
@@ -279,10 +279,10 @@ final class Plugin extends Singleton
     public function createLogisticsOrderAndUpdateOrderState(object $order)
     {
         $authToken = $this->settingsRepository->getAccessToken();
-        $this->writeApiClient->getConfig()->setAccessToken($authToken->getToken());
+        $this->gebruederWeissApiClient->getConfig()->setAccessToken($authToken->getToken());
 
         try {
-            (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApiClient))->execute();
+            (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->gebruederWeissApiClient))->execute();
         } catch (CreateLogisticsOrderConflictException $e) {
             $order->set_status($this->settingsRepository->getFulfillmentErrorState());
             $order->save();
@@ -306,7 +306,7 @@ final class Plugin extends Singleton
         (new RetryFailedRequestsQueueWorker(
             $this->failedRequestRepository,
             $this->logisticsOrderFactory,
-            $this->writeApiClient,
+            $this->gebruederWeissApiClient,
             $this->orderRepository,
             $this->settingsRepository
         ))->start();
@@ -434,12 +434,12 @@ final class Plugin extends Singleton
     /**
      * Sets the client for writing to the Gebrueder Weiss API.
      *
-     * @param WriteApi $client The client for writing to the api.
+     * @param DefaultApi $client The client for writing to the api.
      * @return void
      */
-    public function setWriteApiClient(WriteApi $client): void
+    public function setGebruederWeissApiClient(DefaultApi $client): void
     {
-        $this->writeApiClient = $client;
+        $this->gebruederWeissApiClient = $client;
     }
 
     /**

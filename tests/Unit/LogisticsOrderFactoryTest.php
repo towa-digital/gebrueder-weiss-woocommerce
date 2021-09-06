@@ -82,35 +82,42 @@ class LogisticsOrderFactoryTest extends TestCase
         ];
     }
 
-    public function test_it_adds_the_callback_url_to_the_logistics_order()
+    public function test_it_adds_the_success_callback_url_to_the_payload()
     {
         $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
 
-        $this->assertSame("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/update/12", $logisticsOrder->getUrl());
+        $this->assertSame("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/success", $logisticsOrder->getCallbacks()->getSuccessCallback());
+    }
+
+    public function test_it_adds_the_fulfillment_callback_url_to_the_payload()
+    {
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+
+        $this->assertSame("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/fulfilled", $logisticsOrder->getCallbacks()->getFullfilledCallback());
     }
 
     public function test_it_adds_the_created_date_to_the_logistics_order()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
 
         $this->assertSame("2021-07-29T14:53:52+00:00", $logisticsOrder->getCreationDateTime()->format(DateTimeInterface::RFC3339));
     }
 
     public function test_it_adds_the_owner_id_to_the_logistics_order()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
 
-        $this->assertSame(420000, $logisticsOrder->getOwnerId());
+        $this->assertSame(420000, $logisticsOrder->getCustomerId());
     }
 
     public function test_it_correctly_adds_the_consignee_address()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
 
         $logisticsOrder->getLogisticsAddresses();
         $address = $logisticsOrder->getLogisticsAddresses()[0];
 
-        $this->assertSame("consignee", $address->getAddressType());
+        $this->assertSame("CONSIGNEE", $address->getAddressType());
         $this->assertSame("first-name", $address->getAddress()->getName1());
         $this->assertSame("last-name", $address->getAddress()->getName2());
         $this->assertSame("company", $address->getAddress()->getName3());
@@ -124,7 +131,7 @@ class LogisticsOrderFactoryTest extends TestCase
 
     public function test_it_correctly_adds_the_consignee_contact()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
 
         $logisticsOrder->getLogisticsAddresses();
         $address = $logisticsOrder->getLogisticsAddresses()[0];
@@ -139,7 +146,7 @@ class LogisticsOrderFactoryTest extends TestCase
         $orderMethods = $this->wooCommerceOrderMockMethods;
         $orderMethods["get_shipping_first_name"] = null;
 
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder($orderMethods));
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder($orderMethods))->getLogisticsOrder();
 
         $logisticsOrder->getLogisticsAddresses();
         $address = $logisticsOrder->getLogisticsAddresses()[0];
@@ -149,17 +156,17 @@ class LogisticsOrderFactoryTest extends TestCase
 
     public function test_it_correctly_adds_the_orderby_address()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
 
         $logisticsOrder->getLogisticsAddresses();
         $address = $logisticsOrder->getLogisticsAddresses()[1];
 
-        $this->assertSame("orderby", $address->getAddressType());
+        $this->assertSame("ORDERBY", $address->getAddressType());
     }
 
     public function test_it_adds_the_correct_qualifier_to_the_orderby_address()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
 
         $logisticsOrder->getLogisticsAddresses();
         $address = $logisticsOrder->getLogisticsAddresses()[1];
@@ -169,64 +176,55 @@ class LogisticsOrderFactoryTest extends TestCase
 
     public function test_it_adds_the_custom_id_to_the_orderby_address()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
 
         $logisticsOrder->getLogisticsAddresses();
         $address = $logisticsOrder->getLogisticsAddresses()[1];
 
-        $this->assertSame("gwcustomerid", $address->getAddressReferences()[0]->getQualifier());
+        $this->assertSame("CUSTOMER_ID", $address->getAddressReferences()[0]->getQualifier());
     }
 
     public function test_it_builds_an_order_line_for_each_article()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
 
         $this->assertCount(2, $logisticsOrder->getOrderLines());
     }
 
     public function test_it_ensures_that_the_order_line_array_has_proper_keys()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
 
         $this->assertArrayHasKey(0, $logisticsOrder->getOrderLines());
         $this->assertArrayHasKey(1, $logisticsOrder->getOrderLines());
     }
 
-    public function test_it_adds_one_item_per_orderline()
-    {
-        $order = $this->createMockOrder();
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($order);
-
-        $order->shouldHaveReceived("get_items", ["line_item"]);
-        $this->assertCount(1, $logisticsOrder->getOrderLines()[0]->getArticles());
-    }
-
     public function test_it_converts_woocommerce_order_items_into_articles()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
-        $article = $logisticsOrder->getOrderLines()[0]->getArticles()[0];
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+        $orderLine = $logisticsOrder->getOrderLines()[0];
 
-        $this->assertSame(234, $article->getArticleId());
-        $this->assertSame(123, $article->getLineItemNumber());
-        $this->assertSame(4, $article->getQuantity());
+        $this->assertSame(234, $orderLine->getArticleId());
+        $this->assertSame(123, $orderLine->getLineItemNumber());
+        $this->assertSame(4, $orderLine->getQuantity());
     }
 
     public function test_it_adds_one_delivery_note_to_the_article()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
-        $article = $logisticsOrder->getOrderLines()[0]->getArticles()[0];
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+        $article = $logisticsOrder->getOrderLines()[0];
 
-        $this->assertCount(1, $article->getLogisticsrequirement()->getNotes());
-        $this->assertSame("deliverynotearticle", $article->getLogisticsrequirement()->getNotes()[0]->getNoteType());
+        $this->assertCount(1, $article->getNotes());
+        $this->assertSame("DELIVERYNOTE", $article->getNotes()[0]->getNoteType());
     }
 
     public function test_it_adds_the_customer_message_to_the_delivery_note()
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
-        $article = $logisticsOrder->getOrderLines()[0]->getArticles()[0];
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+        $article = $logisticsOrder->getOrderLines()[0];
 
-        $this->assertSame("de-DE", $article->getLogisticsrequirement()->getNotes()[0]->getNoteText()->getLanguage());
-        $this->assertSame("note", $article->getLogisticsrequirement()->getNotes()[0]->getNoteText()->getText());
+        $this->assertSame("de-DE", $article->getNotes()[0]->getNoteText()->getLanguage());
+        $this->assertSame("note", $article->getNotes()[0]->getNoteText()->getText());
     }
 
     private function createMockOrder(?array $mockMethods = null)

@@ -6,9 +6,10 @@ use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
-use Towa\GebruederWeissSDK\Api\WriteApi;
 use Towa\GebruederWeissSDK\ApiException;
 use Towa\GebruederWeissSDK\Configuration;
+use Towa\GebruederWeissSDK\Api\DefaultApi;
+use Towa\GebruederWeissSDK\Model\InlineObject;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequest;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
@@ -23,8 +24,8 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 
-    /** @var MockInterface|WriteApi */
-    private $writeApi;
+    /** @var MockInterface|DefaultApi */
+    private $gebruederWeissApi;
 
     /** @var MockInterface|LogisticsOrderFactory */
     private $logisticsOrderFactory;
@@ -39,15 +40,15 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
     {
         parent::setUp();
 
-        /** @var MockInterface|WriteApi */
-        $this->writeApi = Mockery::mock(WriteApi::class);
-        $this->writeApi->allows("logisticsOrderPost");
-        $this->writeApi->allows(["getConfig" => new Configuration()]);
+        /** @var MockInterface|DefaultApi */
+        $this->gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $this->gebruederWeissApi->allows("logisticsOrderPost");
+        $this->gebruederWeissApi->allows(["getConfig" => new Configuration()]);
 
         /** @var MockInterface|LogisticsOrderFactory */
         $this->logisticsOrderFactory = Mockery::mock(LogisticsOrderFactory::class);
         $this->logisticsOrderFactory->allows([
-            "buildFromWooCommerceOrder" => new LogisticsOrder(),
+            "buildFromWooCommerceOrder" => new InlineObject(),
         ]);
 
         /** @var MockInterface|\WC_Order */
@@ -81,7 +82,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequestRepository->allows("update");
         $failedRequestRepository->shouldReceive("findOneToRetry")->times(2)->andReturn($failedRequest, null);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->writeApi, $this->orderRepository, $this->settingsRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->gebruederWeissApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
     }
 
@@ -90,19 +91,19 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequest1 = new FailedRequest(2, 4);
         $failedRequest2 = new FailedRequest(3, 5);
 
-        /** @var MockInterface|WriteApi */
-        $writeApi = Mockery::mock(WriteApi::class);
-        $writeApi->allows([
+        /** @var MockInterface|DefaultApi */
+        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $gebruederWeissApi->allows([
             "getConfig" => new Configuration()
         ]);
-        $writeApi->shouldReceive("logisticsOrderPost")->times(2);
+        $gebruederWeissApi->shouldReceive("logisticsOrderPost")->times(2);
 
         /** @var FailedRequestRepository|MockInterface */
         $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
         $failedRequestRepository->allows("update");
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest1, $failedRequest2, null);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository, $this->settingsRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $gebruederWeissApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
     }
 
@@ -117,7 +118,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequestRepository->shouldReceive("update")->once();
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->writeApi, $this->orderRepository, $this->settingsRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->gebruederWeissApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
 
         $failedRequest->shouldHaveReceived("setStatus", [FailedRequest::SUCCESS_STATUS]);
@@ -135,14 +136,14 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequestRepository->shouldReceive("update")->once();
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
 
-        /** @var MockInterface|WriteApi */
-        $writeApi = Mockery::mock(WriteApi::class);
-        $writeApi->allows([
+        /** @var MockInterface|DefaultApi */
+        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $gebruederWeissApi->allows([
             "getConfig" => new Configuration()
         ]);
-        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("ups"));
+        $gebruederWeissApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("ups"));
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository, $this->settingsRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $gebruederWeissApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
     }
 
@@ -165,18 +166,18 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequestRepository->shouldReceive("update");
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
 
-        /** @var MockInterface|WriteApi */
-        $writeApi = Mockery::mock(WriteApi::class);
-        $writeApi->allows([
+        /** @var MockInterface|DefaultApi */
+        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $gebruederWeissApi->allows([
             "getConfig" => new Configuration()
         ]);
-        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("ups"));
+        $gebruederWeissApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("ups"));
 
         /** @var MockInterface */
         $wordpressMock = Mockery::mock("alias:" . WordPress::class);
         $wordpressMock->shouldReceive("sendMailToAdmin")->once();
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository, $this->settingsRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $gebruederWeissApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
     }
 
@@ -199,12 +200,12 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequestRepository->shouldReceive("update");
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
 
-        /** @var MockInterface|WriteApi */
-        $writeApi = Mockery::mock(WriteApi::class);
-        $writeApi->allows([
+        /** @var MockInterface|DefaultApi */
+        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $gebruederWeissApi->allows([
             "getConfig" => new Configuration()
         ]);
-        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("ups"));
+        $gebruederWeissApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("ups"));
 
         /** @var MockInterface */
         $wordpressMock = Mockery::mock("alias:" . WordPress::class);
@@ -224,7 +225,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
             "findById" => $order
         ]);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $orderRepository, $this->settingsRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $gebruederWeissApi, $orderRepository, $this->settingsRepository);
         $worker->start();
 
         // wc-failed is the value returned by the settings repository
@@ -250,12 +251,12 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $failedRequestRepository->shouldReceive("update");
         $failedRequestRepository->shouldReceive("findOneToRetry")->andReturn($failedRequest, null);
 
-        /** @var MockInterface|WriteApi */
-        $writeApi = Mockery::mock(WriteApi::class);
-        $writeApi->allows([
+        /** @var MockInterface|DefaultApi */
+        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $gebruederWeissApi->allows([
             "getConfig" => new Configuration(),
         ]);
-        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Conflict", 409));
+        $gebruederWeissApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Conflict", 409));
 
         /** @var MockInterface */
         $wordpressMock = Mockery::mock("alias:" . WordPress::class);
@@ -275,7 +276,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
             "findById" => $order
         ]);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $orderRepository, $this->settingsRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $gebruederWeissApi, $orderRepository, $this->settingsRepository);
         $worker->start();
 
         // wc-failed is the value returned by the settings repository
@@ -294,11 +295,11 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $configuration = Mockery::mock(Configuration::class);
         $configuration->shouldReceive("setAccessToken")->once()->withArgs(["token"]);
 
-        /** @var MockInterface|WriteApi */
-        $writeApi = Mockery::mock(WriteApi::class);
-        $writeApi->shouldReceive("getConfig")->once()->andReturn($configuration);
+        /** @var MockInterface|DefaultApi */
+        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $gebruederWeissApi->shouldReceive("getConfig")->once()->andReturn($configuration);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $writeApi, $this->orderRepository, $this->settingsRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $gebruederWeissApi, $this->orderRepository, $this->settingsRepository);
         $worker->start();
     }
 
@@ -319,7 +320,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
             "findById" => null
         ]);
 
-        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->writeApi, $orderRepository, $this->settingsRepository);
+        $worker = new RetryFailedRequestsQueueWorker($failedRequestRepository, $this->logisticsOrderFactory, $this->gebruederWeissApi, $orderRepository, $this->settingsRepository);
         $worker->start();
 
         $failedRequest->shouldHaveReceived("setStatus", [FailedRequest::SUCCESS_STATUS]);

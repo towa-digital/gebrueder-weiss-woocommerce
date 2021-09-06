@@ -11,7 +11,7 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
-use Towa\GebruederWeissSDK\Api\WriteApi;
+use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissSDK\ApiException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
@@ -26,9 +26,9 @@ class CreateLogisticsOrderCommand
     /**
      * Gebrueder Weiss Write API client
      *
-     * @var WriteApi
+     * @var DefaultApi
      */
-    private $writeApi;
+    private $gebruederWeissApi;
 
     /**
      * WooCommerce Order to be processed
@@ -49,11 +49,11 @@ class CreateLogisticsOrderCommand
      *
      * @param object                $wooCommerceOrder WooCommerce order.
      * @param LogisticsOrderFactory $logisticsOrderFactory Factory for creating logistics orders.
-     * @param WriteApi              $writeApi Gebrueder Weiss Write API client.
+     * @param DefaultApi            $gebruederWeissApi Gebrueder Weiss Write API client.
      */
-    public function __construct(object $wooCommerceOrder, LogisticsOrderFactory $logisticsOrderFactory, WriteApi $writeApi)
+    public function __construct(object $wooCommerceOrder, LogisticsOrderFactory $logisticsOrderFactory, DefaultApi $gebruederWeissApi)
     {
-        $this->writeApi = $writeApi;
+        $this->gebruederWeissApi = $gebruederWeissApi;
         $this->wooCommerceOrder = $wooCommerceOrder;
         $this->logisticsOrderFactory = $logisticsOrderFactory;
     }
@@ -67,10 +67,10 @@ class CreateLogisticsOrderCommand
      */
     public function execute(): void
     {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->wooCommerceOrder);
+        $payload = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->wooCommerceOrder);
 
         try {
-            $this->writeApi->logisticsOrderPost($logisticsOrder);
+            $this->gebruederWeissApi->logisticsOrderPost("de-DE", $payload);
             $this->wooCommerceOrder->set_status("on-hold");
             $this->wooCommerceOrder->save();
         } catch (ApiException $e) {

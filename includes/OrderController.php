@@ -47,7 +47,7 @@ class OrderController
         $this->orderRepository = $orderRepository;
 
         \add_action('rest_api_init', function () {
-            register_rest_route(self::NAMESPACE, '/update/(?P<id>\d+)', [
+            register_rest_route(self::NAMESPACE, '/orders/(?P<id>\d+)/callbacks/success', [
                 'methods' => 'POST',
                 'callback' => [$this, 'handleOrderUpdateRequest'],
                 'permission_callback' => '__return_true'

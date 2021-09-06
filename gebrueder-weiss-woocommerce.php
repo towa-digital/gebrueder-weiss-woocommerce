@@ -28,7 +28,7 @@ use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use League\OAuth2\Client\Provider\GenericProvider;
-use Towa\GebruederWeissSDK\Api\WriteApi;
+use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 use Towa\GebruederWeissWooCommerce\OrderRepository;
 
@@ -59,8 +59,8 @@ add_action("init", function () {
         'urlResourceOwnerDetails' => null
     ]);
 
-    $writeApi = new WriteApi();
-    $writeApi->getConfig()->setHost($apiEndpoint);
+    $gebruederWeissApi = new DefaultApi();
+    $gebruederWeissApi->getConfig()->setHost($apiEndpoint);
 
     $settingsRepository = new SettingsRepository();
     $logisticsOrderFactory = new LogisticsOrderFactory($settingsRepository);
@@ -69,7 +69,7 @@ add_action("init", function () {
     $plugin->setAuthenticationClient($authenticationClient);
     $plugin->setOrderStateRepository(new OrderStateRepository());
     $plugin->setSettingsRepository($settingsRepository);
-    $plugin->setWriteApiClient($writeApi);
+    $plugin->setGebruederWeissApiClient($gebruederWeissApi);
     $plugin->setLogisticsOrderFactory($logisticsOrderFactory);
     $plugin->setFailedRequestRepository(new FailedRequestRepository());
     $plugin->setOrderRepository(new OrderRepository());

@@ -14,11 +14,15 @@ use Towa\GebruederWeissSDK\Model\AddressReference;
 use Towa\GebruederWeissSDK\Model\Article;
 use Towa\GebruederWeissSDK\Model\ArticleNote;
 use Towa\GebruederWeissSDK\Model\Contact;
+use Towa\GebruederWeissSDK\Model\InlineObject;
 use Towa\GebruederWeissSDK\Model\LingualText;
 use Towa\GebruederWeissSDK\Model\LogisticsAddress;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
+use Towa\GebruederWeissSDK\Model\LogisticsOrderCallbacks;
 use Towa\GebruederWeissSDK\Model\LogisticsRequirements;
+use Towa\GebruederWeissSDK\Model\Note;
 use Towa\GebruederWeissSDK\Model\OrderLine;
+use Towa\GebruederWeissSDK\Model\OrderLineNote;
 
 /**
  * Factory for creating Logistics Orders
@@ -46,14 +50,15 @@ class LogisticsOrderFactory
      * Creates a logistics order from a WooCommerce order
      *
      * @param object $wooCommerceOrder The order to be converted into a logistics order.
-     * @return LogisticsOrder
+     * @return InlineObject
      */
-    public function buildFromWooCommerceOrder(object $wooCommerceOrder): LogisticsOrder
+    public function buildFromWooCommerceOrder(object $wooCommerceOrder): InlineObject
     {
+        $payload = new InlineObject();
+
         $logisticsOrder = new LogisticsOrder();
-        $logisticsOrder->setUrl($this->settingsRepository->getSiteUrl() . "/wp-json/gebrueder-weiss-woocommerce/v1/update/" . $wooCommerceOrder->get_id());
         $logisticsOrder->setCreationDateTime($wooCommerceOrder->get_date_created());
-        $logisticsOrder->setOwnerId($this->settingsRepository->getCustomerId());
+        $logisticsOrder->setCustomerId($this->settingsRepository->getCustomerId());
 
         $logisticsOrder->setLogisticsAddresses([
             $this->createConsigneeAddress($wooCommerceOrder),
@@ -64,7 +69,15 @@ class LogisticsOrderFactory
             $this->createOrderLines($wooCommerceOrder)
         );
 
-        return $logisticsOrder;
+        $payload->setLogisticsOrder($logisticsOrder);
+
+        $callbacks = new LogisticsOrderCallbacks();
+        $callbacks->setSuccessCallback($this->settingsRepository->getSiteUrl() . "/wp-json/gebrueder-weiss-woocommerce/v1/orders/" . $wooCommerceOrder->get_id() . "/callbacks/success");
+        $callbacks->setFullfilledCallback($this->settingsRepository->getSiteUrl() . "/wp-json/gebrueder-weiss-woocommerce/v1/orders/" . $wooCommerceOrder->get_id() . "/callbacks/fulfilled");
+
+        $payload->setCallbacks($callbacks);
+
+        return $payload;
     }
 
     /**
@@ -76,7 +89,7 @@ class LogisticsOrderFactory
     private function createConsigneeAddress(object $wooCommerceOrder): LogisticsAddress
     {
         $logisticsAddress = new LogisticsAddress();
-        $logisticsAddress->setAddressType("consignee");
+        $logisticsAddress->setAddressType("CONSIGNEE");
 
         $address = new Address();
         $address->setName1($wooCommerceOrder->get_shipping_first_name());
@@ -110,10 +123,10 @@ class LogisticsOrderFactory
     private function createOrderbyAddress(): LogisticsAddress
     {
         $logisticsAddress = new LogisticsAddress();
-        $logisticsAddress->setAddressType("orderby");
+        $logisticsAddress->setAddressType("ORDERBY");
 
         $addressReference = new AddressReference();
-        $addressReference->setQualifier("gwcustomerid");
+        $addressReference->setQualifier("CUSTOMER_ID");
         $addressReference->setReference(strval($this->settingsRepository->getCustomerId()));
         $logisticsAddress->setAddressReferences([$addressReference]);
 
@@ -131,24 +144,19 @@ class LogisticsOrderFactory
         return array_map(function (object $orderItem) use ($wooCommerceOrder) {
             $orderLine = new OrderLine();
 
-            $article = new Article();
-            $article->setLineItemNumber($orderItem->get_id());
-            $article->setArticleId(intval($orderItem->get_product()->get_sku()));
-            $article->setQuantity($orderItem->get_quantity());
+            $orderLine->setArticleId(intval($orderItem->get_product()->get_sku()));
+            $orderLine->setLineItemNumber($orderItem->get_id());
+            $orderLine->setQuantity($orderItem->get_quantity());
 
             $customerNote = new LingualText();
             $customerNote->setLanguage("de-DE");
             $customerNote->setText($wooCommerceOrder->get_customer_note());
-            $logisticsRequirementNote = new ArticleNote();
-            $logisticsRequirementNote->setNoteType("deliverynotearticle");
+
+            $logisticsRequirementNote = new OrderLineNote();
+            $logisticsRequirementNote->setNoteType("DELIVERYNOTE");
             $logisticsRequirementNote->setNoteText($customerNote);
 
-            $logisticsRequirement = new LogisticsRequirements();
-            $logisticsRequirement->setNotes([$logisticsRequirementNote]);
-
-            $article->setLogisticsrequirement($logisticsRequirement);
-
-            $orderLine->setArticles([$article]);
+            $orderLine->setNotes([$logisticsRequirementNote]);
 
             return $orderLine;
 
