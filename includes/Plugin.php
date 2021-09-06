@@ -44,7 +44,7 @@ final class Plugin extends Singleton
      *
      * @var string
      */
-    public static $languageDomain = 'gbw-woocommerce';
+    const LANGUAGE_DOMAIN = 'gbw-woocommerce';
 
     /**
      * Options Page
@@ -123,12 +123,12 @@ final class Plugin extends Singleton
     public function initOptionPage(): void
     {
         $optionsPage = new OptionPage('options', self::OPTIONPAGESLUG);
-        $accountTab = (new Tab(__('Account', self::$languageDomain), 'account'))->onTabInit([$this, 'validateCredentials']);
+        $accountTab = (new Tab(__('Account', self::LANGUAGE_DOMAIN), 'account'))->onTabInit([$this, 'validateCredentials']);
 
         $accountTab
-            ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::$languageDomain), 'account', 'integer'))
-            ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::$languageDomain), 'account', 'string'))
-            ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::$languageDomain), 'account', 'string'));
+            ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::LANGUAGE_DOMAIN), 'account', 'integer'))
+            ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::LANGUAGE_DOMAIN), 'account', 'string'))
+            ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::LANGUAGE_DOMAIN), 'account', 'string'));
         $optionsPage->addTab($accountTab);
 
         $orderStatuses = $this->orderStateRepository->getAllOrderStates();
@@ -182,12 +182,12 @@ final class Plugin extends Singleton
         try {
             $token = $this->authenticationClient->authenticate();
             if ($token && $token->isValid()) {
-                self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
+                self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::LANGUAGE_DOMAIN));
             } else {
-                self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::$languageDomain));
+                self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::LANGUAGE_DOMAIN));
             }
         } catch (\Exception $e) {
-            self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed.", self::$languageDomain));
+            self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed.", self::LANGUAGE_DOMAIN));
         }
     }
 
@@ -200,14 +200,14 @@ final class Plugin extends Singleton
     {
         if (!self::pluginIsCompatibleWithCurrentPhpVersion()) {
             self::showWordpressAdminErrorMessage(
-                __("Gebrüder Weiss WooCommerce is not compatible with PHP " . phpversion() . ".", self::$languageDomain)
+                __("Gebrüder Weiss WooCommerce is not compatible with PHP " . phpversion() . ".", self::LANGUAGE_DOMAIN)
             );
             return false;
         }
 
         if (!self::isWooCommerceActive()) {
             self::showWordpressAdminErrorMessage(
-                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed and active.", self::$languageDomain)
+                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed and active.", self::LANGUAGE_DOMAIN)
             );
             return false;
         }
@@ -233,19 +233,19 @@ final class Plugin extends Singleton
 
         if ($fulfillmentState === $fulfilledState) {
             $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfilled State are set to the same state.", self::$languageDomain)
+                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfilled State are set to the same state.", self::LANGUAGE_DOMAIN)
             );
         }
 
         if ($fulfillmentState === $fulfillmentErrorState) {
             $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfillment Error State are set to the same state.", self::$languageDomain)
+                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfillment Error State are set to the same state.", self::LANGUAGE_DOMAIN)
             );
         }
 
         if ($fulfilledState === $fulfillmentErrorState) {
             $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfilled State and Fulfillment Error State are set to the same state.", self::$languageDomain)
+                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfilled State and Fulfillment Error State are set to the same state.", self::LANGUAGE_DOMAIN)
             );
         }
     }
@@ -478,14 +478,14 @@ final class Plugin extends Singleton
     {
         if (!$optionValue) {
             $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".", self::$languageDomain)
+                __("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".", self::LANGUAGE_DOMAIN)
             );
             return;
         }
 
         if (!$this->checkIfWooCommerceOrderStateExists($optionValue)) {
             $this->showWordpressAdminErrorMessage(
-                __("The selected order state for " . $displayName . " in the options for the Gebrüder Weiss WooCommerce Plugin does not exist in WooCommerce.", self::$languageDomain)
+                __("The selected order state for " . $displayName . " in the options for the Gebrüder Weiss WooCommerce Plugin does not exist in WooCommerce.", self::LANGUAGE_DOMAIN)
             );
         }
     }

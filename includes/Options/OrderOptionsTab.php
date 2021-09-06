@@ -1,6 +1,6 @@
 <?php
 /**
- * Fulfillment Options Tab
+ * Order Options Tab
  *
  * @package Options
  */
@@ -18,13 +18,11 @@ class FulfillmentOptionsTab extends Tab
 {
 
     /**
-     * Creates the fulfillment options based on the passed states.
-     *
-     * @param array $orderStates The states to be shown as options in the dropdowns.
+     * Creates the order options tab
      */
-    public function __construct(array $orderStates)
+    public function __construct()
     {
-        parent::__construct(__('Fulfillment', Plugin::LANGUAGE_DOMAIN), 'fulfillment');
+        parent::__construct(__('Order', Plugin::LANGUAGE_DOMAIN), 'fulfillment');
         $this
             ->addOption(new OptionDropdown('Fulfillment State', 'fulfillmentState', __('Fulfillment State', Plugin::LANGUAGE_DOMAIN), 'fulfillment', $orderStates))
             ->addOption(new OptionDropdown('Fulfilled State', 'fulfilledState', __('Fulfilled State', Plugin::LANGUAGE_DOMAIN), 'fulfillment', $orderStates))
