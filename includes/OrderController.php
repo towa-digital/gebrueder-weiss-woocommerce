@@ -11,6 +11,10 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
+use Towa\GebruederWeissSDK\Model\InlineObject1;
+use Towa\GebruederWeissSDK\Model\InlineObject2;
+use Towa\GebruederWeissWooCommerce\Options\Option;
+use Towa\GebruederWeissWooCommerce\Options\OrderOptionsTab;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -49,20 +53,47 @@ class OrderController
         \add_action('rest_api_init', function () {
             register_rest_route(self::NAMESPACE, '/orders/(?P<id>\d+)/callbacks/success', [
                 'methods' => 'POST',
-                'callback' => [$this, 'handleOrderUpdateRequest'],
+                'callback' => [$this, 'handleSuccessCallback'],
                 'permission_callback' => '__return_true'
             ]);
         });
     }
 
     /**
-     * The callback handler.
+     * The callback handler for success callbacks.
      *
      * @param WP_REST_Request $request the post request.
      */
-    public function handleOrderUpdateRequest(WP_REST_Request $request): WP_REST_Response
+    public function handleSuccessCallback(WP_REST_Request $request): WP_REST_Response
     {
         $id = $request->get_params()['id'];
+        $requestBody = $request->get_body();
+        $data = new InlineObject1(json_decode($requestBody, true));
+
+        $order = $this->orderRepository->findById($id);
+
+        if (is_null($order)) {
+            return new WP_REST_Response(null, 404, null);
+        }
+
+        $order->update_meta_data($this->settings->getOrderIdFieldName(), $data->getOrderId());
+
+        $order->save();
+
+        return new WP_REST_Response(null, 200, null);
+    }
+
+    /**
+     * The callback handler for fulfillment callbacks.
+     *
+     * @param WP_REST_Request $request The post request.
+     * @return WP_REST_Response
+     */
+    public function handleFulfillmentCallback(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = $request->get_params()['id'];
+        $requestBody = $request->get_body();
+        $data = new InlineObject2(json_decode($requestBody, true));
 
         $order = $this->orderRepository->findById($id);
 
@@ -71,6 +102,9 @@ class OrderController
         }
 
         $order->set_status($this->settings->getFulfilledState());
+        $order->update_meta_data($this->settings->getTrackingLinkFieldName(), $data->getTrackingUrl());
+        $order->update_meta_data($this->settings->getCarrierInformationFieldName(), $data->getTransportProduct());
+
         $order->save();
 
         return new WP_REST_Response(null, 200, null);
