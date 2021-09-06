@@ -30,20 +30,12 @@ use Towa\GebruederWeissWooCommerce\Support\WordPress;
  */
 final class Plugin extends Singleton
 {
-    /**
-     * Option Page Slug
-     */
     const OPTION_PAGE_SLUG = 'gbw-woocommerce';
 
     const RETRY_REQUESTS_CRON_JOB = "gbw_retry_failed_requests";
 
     const CRON_EVERY_FIVE_MINUTES = "gbw_every_five_minutes";
 
-    /**
-     * Plugin Language Domain
-     *
-     * @var string
-     */
     const LANGUAGE_DOMAIN = 'gbw-woocommerce';
 
     /**
