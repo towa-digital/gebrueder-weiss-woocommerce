@@ -11,8 +11,6 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
-use Towa\GebruederWeissSDK\Model\InlineObject1 as SuccessCallbackBody;
-use Towa\GebruederWeissSDK\Model\InlineObject2 as FulfilledCallbackBody;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -54,6 +52,12 @@ class OrderController
                 'callback' => [$this, 'handleSuccessCallback'],
                 'permission_callback' => '__return_true'
             ]);
+
+            register_rest_route(self::NAMESPACE, '/orders/(?P<id>\d+)/callbacks/fulfillment', [
+                'methods' => 'POST',
+                'callback' => [$this, 'handleFulfillmentCallback'],
+                'permission_callback' => '__return_true'
+            ]);
         });
     }
 
@@ -65,8 +69,7 @@ class OrderController
     public function handleSuccessCallback(WP_REST_Request $request): WP_REST_Response
     {
         $id = $request->get_params()['id'];
-        $requestBody = $request->get_body();
-        $data = new SuccessCallbackBody(json_decode($requestBody, true));
+        $data = json_decode($request->get_body());
 
         $order = $this->orderRepository->findById($id);
 
@@ -74,7 +77,7 @@ class OrderController
             return new WP_REST_Response(null, 404, null);
         }
 
-        $order->update_meta_data($this->settings->getOrderIdFieldName(), $data->getOrderId());
+        $order->update_meta_data($this->settings->getOrderIdFieldName(), $data->orderId);
 
         $order->save();
 
@@ -90,8 +93,7 @@ class OrderController
     public function handleFulfillmentCallback(WP_REST_Request $request): WP_REST_Response
     {
         $id = $request->get_params()['id'];
-        $requestBody = $request->get_body();
-        $data = new FulfilledCallbackBody(json_decode($requestBody, true));
+        $data = json_decode($request->get_body());
 
         $order = $this->orderRepository->findById($id);
 
@@ -100,8 +102,8 @@ class OrderController
         }
 
         $order->set_status($this->settings->getFulfilledState());
-        $order->update_meta_data($this->settings->getTrackingLinkFieldName(), $data->getTrackingUrl());
-        $order->update_meta_data($this->settings->getCarrierInformationFieldName(), $data->getTransportProduct());
+        $order->update_meta_data($this->settings->getTrackingLinkFieldName(), $data->trackingUrl);
+        $order->update_meta_data($this->settings->getCarrierInformationFieldName(), $data->transportProduct);
 
         $order->save();
 

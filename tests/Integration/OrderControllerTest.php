@@ -23,7 +23,7 @@ class OrderControllerTest extends TestCase
         /** @var \WP_REST_Request|MockInterface */
         $request = Mockery::mock(\WP_REST_Request::class);
         $request->allows('get_params')->andReturn(['id' => 12]);
-        $request->allows('get_body')->andReturn('{"order_id": 12}');
+        $request->allows('get_body')->andReturn('{"orderId": 12}');
 
         /** @var MockInterface|OrderRepository */
         $orderRepository = Mockery::mock(OrderRepository::class);
@@ -64,7 +64,7 @@ class OrderControllerTest extends TestCase
         /** @var \WP_REST_Request|MockInterface */
         $request = Mockery::mock(\WP_REST_Request::class);
         $request->allows('get_params')->andReturn(['id' => 12]);
-        $request->allows('get_body')->andReturn('{"order_id": 12, "tracking_url": "http://example.com", "transport_product": "DHL"}');
+        $request->allows('get_body')->andReturn('{"orderId": 12, "trackingUrl": "http://example.com", "transportProduct": "DHL"}');
 
         $controller = new OrderController($settingsRepository, $orderRepository);
 
@@ -97,13 +97,13 @@ class OrderControllerTest extends TestCase
         /** @var \WP_REST_Request|MockInterface */
         $request = Mockery::mock(\WP_REST_Request::class);
         $request->allows('get_params')->andReturn(['id' => 12]);
-        $request->allows('get_body')->andReturn('{"order_id": 13, "tracking_url": "http://example.com", "transport_product": "DHL"}');
+        $request->allows('get_body')->andReturn('{"orderId": 1234567890, "trackingUrl": "http://example.com", "transportProduct": "DHL"}');
 
         $controller = new OrderController($settingsRepository, $orderRepository);
 
         $controller->handleSuccessCallback($request);
 
-        $order->shouldHaveReceived("update_meta_data")->with("order_id", 13);
+        $order->shouldHaveReceived("update_meta_data", ["order_id", 1234567890]);
         $order->shouldHaveReceived("save");
     }
 
@@ -112,7 +112,7 @@ class OrderControllerTest extends TestCase
         /** @var \WP_REST_Request|MockInterface */
         $request = Mockery::mock(\WP_REST_Request::class);
         $request->allows('get_params')->andReturn(['id' => 12]);
-        $request->allows('get_body')->andReturn('{"order_id": 12, "tracking_url": "http://example.com", "transport_product": "DHL"}');
+        $request->allows('get_body')->andReturn('{"orderId": 1234567890, "trackingUrl": "http://example.com", "transportProduct": "DHL"}');
 
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
@@ -139,7 +139,7 @@ class OrderControllerTest extends TestCase
 
         $controller->handleFulfillmentCallback($request);
 
-        $order->shouldHaveReceived("set_status")->with("wc-fulfilled");
+        $order->shouldHaveReceived("set_status", ["wc-fulfilled"]);
         $order->shouldHaveReceived('save');
     }
 
@@ -148,7 +148,7 @@ class OrderControllerTest extends TestCase
         /** @var \WP_REST_Request|MockInterface */
         $request = Mockery::mock(\WP_REST_Request::class);
         $request->allows('get_params')->andReturn(['id' => 12]);
-        $request->allows('get_body')->andReturn('{"order_id": 12, "tracking_url": "http://example.com", "transport_product": "DHL"}');
+        $request->allows('get_body')->andReturn('{"orderId": 1234567890, "trackingUrl": "http://example.com", "transportProduct": "DHL"}');
 
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
@@ -175,8 +175,8 @@ class OrderControllerTest extends TestCase
 
         $controller->handleFulfillmentCallback($request);
 
-        $order->shouldHaveReceived("update_meta_data")->with("tracking_id", "http://example.com");
-        $order->shouldHaveReceived("update_meta_data")->with("carrier_information", "DHL");
+        $order->shouldHaveReceived("update_meta_data", ["tracking_id", "http://example.com"]);
+        $order->shouldHaveReceived("update_meta_data", ["carrier_information", "DHL"]);
     }
 
     public function test_the_fulfillment_callback_returns_200_on_success()
@@ -184,7 +184,7 @@ class OrderControllerTest extends TestCase
         /** @var \WP_REST_Request|MockInterface */
         $request = Mockery::mock(\WP_REST_Request::class);
         $request->allows('get_params')->andReturn(['id' => 12]);
-        $request->allows('get_body')->andReturn('{"order_id": 12, "tracking_url": "http://example.com", "transport_product": "DHL"}');
+        $request->allows('get_body')->andReturn('{"orderId": 1234567890, "trackingUrl": "http://example.com", "transportProduct": "DHL"}');
 
         /** @var SettingsRepository|MockInterface */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
