@@ -9,7 +9,7 @@ use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use Towa\GebruederWeissSDK\ApiException;
 use Towa\GebruederWeissSDK\Api\DefaultApi;
-use Towa\GebruederWeissSDK\Model\InlineObject;
+use Towa\GebruederWeissSDK\Model\InlineObject as CreateLogisticsOrderPayload;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\CreateLogisticsOrderCommand;
@@ -40,7 +40,7 @@ class CreateLogisticsOrderCommandTest extends TestCase
         /** @var MockInterface|LogisticsOrderFactory */
         $this->logisticsOrderFactory = Mockery::mock(LogisticsOrderFactory::class);
         $this->logisticsOrderFactory->allows([
-            "buildFromWooCommerceOrder" => new InlineObject(),
+            "buildFromWooCommerceOrder" => new CreateLogisticsOrderPayload(),
         ]);
 
         /** @var MockInterface|stdClass */

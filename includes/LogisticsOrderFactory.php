@@ -14,7 +14,7 @@ use Towa\GebruederWeissSDK\Model\AddressReference;
 use Towa\GebruederWeissSDK\Model\Article;
 use Towa\GebruederWeissSDK\Model\ArticleNote;
 use Towa\GebruederWeissSDK\Model\Contact;
-use Towa\GebruederWeissSDK\Model\InlineObject;
+use Towa\GebruederWeissSDK\Model\InlineObject as CreateLogisticsOrderPayload;
 use Towa\GebruederWeissSDK\Model\LingualText;
 use Towa\GebruederWeissSDK\Model\LogisticsAddress;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
@@ -50,11 +50,11 @@ class LogisticsOrderFactory
      * Creates a logistics order from a WooCommerce order
      *
      * @param object $wooCommerceOrder The order to be converted into a logistics order.
-     * @return InlineObject
+     * @return CreateLogisticsOrderPayload
      */
-    public function buildFromWooCommerceOrder(object $wooCommerceOrder): InlineObject
+    public function buildFromWooCommerceOrder(object $wooCommerceOrder): CreateLogisticsOrderPayload
     {
-        $payload = new InlineObject();
+        $payload = new CreateLogisticsOrderPayload();
 
         $logisticsOrder = new LogisticsOrder();
         $logisticsOrder->setCreationDateTime($wooCommerceOrder->get_date_created());

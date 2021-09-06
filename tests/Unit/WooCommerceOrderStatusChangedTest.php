@@ -14,7 +14,7 @@ use Mockery\MockInterface;
 use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissSDK\ApiException;
 use Towa\GebruederWeissSDK\Configuration;
-use Towa\GebruederWeissSDK\Model\InlineObject;
+use Towa\GebruederWeissSDK\Model\InlineObject as CreateLogisticsOrderPayload;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
@@ -70,7 +70,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         /** @var MockInterface|LogisticsOrderFactory */
         $this->logisticsOrderFactory = Mockery::mock(LogisticsOrderFactory::class);
         $this->logisticsOrderFactory->allows([
-            "buildFromWooCommerceOrder" => new InlineObject(),
+            "buildFromWooCommerceOrder" => new CreateLogisticsOrderPayload(),
         ]);
 
         /** @var MockInterface|OAuthAuthenticator */
@@ -104,7 +104,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
 
         $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::SELECTED_FULFILLMENT_STATE, $order);
 
-        $this->gebruederWeissApi->shouldHaveReceived("logisticsOrderPost", ["de-DE", InlineObject::class]);
+        $this->gebruederWeissApi->shouldHaveReceived("logisticsOrderPost", ["de-DE", CreateLogisticsOrderPayload::class]);
     }
 
     public function test_it_creates_a_failed_request_if_the_command_fails()

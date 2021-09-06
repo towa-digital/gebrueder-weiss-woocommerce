@@ -11,10 +11,8 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
-use Towa\GebruederWeissSDK\Model\InlineObject1;
-use Towa\GebruederWeissSDK\Model\InlineObject2;
-use Towa\GebruederWeissWooCommerce\Options\Option;
-use Towa\GebruederWeissWooCommerce\Options\OrderOptionsTab;
+use Towa\GebruederWeissSDK\Model\InlineObject1 as SuccessCallbackBody;
+use Towa\GebruederWeissSDK\Model\InlineObject2 as FulfilledCallbackBody;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -68,7 +66,7 @@ class OrderController
     {
         $id = $request->get_params()['id'];
         $requestBody = $request->get_body();
-        $data = new InlineObject1(json_decode($requestBody, true));
+        $data = new SuccessCallbackBody(json_decode($requestBody, true));
 
         $order = $this->orderRepository->findById($id);
 
@@ -93,7 +91,7 @@ class OrderController
     {
         $id = $request->get_params()['id'];
         $requestBody = $request->get_body();
-        $data = new InlineObject2(json_decode($requestBody, true));
+        $data = new FulfilledCallbackBody(json_decode($requestBody, true));
 
         $order = $this->orderRepository->findById($id);
 
