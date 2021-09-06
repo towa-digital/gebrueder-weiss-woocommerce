@@ -23,6 +23,7 @@ use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictExcept
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\RetryFailedRequestsQueueWorker;
+use Towa\GebruederWeissWooCommerce\Options\OrderOptionsTab;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 /**
@@ -128,6 +129,9 @@ final class Plugin extends Singleton
         $fulfillmentTab = new FulfillmentOptionsTab($orderStatuses);
 
         $optionsPage->addTab($fulfillmentTab);
+
+        $orderMetaKeys = Wordpress::getAllMetaKeysForPostType('shop_order');
+        $optionsPage->addTab(new OrderOptionsTab($orderMetaKeys));
 
         $this->setOptionPage($optionsPage);
     }
@@ -358,6 +362,7 @@ final class Plugin extends Singleton
     {
         self::createRequestQueueTable();
         self::addCronIntervals();
+        self::setOrderOptionsDefaults();
 
         WordPress::scheduleCronjob(self::RETRY_REQUESTS_CRON_JOB, time(), self::CRON_EVERY_FIVE_MINUTES);
     }
@@ -623,5 +628,25 @@ final class Plugin extends Singleton
         global $wpdb;
         $sql = "DROP TABLE IF EXISTS `{$wpdb->base_prefix}gbw_request_retry_queue`";
         $wpdb->query($sql);
+    }
+
+    /**
+     * Sets the default values for the order options.
+     *
+     * @return void
+     */
+    private static function setOrderOptionsDefaults(): void
+    {
+        if (!WordPress::getOption(Option::OPTIONS_PREFIX . OrderOptionsTab::ORDER_ID_FIELD_NAME)) {
+            WordPress::updateOption(Option::OPTIONS_PREFIX . OrderOptionsTab::ORDER_ID_FIELD_NAME, OrderOptionsTab::ORDER_ID_FIELD_DEFAULT_VALUE);
+        }
+
+        if (!Wordpress::getOption(Option::OPTIONS_PREFIX . OrderOptionsTab::CARRIER_INFORMATION_FIELD_NAME)) {
+            WordPress::updateOption(Option::OPTIONS_PREFIX . OrderOptionsTab::CARRIER_INFORMATION_FIELD_NAME, OrderOptionsTab::CARRIER_INFORMATION_FIELD_DEFAULT_VALUE);
+        }
+
+        if (!Wordpress::getOption(Option::OPTIONS_PREFIX . OrderOptionsTab::TRACKING_LINK_FIELD_NAME)) {
+            WordPress::updateOption(Option::OPTIONS_PREFIX . OrderOptionsTab::TRACKING_LINK_FIELD_NAME, OrderOptionsTab::TRACKING_LINK_FIELD_DEFAULT_VALUE);
+        }
     }
 }

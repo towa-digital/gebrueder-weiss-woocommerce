@@ -2,6 +2,8 @@
 
 namespace Tests\Integration;
 
+use Towa\GebruederWeissWooCommerce\Options\Option;
+use Towa\GebruederWeissWooCommerce\Options\OrderOptionsTab;
 use Towa\GebruederWeissWooCommerce\Plugin;
 
 
@@ -31,5 +33,14 @@ class PluginInstallationTest extends \WP_UnitTestCase
         Plugin::onActivation();
 
         $this->assertSame(Plugin::CRON_EVERY_FIVE_MINUTES, \wp_get_schedule(Plugin::RETRY_REQUESTS_CRON_JOB));
+    }
+
+    public function test_it_sets_the_default_values_for_order_options()
+    {
+        Plugin::onActivation();
+
+        $this->assertSame(OrderOptionsTab::ORDER_ID_FIELD_DEFAULT_VALUE, \get_option(Option::OPTIONS_PREFIX . OrderOptionsTab::ORDER_ID_FIELD_NAME));
+        $this->assertSame(OrderOptionsTab::TRACKING_LINK_FIELD_DEFAULT_VALUE, \get_option(Option::OPTIONS_PREFIX . OrderOptionsTab::TRACKING_LINK_FIELD_NAME));
+        $this->assertSame(OrderOptionsTab::CARRIER_INFORMATION_FIELD_DEFAULT_VALUE, \get_option(Option::OPTIONS_PREFIX . OrderOptionsTab::CARRIER_INFORMATION_FIELD_NAME));
     }
 }

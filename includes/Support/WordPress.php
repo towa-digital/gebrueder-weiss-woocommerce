@@ -118,4 +118,27 @@ class WordPress
     {
         \wp_clear_scheduled_hook($hook);
     }
+
+    /**
+     * Returns all meta field keys for the given post type
+     *
+     * @param string $postType The post type to get the meta keys for.
+     * @return array
+     */
+    public static function getAllMetaKeysForPostType(string $postType): array
+    {
+        global $wpdb;
+
+        $query = "
+            SELECT DISTINCT($wpdb->postmeta.meta_key) 
+            FROM $wpdb->posts 
+            LEFT JOIN $wpdb->postmeta 
+            ON $wpdb->posts.ID = $wpdb->postmeta.post_id 
+            WHERE $wpdb->posts.post_type = '%s'
+            # exclude hidden meta keys
+            AND $wpdb->postmeta.meta_key NOT RegExp '(^[_0-9].+$)' 
+        ";
+
+        return $wpdb->get_col($wpdb->prepare($query, $postType));
+    }
 }
