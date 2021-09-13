@@ -30,11 +30,12 @@ class WordPress
      * Reads WordPressOptions
      *
      * @param string $name The name of the option.
+     * @param mixed  $default The default value to return if the option is not set.
      * @return mixed
      */
-    public static function getOption(string $name)
+    public static function getOption(string $name, $default = null)
     {
-        return \get_option($name, null);
+        return \get_option($name, $default);
     }
 
     /**

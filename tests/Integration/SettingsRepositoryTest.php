@@ -3,6 +3,7 @@
 namespace Tests\Integration;
 
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
+use Towa\GebruederWeissWooCommerce\Options\OrderOptionsTab;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
 class SettingsRepositoryTest extends \WP_UnitTestCase
@@ -118,6 +119,13 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
         $this->assertSame("asdf", $settingsRepository->getOrderIdFieldName());
     }
 
+    public function test_it_retrieves_a_default_order_id_field_name()
+    {
+        $settingsRepository = new SettingsRepository();
+
+        $this->assertSame(OrderOptionsTab::ORDER_ID_FIELD_DEFAULT_VALUE, $settingsRepository->getOrderIdFieldName());
+    }
+
     public function test_it_can_retrieve_the_tracking_link_field()
     {
         update_option("gbw_tracking_link_field", "tracking_link");
@@ -127,6 +135,13 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
         $this->assertSame("tracking_link", $settingsRepository->getTrackingLinkFieldName());
     }
 
+    public function test_it_retrieves_a_default_tracking_link_field_name()
+    {
+        $settingsRepository = new SettingsRepository();
+
+        $this->assertSame(OrderOptionsTab::TRACKING_LINK_FIELD_DEFAULT_VALUE, $settingsRepository->getTrackingLinkFieldName());
+    }
+
     public function test_it_can_retrieve_the_carrier_information()
     {
         update_option("gbw_carrier_information_field", "carrier_information");
@@ -134,5 +149,12 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
         $settingsRepository = new SettingsRepository();
 
         $this->assertSame("carrier_information", $settingsRepository->getCarrierInformationFieldName());
+    }
+
+    public function test_it_retrieves_a_default_carrier_information_field_name()
+    {
+        $settingsRepository = new SettingsRepository();
+
+        $this->assertSame(OrderOptionsTab::CARRIER_INFORMATION_FIELD_DEFAULT_VALUE, $settingsRepository->getCarrierInformationFieldName());
     }
 }
