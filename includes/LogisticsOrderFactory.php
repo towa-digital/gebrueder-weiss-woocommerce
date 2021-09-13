@@ -105,10 +105,13 @@ class LogisticsOrderFactory
 
         $fullName = implode(" ", array_filter([$wooCommerceOrder->get_shipping_first_name(), $wooCommerceOrder->get_shipping_last_name()]));
 
+        $email = $wooCommerceOrder->get_billing_email();
+        $phone = $wooCommerceOrder->get_billing_phone();
+
         $contact = new Contact();
         $contact->setName($fullName);
-        $contact->setEmail($wooCommerceOrder->get_billing_email());
-        $contact->setPhone($wooCommerceOrder->get_billing_phone());
+        $contact->setEmail(!empty($email) ? $email : null);
+        $contact->setPhone(!empty($phone) ? $phone : null);
         $contact->setLanguage("en-US");
         $logisticsAddress->setContact($contact);
 
