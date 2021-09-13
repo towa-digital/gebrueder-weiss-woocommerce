@@ -77,6 +77,14 @@ class OrderController
             return new WP_REST_Response(null, 404, null);
         }
 
+        if (empty($data)) {
+            return new WP_REST_Response(['message' => 'Invalid payload'], 422);
+        }
+
+        if (empty($data->orderId)) {
+            return new WP_REST_Response(['message' => 'Missing orderId'], 422);
+        }
+
         $order->update_meta_data($this->settings->getOrderIdFieldName(), $data->orderId);
 
         $order->save();
@@ -99,6 +107,18 @@ class OrderController
 
         if (is_null($order)) {
             return new WP_REST_Response(null, 404, null);
+        }
+
+        if (empty($data)) {
+            return new WP_REST_Response(['message' => 'Invalid payload'], 422);
+        }
+
+        if (empty($data->trackingUrl)) {
+            return new WP_REST_Response(['message' => 'Missing trackingUrl'], 422);
+        }
+
+        if (empty($data->transportProduct)) {
+            return new WP_REST_Response(['message' => 'Missing trackingProduct'], 422);
         }
 
         $order->set_status($this->settings->getFulfilledState());
