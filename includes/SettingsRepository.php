@@ -14,6 +14,7 @@ defined('ABSPATH') || exit;
 use Exception;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\Options\Option;
+use Towa\GebruederWeissWooCommerce\Options\OrderOptionsTab;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 /**
@@ -119,6 +120,36 @@ class SettingsRepository
     }
 
     /**
+     * Reads the custom field name for the order id from the plugin settings.
+     *
+     * @return integer|null
+     */
+    public function getOrderIdFieldName(): string
+    {
+        return $this->getOption(OrderOptionsTab::ORDER_ID_FIELD_NAME, OrderOptionsTab::ORDER_ID_FIELD_DEFAULT_VALUE);
+    }
+
+    /**
+     * Reads the custom field name for the tracking link from the plugin settings.
+     *
+     * @return integer|null
+     */
+    public function getTrackingLinkFieldName(): string
+    {
+        return $this->getOption(OrderOptionsTab::TRACKING_LINK_FIELD_NAME, OrderOptionsTab::TRACKING_LINK_FIELD_DEFAULT_VALUE);
+    }
+
+    /**
+     * Reads the custom field name for the carrier information from the plugin settings.
+     *
+     * @return integer|null
+     */
+    public function getCarrierInformationFieldName(): string
+    {
+        return $this->getOption(OrderOptionsTab::CARRIER_INFORMATION_FIELD_NAME, OrderOptionsTab::CARRIER_INFORMATION_FIELD_DEFAULT_VALUE);
+    }
+
+    /**
      * Reads the wordpress site URL from the options.
      *
      * @return string|null
@@ -131,12 +162,13 @@ class SettingsRepository
     /**
      * Reads the plugin option with the passed name from the wordpress options
      *
-     * @param string $name The name of the option.
+     * @param string     $name The name of the option.
+     * @param mixed|null $default The default value to return if the option is not set.
      * @return mixed
      */
-    private function getOption(string $name)
+    private function getOption(string $name, $default = null)
     {
-        return WordPress::getOption(Option::OPTIONS_PREFIX . $name, null);
+        return WordPress::getOption(Option::OPTIONS_PREFIX . $name, $default);
     }
 
     /**

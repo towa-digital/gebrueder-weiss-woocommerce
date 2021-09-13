@@ -24,10 +24,10 @@ class FulfillmentOptionsTab extends Tab
      */
     public function __construct(array $orderStates)
     {
-        parent::__construct(__('Fulfillment', Plugin::$languageDomain), 'fulfillment');
+        parent::__construct(__('Fulfillment', Plugin::LANGUAGE_DOMAIN), 'fulfillment');
         $this
-            ->addOption(new OptionDropdown('Fulfillment State', 'fulfillmentState', __('Fulfillment State', Plugin::$languageDomain), 'fulfillment', $orderStates))
-            ->addOption(new OptionDropdown('Fulfilled State', 'fulfilledState', __('Fulfilled State', Plugin::$languageDomain), 'fulfillment', $orderStates))
-            ->addOption(new OptionDropdown('Fulfillment Error State', 'fulfillmentErrorState', __('Fulfillment Error State', Plugin::$languageDomain), 'fulfillment', $orderStates));
+            ->addOption(new OptionDropdown('Fulfillment State', 'fulfillmentState', __('Fulfillment State', Plugin::LANGUAGE_DOMAIN), 'fulfillment', $orderStates))
+            ->addOption(new OptionDropdown('Fulfilled State', 'fulfilledState', __('Fulfilled State', Plugin::LANGUAGE_DOMAIN), 'fulfillment', $orderStates))
+            ->addOption(new OptionDropdown('Fulfillment Error State', 'fulfillmentErrorState', __('Fulfillment Error State', Plugin::LANGUAGE_DOMAIN), 'fulfillment', $orderStates));
     }
 }

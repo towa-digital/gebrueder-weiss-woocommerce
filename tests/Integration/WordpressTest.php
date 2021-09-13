@@ -68,4 +68,12 @@ class WordPressTest extends \WP_UnitTestCase
 
         $this->assertFalse(\wp_get_schedule("hook"));
     }
+
+    public function test_it_can_retrieve_all_meta_keys_for_a_post_type()
+    {
+        $postId = $this->factory()->post->create(["post_type" => "post"]);
+        \update_post_meta($postId, "key1", "value1");
+
+        $this->assertCount(1, WordPress::getAllMetaKeysForPostType("post"));
+    }
 }

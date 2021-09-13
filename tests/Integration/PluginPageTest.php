@@ -43,7 +43,7 @@ class PluginPageTest extends \WP_UnitTestCase
 
     public function test_if_page_renders()
     {
-        $optionsPage = (new OptionPage('test', Plugin::OPTIONPAGESLUG));
+        $optionsPage = (new OptionPage('test', Plugin::OPTION_PAGE_SLUG));
 
         \ob_start();
         $optionsPage->render();

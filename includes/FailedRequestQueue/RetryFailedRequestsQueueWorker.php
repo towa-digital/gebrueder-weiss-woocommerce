@@ -9,7 +9,7 @@ namespace Towa\GebruederWeissWooCommerce\FailedRequestQueue;
 
 defined('ABSPATH') || exit;
 
-use Towa\GebruederWeissSDK\Api\WriteApi;
+use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissWooCommerce\CreateLogisticsOrderCommand;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
@@ -40,9 +40,9 @@ class RetryFailedRequestsQueueWorker
     /**
      * Gebrueder Weiss Write API
      *
-     * @var WriteApi
+     * @var DefaultApi
      */
-    private $writeApi = null;
+    private $gebruederWeissApi = null;
 
     /**
      * Order Repository
@@ -63,19 +63,19 @@ class RetryFailedRequestsQueueWorker
      *
      * @param FailedRequestRepository $failedRequestRepository Failed Requests Repository.
      * @param LogisticsOrderFactory   $logisticsOrderFactory Logistics Order Factory.
-     * @param WriteApi                $writeApi Gebrueder Weiss Write API.
+     * @param DefaultApi              $gebruederWeissApi Gebrueder Weiss Write API.
      * @param OrderRepository         $orderRepository WooCommerce Order Repository.
      * @param SettingsRepository      $settingsRepository Settings Repository.
      */
     public function __construct(
         FailedRequestRepository $failedRequestRepository,
         LogisticsOrderFactory $logisticsOrderFactory,
-        WriteApi $writeApi,
+        DefaultApi $gebruederWeissApi,
         OrderRepository $orderRepository,
         SettingsRepository $settingsRepository
     ) {
         $this->failedRequestRepository = $failedRequestRepository;
-        $this->writeApi = $writeApi;
+        $this->gebruederWeissApi = $gebruederWeissApi;
         $this->logisticsOrderFactory = $logisticsOrderFactory;
         $this->orderRepository = $orderRepository;
         $this->settingsRepository = $settingsRepository;
@@ -88,7 +88,7 @@ class RetryFailedRequestsQueueWorker
      */
     public function start(): void
     {
-        $this->writeApi->getConfig()->setAccessToken($this->settingsRepository->getAccessToken()->getToken());
+        $this->gebruederWeissApi->getConfig()->setAccessToken($this->settingsRepository->getAccessToken()->getToken());
 
         while (true) {
             $failedRequest = $this->failedRequestRepository->findOneToRetry();
@@ -109,7 +109,7 @@ class RetryFailedRequestsQueueWorker
                 (new CreateLogisticsOrderCommand(
                     $order,
                     $this->logisticsOrderFactory,
-                    $this->writeApi
+                    $this->gebruederWeissApi
                 ))->execute();
 
                 $failedRequest->setStatus(FailedRequest::SUCCESS_STATUS);

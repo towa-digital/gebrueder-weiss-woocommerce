@@ -79,7 +79,7 @@ class Tab implements CanRender
      * @param array  $options Options which should be displayed on the tab.
      * @param string $page Slug of the options page where the tab should be displayed.
      */
-    public function __construct(string $name, string $slug, array $options = [], string $page = Plugin::OPTIONPAGESLUG)
+    public function __construct(string $name, string $slug, array $options = [], string $page = Plugin::OPTION_PAGE_SLUG)
     {
         $this->name = $name;
         $this->slug = $slug;

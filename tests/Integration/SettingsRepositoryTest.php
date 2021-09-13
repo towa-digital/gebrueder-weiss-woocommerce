@@ -108,4 +108,31 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
 
         $this->assertSame(42, $settingsRepository->getCustomerId());
     }
+
+    public function test_it_can_retrieve_the_order_id_field()
+    {
+        update_option("gbw_order_id_field", "asdf");
+
+        $settingsRepository = new SettingsRepository();
+
+        $this->assertSame("asdf", $settingsRepository->getOrderIdFieldName());
+    }
+
+    public function test_it_can_retrieve_the_tracking_link_field()
+    {
+        update_option("gbw_tracking_link_field", "tracking_link");
+
+        $settingsRepository = new SettingsRepository();
+
+        $this->assertSame("tracking_link", $settingsRepository->getTrackingLinkFieldName());
+    }
+
+    public function test_it_can_retrieve_the_carrier_information()
+    {
+        update_option("gbw_carrier_information_field", "carrier_information");
+
+        $settingsRepository = new SettingsRepository();
+
+        $this->assertSame("carrier_information", $settingsRepository->getCarrierInformationFieldName());
+    }
 }

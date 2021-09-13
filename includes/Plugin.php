@@ -18,11 +18,12 @@ use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 use Towa\GebruederWeissWooCommerce\Options\Tab;
 use Towa\GebruederWeissWooCommerce\Support\Singleton;
-use Towa\GebruederWeissSDK\Api\WriteApi;
+use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderFailedException;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\RetryFailedRequestsQueueWorker;
+use Towa\GebruederWeissWooCommerce\Options\OrderOptionsTab;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 /**
@@ -30,21 +31,13 @@ use Towa\GebruederWeissWooCommerce\Support\WordPress;
  */
 final class Plugin extends Singleton
 {
-    /**
-     * Option Page Slug
-     */
-    const OPTIONPAGESLUG = 'gbw-woocommerce';
+    const OPTION_PAGE_SLUG = 'gbw-woocommerce';
 
     const RETRY_REQUESTS_CRON_JOB = "gbw_retry_failed_requests";
 
     const CRON_EVERY_FIVE_MINUTES = "gbw_every_five_minutes";
 
-    /**
-     * Plugin Language Domain
-     *
-     * @var string
-     */
-    public static $languageDomain = 'gbw-woocommerce';
+    const LANGUAGE_DOMAIN = 'gbw-woocommerce';
 
     /**
      * Options Page
@@ -77,9 +70,9 @@ final class Plugin extends Singleton
     /**
      * Client for writing to the Gebrueder Weiss API.
      *
-     * @var WriteApi
+     * @var DefaultApi
      */
-    private $writeApiClient = null;
+    private $gebruederWeissApiClient = null;
 
     /**
      * Factory for building logistics orders.
@@ -122,13 +115,13 @@ final class Plugin extends Singleton
      */
     public function initOptionPage(): void
     {
-        $optionsPage = new OptionPage('options', self::OPTIONPAGESLUG);
-        $accountTab = (new Tab(__('Account', self::$languageDomain), 'account'))->onTabInit([$this, 'validateCredentials']);
+        $optionsPage = new OptionPage('options', self::OPTION_PAGE_SLUG);
+        $accountTab = (new Tab(__('Account', self::LANGUAGE_DOMAIN), 'account'))->onTabInit([$this, 'validateCredentials']);
 
         $accountTab
-            ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::$languageDomain), 'account', 'integer'))
-            ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::$languageDomain), 'account', 'string'))
-            ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::$languageDomain), 'account', 'string'));
+            ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::LANGUAGE_DOMAIN), 'account', 'integer'))
+            ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::LANGUAGE_DOMAIN), 'account', 'string'))
+            ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::LANGUAGE_DOMAIN), 'account', 'string'));
         $optionsPage->addTab($accountTab);
 
         $orderStatuses = $this->orderStateRepository->getAllOrderStates();
@@ -136,6 +129,9 @@ final class Plugin extends Singleton
         $fulfillmentTab = new FulfillmentOptionsTab($orderStatuses);
 
         $optionsPage->addTab($fulfillmentTab);
+
+        $orderMetaKeys = Wordpress::getAllMetaKeysForPostType('shop_order');
+        $optionsPage->addTab(new OrderOptionsTab($orderMetaKeys));
 
         $this->setOptionPage($optionsPage);
     }
@@ -182,12 +178,12 @@ final class Plugin extends Singleton
         try {
             $token = $this->authenticationClient->authenticate();
             if ($token && $token->isValid()) {
-                self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::$languageDomain));
+                self::showWordpressAdminSuccessMessage(__("Your credentials were successfully validated.", self::LANGUAGE_DOMAIN));
             } else {
-                self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::$languageDomain));
+                self::showWordpressAdminErrorMessage(__("Your credentials were not accepted by the Gebrüder Weiss API.", self::LANGUAGE_DOMAIN));
             }
         } catch (\Exception $e) {
-            self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed.", self::$languageDomain));
+            self::showWordpressAdminErrorMessage(__("Sending an authentication request to the Gebrüder Weiss API Failed.", self::LANGUAGE_DOMAIN));
         }
     }
 
@@ -200,14 +196,14 @@ final class Plugin extends Singleton
     {
         if (!self::pluginIsCompatibleWithCurrentPhpVersion()) {
             self::showWordpressAdminErrorMessage(
-                __("Gebrüder Weiss WooCommerce is not compatible with PHP " . phpversion() . ".", self::$languageDomain)
+                __("Gebrüder Weiss WooCommerce is not compatible with PHP " . phpversion() . ".", self::LANGUAGE_DOMAIN)
             );
             return false;
         }
 
         if (!self::isWooCommerceActive()) {
             self::showWordpressAdminErrorMessage(
-                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed and active.", self::$languageDomain)
+                __("Gebrüder Weiss WooCommerce requires WooCommerce to be installed and active.", self::LANGUAGE_DOMAIN)
             );
             return false;
         }
@@ -233,19 +229,19 @@ final class Plugin extends Singleton
 
         if ($fulfillmentState === $fulfilledState) {
             $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfilled State are set to the same state.", self::$languageDomain)
+                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfilled State are set to the same state.", self::LANGUAGE_DOMAIN)
             );
         }
 
         if ($fulfillmentState === $fulfillmentErrorState) {
             $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfillment Error State are set to the same state.", self::$languageDomain)
+                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfillment Error State are set to the same state.", self::LANGUAGE_DOMAIN)
             );
         }
 
         if ($fulfilledState === $fulfillmentErrorState) {
             $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfilled State and Fulfillment Error State are set to the same state.", self::$languageDomain)
+                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfilled State and Fulfillment Error State are set to the same state.", self::LANGUAGE_DOMAIN)
             );
         }
     }
@@ -283,10 +279,10 @@ final class Plugin extends Singleton
     public function createLogisticsOrderAndUpdateOrderState(object $order)
     {
         $authToken = $this->settingsRepository->getAccessToken();
-        $this->writeApiClient->getConfig()->setAccessToken($authToken->getToken());
+        $this->gebruederWeissApiClient->getConfig()->setAccessToken($authToken->getToken());
 
         try {
-            (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->writeApiClient))->execute();
+            (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->gebruederWeissApiClient))->execute();
         } catch (CreateLogisticsOrderConflictException $e) {
             $order->set_status($this->settingsRepository->getFulfillmentErrorState());
             $order->save();
@@ -310,7 +306,7 @@ final class Plugin extends Singleton
         (new RetryFailedRequestsQueueWorker(
             $this->failedRequestRepository,
             $this->logisticsOrderFactory,
-            $this->writeApiClient,
+            $this->gebruederWeissApiClient,
             $this->orderRepository,
             $this->settingsRepository
         ))->start();
@@ -339,7 +335,7 @@ final class Plugin extends Singleton
             __('options', 'gbw-woocommerce'),
             __('Gebrüder Weiss Woocommerce', 'gbw-woocommerce'),
             'manage_options',
-            self::OPTIONPAGESLUG,
+            self::OPTION_PAGE_SLUG,
             [$this, 'renderOptionPage']
         );
     }
@@ -366,6 +362,7 @@ final class Plugin extends Singleton
     {
         self::createRequestQueueTable();
         self::addCronIntervals();
+        self::setOrderOptionsDefaults();
 
         WordPress::scheduleCronjob(self::RETRY_REQUESTS_CRON_JOB, time(), self::CRON_EVERY_FIVE_MINUTES);
     }
@@ -437,12 +434,12 @@ final class Plugin extends Singleton
     /**
      * Sets the client for writing to the Gebrueder Weiss API.
      *
-     * @param WriteApi $client The client for writing to the api.
+     * @param DefaultApi $client The client for writing to the api.
      * @return void
      */
-    public function setWriteApiClient(WriteApi $client): void
+    public function setGebruederWeissApiClient(DefaultApi $client): void
     {
-        $this->writeApiClient = $client;
+        $this->gebruederWeissApiClient = $client;
     }
 
     /**
@@ -478,14 +475,14 @@ final class Plugin extends Singleton
     {
         if (!$optionValue) {
             $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".", self::$languageDomain)
+                __("The Gebrüder Weiss WooCommerce Plugin settings are missing a value for " . $displayName . ".", self::LANGUAGE_DOMAIN)
             );
             return;
         }
 
         if (!$this->checkIfWooCommerceOrderStateExists($optionValue)) {
             $this->showWordpressAdminErrorMessage(
-                __("The selected order state for " . $displayName . " in the options for the Gebrüder Weiss WooCommerce Plugin does not exist in WooCommerce.", self::$languageDomain)
+                __("The selected order state for " . $displayName . " in the options for the Gebrüder Weiss WooCommerce Plugin does not exist in WooCommerce.", self::LANGUAGE_DOMAIN)
             );
         }
     }
@@ -631,5 +628,25 @@ final class Plugin extends Singleton
         global $wpdb;
         $sql = "DROP TABLE IF EXISTS `{$wpdb->base_prefix}gbw_request_retry_queue`";
         $wpdb->query($sql);
+    }
+
+    /**
+     * Sets the default values for the order options.
+     *
+     * @return void
+     */
+    private static function setOrderOptionsDefaults(): void
+    {
+        if (!WordPress::getOption(Option::OPTIONS_PREFIX . OrderOptionsTab::ORDER_ID_FIELD_NAME)) {
+            WordPress::updateOption(Option::OPTIONS_PREFIX . OrderOptionsTab::ORDER_ID_FIELD_NAME, OrderOptionsTab::ORDER_ID_FIELD_DEFAULT_VALUE);
+        }
+
+        if (!Wordpress::getOption(Option::OPTIONS_PREFIX . OrderOptionsTab::CARRIER_INFORMATION_FIELD_NAME)) {
+            WordPress::updateOption(Option::OPTIONS_PREFIX . OrderOptionsTab::CARRIER_INFORMATION_FIELD_NAME, OrderOptionsTab::CARRIER_INFORMATION_FIELD_DEFAULT_VALUE);
+        }
+
+        if (!Wordpress::getOption(Option::OPTIONS_PREFIX . OrderOptionsTab::TRACKING_LINK_FIELD_NAME)) {
+            WordPress::updateOption(Option::OPTIONS_PREFIX . OrderOptionsTab::TRACKING_LINK_FIELD_NAME, OrderOptionsTab::TRACKING_LINK_FIELD_DEFAULT_VALUE);
+        }
     }
 }

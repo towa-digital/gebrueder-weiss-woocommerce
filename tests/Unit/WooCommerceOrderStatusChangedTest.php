@@ -11,9 +11,10 @@ use PHPUnit\Framework\TestCase;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
-use Towa\GebruederWeissSDK\Api\WriteApi;
+use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissSDK\ApiException;
 use Towa\GebruederWeissSDK\Configuration;
+use Towa\GebruederWeissSDK\Model\InlineObject as CreateLogisticsOrderPayload;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
@@ -28,8 +29,8 @@ class WooCommerceOrderStatusChangedTest extends TestCase
     /** @var Plugin */
     private $plugin;
 
-    /** @var MockInterface|WriteApi */
-    private $writeApi;
+    /** @var MockInterface|DefaultApi */
+    private $gebruederWeissApi;
 
     /** @var MockInterface|SettingsRepository */
     private $settingsRepository;
@@ -50,10 +51,10 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         /** @var Plugin */
         $this->plugin = Plugin::getInstance();
 
-        /** @var MockInterface|WriteApi */
-        $this->writeApi = Mockery::mock(WriteApi::class);
-        $this->writeApi->allows("logisticsOrderPost");
-        $this->writeApi->allows(["getConfig" => new Configuration()]);
+        /** @var MockInterface|DefaultApi */
+        $this->gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $this->gebruederWeissApi->allows("logisticsOrderPost");
+        $this->gebruederWeissApi->allows(["getConfig" => new Configuration()]);
 
         /** @var MockInterface|SettingsRepository */
         $this->settingsRepository = Mockery::mock(SettingsRepository::class);
@@ -69,7 +70,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         /** @var MockInterface|LogisticsOrderFactory */
         $this->logisticsOrderFactory = Mockery::mock(LogisticsOrderFactory::class);
         $this->logisticsOrderFactory->allows([
-            "buildFromWooCommerceOrder" => new LogisticsOrder(),
+            "buildFromWooCommerceOrder" => new CreateLogisticsOrderPayload(),
         ]);
 
         /** @var MockInterface|OAuthAuthenticator */
@@ -80,7 +81,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         $this->failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
         $this->failedRequestRepository->allows("create");
 
-        $this->plugin->setWriteApiClient($this->writeApi);
+        $this->plugin->setGebruederWeissApiClient($this->gebruederWeissApi);
         $this->plugin->setSettingsRepository($this->settingsRepository);
         $this->plugin->setAuthenticationClient($this->authenticator);
         $this->plugin->setLogisticsOrderFactory($this->logisticsOrderFactory);
@@ -91,7 +92,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
     {
         $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", "some-state", (object)[]);
 
-        $this->writeApi->shouldNotHaveBeenCalled(["logisticsOrderPost"]);
+        $this->gebruederWeissApi->shouldNotHaveBeenCalled(["logisticsOrderPost"]);
     }
 
     public function test_it_calls_the_api_if_the_fulfillment_state_matches_the_selection()
@@ -103,16 +104,16 @@ class WooCommerceOrderStatusChangedTest extends TestCase
 
         $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::SELECTED_FULFILLMENT_STATE, $order);
 
-        $this->writeApi->shouldHaveReceived("logisticsOrderPost", [LogisticsOrder::class]);
+        $this->gebruederWeissApi->shouldHaveReceived("logisticsOrderPost", ["en-US", CreateLogisticsOrderPayload::class]);
     }
 
     public function test_it_creates_a_failed_request_if_the_command_fails()
     {
-        /** @var MockInterface|WriteApi */
-        $writeApi = Mockery::mock(WriteApi::class);
-        $writeApi->allows(["getConfig" => new Configuration()]);
-        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Unauthenticated", 401));
-        $this->plugin->setWriteApiClient($writeApi);
+        /** @var MockInterface|DefaultApi */
+        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+        $gebruederWeissApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Unauthenticated", 401));
+        $this->plugin->setGebruederWeissApiClient($gebruederWeissApi);
 
         /** @var MockInterface|object */
         $order = Mockery::mock("WC_Order");
@@ -140,11 +141,11 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         $wordpressMock = Mockery::mock("alias:" . WordPress::class);
         $wordpressMock->shouldReceive("sendMailToAdmin")->once();
 
-        /** @var MockInterface|WriteApi */
-        $writeApi = Mockery::mock(WriteApi::class);
-        $writeApi->allows(["getConfig" => new Configuration()]);
-        $writeApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Conflict", 409));
-        $this->plugin->setWriteApiClient($writeApi);
+        /** @var MockInterface|DefaultApi */
+        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+        $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+        $gebruederWeissApi->shouldReceive("logisticsOrderPost")->andThrow(new ApiException("Conflict", 409));
+        $this->plugin->setGebruederWeissApiClient($gebruederWeissApi);
 
         /** @var MockInterface|SettingsRepository */
         $settingsRepository = Mockery::mock(SettingsRepository::class);
