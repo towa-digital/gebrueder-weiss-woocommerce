@@ -45,8 +45,8 @@ add_action("init", function () {
 
     $plugin = Plugin::getInstance();
 
-    $apiEndpoint = env('GEBRUEDER_WEISS_API_URL', 'https://apitest.gw-world.com:443/');
-    $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://apitest.gw-world.com:443/token');
+    $apiEndpoint = env('GEBRUEDER_WEISS_API_URL', null);
+    $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://test.api.gw-world.com/token');
 
     $authProvider = new GenericProvider([
         // Has to be set as non-empty string to instantiate provider.
@@ -60,7 +60,10 @@ add_action("init", function () {
     ]);
 
     $gebruederWeissApi = new DefaultApi();
-    $gebruederWeissApi->getConfig()->setHost($apiEndpoint);
+
+    if ($apiEndpoint) {
+        $gebruederWeissApi->getConfig()->setHost($apiEndpoint);
+    }
 
     $settingsRepository = new SettingsRepository();
     $logisticsOrderFactory = new LogisticsOrderFactory($settingsRepository);
