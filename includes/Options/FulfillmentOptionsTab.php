@@ -16,7 +16,6 @@ use Towa\GebruederWeissWooCommerce\Plugin;
  */
 class FulfillmentOptionsTab extends Tab
 {
-
     /**
      * Creates the fulfillment options based on the passed states.
      *

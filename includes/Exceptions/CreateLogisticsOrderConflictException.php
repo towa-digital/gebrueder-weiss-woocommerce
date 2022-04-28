@@ -16,5 +16,4 @@ use Exception;
  */
 class CreateLogisticsOrderConflictException extends CreateLogisticsOrderFailedException
 {
-
 }
