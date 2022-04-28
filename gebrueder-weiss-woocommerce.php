@@ -45,7 +45,7 @@ add_action("init", function () {
 
     $plugin = Plugin::getInstance();
 
-    $apiEndpoint = env('GEBRUEDER_WEISS_API_URL', null);
+    $apiEndpoint = env('GEBRUEDER_WEISS_API_URL');
     $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://test.api.gw-world.com/token');
 
     $authProvider = new GenericProvider([
@@ -90,7 +90,7 @@ if (!function_exists('env')) {
      * @param string $defaultValue default value to be returned if variable not found.
      * @return string
      */
-    function env(string $varName, string $defaultValue = null): string
+    function env(string $varName, string $defaultValue = null): ?string
     {
         return array_key_exists($varName, $_ENV) ? $_ENV[$varName] : $defaultValue;
     }
