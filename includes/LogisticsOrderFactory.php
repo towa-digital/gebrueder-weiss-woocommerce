@@ -71,7 +71,6 @@ class LogisticsOrderFactory
         $logisticsProduct->setProduct("OUTBOUND_DELIVERY");
         $logisticsProduct->setProductServiceLevel("STANDARD");
 
-
         $logisticsRequirements = new LogisticsRequirements();
         $logisticsRequirements->setLogisticsProduct($logisticsProduct);
         $logisticsOrder->setLogisticsRequirements($logisticsRequirements);
