@@ -11,16 +11,14 @@ defined('ABSPATH') || exit;
 
 use Towa\GebruederWeissSDK\Model\Address;
 use Towa\GebruederWeissSDK\Model\AddressReference;
-use Towa\GebruederWeissSDK\Model\Article;
-use Towa\GebruederWeissSDK\Model\ArticleNote;
 use Towa\GebruederWeissSDK\Model\Contact;
 use Towa\GebruederWeissSDK\Model\InlineObject as CreateLogisticsOrderPayload;
 use Towa\GebruederWeissSDK\Model\LingualText;
 use Towa\GebruederWeissSDK\Model\LogisticsAddress;
 use Towa\GebruederWeissSDK\Model\LogisticsOrder;
 use Towa\GebruederWeissSDK\Model\LogisticsOrderCallbacks;
+use Towa\GebruederWeissSDK\Model\LogisticsProduct;
 use Towa\GebruederWeissSDK\Model\LogisticsRequirements;
-use Towa\GebruederWeissSDK\Model\Note;
 use Towa\GebruederWeissSDK\Model\OrderLine;
 use Towa\GebruederWeissSDK\Model\OrderLineNote;
 
@@ -64,6 +62,18 @@ class LogisticsOrderFactory
             $this->createConsigneeAddress($wooCommerceOrder),
             $this->createOrderbyAddress()
         ]);
+
+        $logisticsOrder->setCustomerOrder(strval($wooCommerceOrder->get_id()));
+        // TODO: Replace the dummy warehouse id with the correct warehouse id.
+        $logisticsOrder->setWarehouseId("4000000000");
+
+        $logisticsProduct = new LogisticsProduct();
+        $logisticsProduct->setProduct("OUTBOUND_DELIVERY");
+        $logisticsProduct->setProductServiceLevel("STANDARD");
+
+        $logisticsRequirements = new LogisticsRequirements();
+        $logisticsRequirements->setLogisticsProduct($logisticsProduct);
+        $logisticsOrder->setLogisticsRequirements($logisticsRequirements);
 
         $logisticsOrder->setOrderLines(
             $this->createOrderLines($wooCommerceOrder)
@@ -147,7 +157,7 @@ class LogisticsOrderFactory
         return array_map(function (object $orderItem) use ($wooCommerceOrder) {
             $orderLine = new OrderLine();
 
-            $orderLine->setArticleId(intval($orderItem->get_product()->get_sku()));
+            $orderLine->setArticleId(strval($orderItem->get_product()->get_sku()));
             $orderLine->setLineItemNumber($orderItem->get_id());
             $orderLine->setQuantity($orderItem->get_quantity());
 

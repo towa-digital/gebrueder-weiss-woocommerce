@@ -79,7 +79,10 @@ class OAuthToken implements Serializable
      */
     public function serialize()
     {
-        return serialize([$this->token, $this->expires]);
+        return json_encode([
+            "token" => $this->token,
+            "expires" => $this->expires,
+        ]);
     }
 
     /**
@@ -90,6 +93,8 @@ class OAuthToken implements Serializable
      */
     public function unserialize($data)
     {
-        list($this->token, $this->expires) = unserialize($data);
+        $deserialized = json_decode($data);
+        $this->token = $deserialized->token;
+        $this->expires = $deserialized->expires;
     }
 }
