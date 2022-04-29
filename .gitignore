@@ -2,6 +2,8 @@ vendor/
 .env
 settings.json
 node_modules/
+wordpress/
+.phpunit.result.cache
 
 # whitelist
 !.gitignore
@@ -9,4 +11,3 @@ node_modules/
 !.phpcs.xml
 !.husky/
 !.github/
-wordpress/
