@@ -61,6 +61,7 @@ class OAuthAuthenticator
             $leagueToken = $this->authProvider->getAccessToken('client_credentials', [
                 'client_id' => $this->settingsRepository->getClientId(),
                 'client_secret' => $this->settingsRepository->getClientSecret(),
+                'scope' => 'API_CUSAPI_LOGISTICS_ORDER_CREATE',
             ]);
 
             return new OAuthToken(
