@@ -17,7 +17,7 @@ The Project contains automated tests which can be run locally with `phpunit` fro
 
 ### Important Note
 
-- if you want to use intellisense in your tests, make sure the tests folder of `vendor/wordpress/wordpress/tests/includes` is added to your intellisense language server includes, AND that its not ignored by a pattern.
+The composer dependencies include stubs for WordPress, WordPress Tests and WooCommerce. You might have to instruct the language server to include the stubs for analysis. The stubs are located in `./vendor/php-stubs`. As an example, `inteliphense` has a `intelephense.stubs` that holds an array of stubs. This array can be extended with the path to the stubs in the vendor folder to to include them.
 
 ### Setup
 
