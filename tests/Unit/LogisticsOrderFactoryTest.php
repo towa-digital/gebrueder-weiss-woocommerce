@@ -82,6 +82,21 @@ class LogisticsOrderFactoryTest extends TestCase
         ];
     }
 
+    public function test_it_adds_the_customer_order_to_the_payload()
+    {
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+
+        $this->assertSame("12", $logisticsOrder->getLogisticsOrder()->getCustomerOrder());
+    }
+
+    public function test_it_adds_the_warehouse_id_to_the_payload()
+    {
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+
+        // TODO: Replace the dummy warehouse id with the correct warehouse id.
+        $this->assertSame("4000000000", $logisticsOrder->getLogisticsOrder()->getWarehouseId());
+    }
+
     public function test_it_adds_the_success_callback_url_to_the_payload()
     {
         $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
@@ -204,7 +219,7 @@ class LogisticsOrderFactoryTest extends TestCase
         $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
         $orderLine = $logisticsOrder->getOrderLines()[0];
 
-        $this->assertSame(234, $orderLine->getArticleId());
+        $this->assertSame("234", $orderLine->getArticleId());
         $this->assertSame(123, $orderLine->getLineItemNumber());
         $this->assertSame(4, $orderLine->getQuantity());
     }
@@ -225,6 +240,23 @@ class LogisticsOrderFactoryTest extends TestCase
 
         $this->assertSame("en-US", $article->getNotes()[0]->getNoteText()->getLanguage());
         $this->assertSame("note", $article->getNotes()[0]->getNoteText()->getText());
+    }
+
+    public function test_it_adds_logistics_requirements()
+    {
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+        $logisticsRequirement = $logisticsOrder->getLogisticsRequirements();
+
+        $this->assertNotNull($logisticsRequirement->getLogisticsProduct());
+    }
+
+    public function test_it_adds_a_logistics_product()
+    {
+        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+        $product = $logisticsOrder->getLogisticsRequirements()->getLogisticsProduct();
+
+        $this->assertSame("OUTBOUND_DELIVERY", $product->getProduct());
+        $this->assertSame("STANDARD", $product->getProductServiceLevel());
     }
 
     private function createMockOrder(?array $mockMethods = null)
