@@ -4,6 +4,7 @@ settings.json
 node_modules/
 wordpress/
 .phpunit.result.cache
+composer.lock
 
 # whitelist
 !.gitignore
