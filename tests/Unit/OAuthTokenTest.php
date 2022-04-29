@@ -37,13 +37,13 @@ class OAuthTokenTest extends TestCase
 
     public function test_it_can_serialize_and_unserialize_the_token()
     {
-        $token = new OAuthToken("test", 1628168570);
+        $token = new OAuthToken("test-1", 1628168570);
         $serialized = $token->serialize();
         $newToken = new OAuthToken("", 0);
 
         $newToken->unserialize($serialized);
 
-        $this->assertSame("test", $newToken->getToken());
+        $this->assertSame("test-1", $newToken->getToken());
         $this->assertSame(1628168570 - time(), $newToken->getExpiresIn());
     }
 }
