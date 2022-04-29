@@ -17,7 +17,7 @@ The Project contains automated tests which can be run locally with `phpunit` fro
 
 ### Important Note
 
-The composer dependencies include stubs for WordPress, WordPress Tests and WooCommerce. You might have to instruct the language server to include the stubs for analysis. The stubs are located in `./vendor/php-stubs`. As an example, `inteliphense` has a `intelephense.stubs` that holds an array of stubs. This array can be extended with the path to the stubs in the vendor folder to to include them.
+The composer dependencies include stubs for WordPress, WordPress Tests and WooCommerce. You might have to instruct the language server to include the stubs for analysis. There is also one more caveat with `intelephense` for VSCode the stubs for WordPress are rather large. Hence you have to increase the maximum file size for indexing. Otherwise the plugin will skip indexing the subs. You have to set `intelephense.files.maxSize` to at least `5000000` since the stub file has around 4.4mb at the time of writing this.
 
 ### Setup
 
