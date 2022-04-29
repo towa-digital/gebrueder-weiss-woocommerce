@@ -9,7 +9,6 @@ use Towa\GebruederWeissWooCommerce\Options\FulfillmentOptionsTab;
  */
 class FulfillmentSettingsTest extends \WP_UnitTestCase
 {
-
     public function test_it_has_the_woocommerce_order_states_as_options()
     {
         $states = [ "order-state-key" => "Order State Name" ];

@@ -73,7 +73,7 @@ class LogisticsOrderFactory
 
         $callbacks = new LogisticsOrderCallbacks();
         $callbacks->setSuccessCallback($this->settingsRepository->getSiteUrl() . "/wp-json/gebrueder-weiss-woocommerce/v1/orders/" . $wooCommerceOrder->get_id() . "/callbacks/success");
-        $callbacks->setFullfilledCallback($this->settingsRepository->getSiteUrl() . "/wp-json/gebrueder-weiss-woocommerce/v1/orders/" . $wooCommerceOrder->get_id() . "/callbacks/fulfillment");
+        $callbacks->setFulfillmentCallback($this->settingsRepository->getSiteUrl() . "/wp-json/gebrueder-weiss-woocommerce/v1/orders/" . $wooCommerceOrder->get_id() . "/callbacks/fulfillment");
 
         $payload->setCallbacks($callbacks);
 

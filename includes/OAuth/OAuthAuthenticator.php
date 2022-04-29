@@ -53,14 +53,14 @@ class OAuthAuthenticator
      * Returns the access token
      *
      * @throws AuthenticationFailedException Thrown if an error occurred.
-     * @return string
+     * @return OAuthToken
      */
     public function authenticate(): OAuthToken
     {
         try {
             $leagueToken = $this->authProvider->getAccessToken('client_credentials', [
-                'clientId' => $this->settingsRepository->getClientId(),
-                'clientSecret' => $this->settingsRepository->getClientSecret(),
+                'client_id' => $this->settingsRepository->getClientId(),
+                'client_secret' => $this->settingsRepository->getClientSecret(),
             ]);
 
             return new OAuthToken(

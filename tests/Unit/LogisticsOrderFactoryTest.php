@@ -93,7 +93,7 @@ class LogisticsOrderFactoryTest extends TestCase
     {
         $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
 
-        $this->assertSame("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/fulfillment", $logisticsOrder->getCallbacks()->getFullfilledCallback());
+        $this->assertSame("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/fulfillment", $logisticsOrder->getCallbacks()->getFulfillmentCallback());
     }
 
     public function test_it_adds_the_created_date_to_the_logistics_order()
