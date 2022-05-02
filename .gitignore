@@ -2,6 +2,9 @@ vendor/
 .env
 settings.json
 node_modules/
+wordpress/
+.phpunit.result.cache
+composer.lock
 
 # whitelist
 !.gitignore
@@ -9,4 +12,3 @@ node_modules/
 !.phpcs.xml
 !.husky/
 !.github/
-wordpress/
