@@ -64,8 +64,6 @@ class LogisticsOrderFactory
         ]);
 
         $logisticsOrder->setCustomerOrder(strval($wooCommerceOrder->get_id()));
-        // TODO: Replace the dummy warehouse id with the correct warehouse id.
-        $logisticsOrder->setWarehouseId("4000000000");
 
         $logisticsProduct = new LogisticsProduct();
         $logisticsProduct->setProduct("OUTBOUND_DELIVERY");
