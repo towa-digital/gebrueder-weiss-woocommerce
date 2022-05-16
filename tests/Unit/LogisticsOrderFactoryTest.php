@@ -89,13 +89,6 @@ class LogisticsOrderFactoryTest extends TestCase
         $this->assertSame("12", $logisticsOrder->getLogisticsOrder()->getCustomerOrder());
     }
 
-    public function test_it_adds_the_warehouse_id_to_the_payload()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
-
-        // TODO: Replace the dummy warehouse id with the correct warehouse id.
-        $this->assertSame("4000000000", $logisticsOrder->getLogisticsOrder()->getWarehouseId());
-    }
 
     public function test_it_adds_the_success_callback_url_to_the_payload()
     {
