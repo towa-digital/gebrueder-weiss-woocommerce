@@ -80,8 +80,8 @@ class LogisticsOrderFactory
         $payload->setLogisticsOrder($logisticsOrder);
 
         $callbacks = new LogisticsOrderCallbacks();
-        $callbacks->setSuccessCallback($this->settingsRepository->getSiteUrl() . "/wp-json/gebrueder-weiss-woocommerce/v1/orders/" . $wooCommerceOrder->get_id() . "/callbacks/success");
-        $callbacks->setFulfillmentCallback($this->settingsRepository->getSiteUrl() . "/wp-json/gebrueder-weiss-woocommerce/v1/orders/" . $wooCommerceOrder->get_id() . "/callbacks/fulfillment");
+        $callbacks->setSuccessCallback($this->settingsRepository->getRestUrl() . "gebrueder-weiss-woocommerce/v1/orders/" . $wooCommerceOrder->get_id() . "/callbacks/success");
+        $callbacks->setFulfillmentCallback($this->settingsRepository->getRestUrl() . "gebrueder-weiss-woocommerce/v1/orders/" . $wooCommerceOrder->get_id() . "/callbacks/fulfillment");
 
         $payload->setCallbacks($callbacks);
 
@@ -171,10 +171,10 @@ class LogisticsOrderFactory
 
             return $orderLine;
 
-        /**
-         * We need to remove the keys from the items array since they are not in order.
-         * Not removing them will cause PHP to serialize the array as an object.
-         */
+            /**
+             * We need to remove the keys from the items array since they are not in order.
+             * Not removing them will cause PHP to serialize the array as an object.
+             */
         }, array_values($wooCommerceOrder->get_items("line_item")));
     }
 }
