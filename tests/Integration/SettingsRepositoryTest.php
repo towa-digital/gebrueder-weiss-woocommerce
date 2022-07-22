@@ -105,10 +105,12 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
     {
         $settingsRepository = new SettingsRepository();
 
-        $homeUrl = "http://test.com/wp-json/index.php?rest_route=/";
+        $homeUrl = "http://test.com";
+        $restUrlToTest = $homeUrl . "/wp-json/";
         update_option('home', $homeUrl);
+        update_option('permalink_structure', '/%postname%/');
 
-        $this->assertSame($homeUrl, $settingsRepository->getRestUrl());
+        $this->assertSame($restUrlToTest, $settingsRepository->getRestUrl());
     }
 
     public function test_it_can_retrieve_the_customer_id()
