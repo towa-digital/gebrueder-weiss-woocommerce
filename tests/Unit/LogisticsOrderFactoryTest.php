@@ -32,6 +32,7 @@ class LogisticsOrderFactoryTest extends TestCase
         $this->settingsRepository = Mockery::mock(SettingsRepository::class);
         $this->settingsRepository->allows([
             "getSiteUrl" => "http://test.com",
+            "getHomeUrl" => "http://test.com/wp",
             "getCustomerId" => 420000,
         ]);
 
@@ -94,14 +95,14 @@ class LogisticsOrderFactoryTest extends TestCase
     {
         $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
 
-        $this->assertSame("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/success", $logisticsOrder->getCallbacks()->getSuccessCallback());
+        $this->assertSame("http://test.com/wp/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/success", $logisticsOrder->getCallbacks()->getSuccessCallback());
     }
 
     public function test_it_adds_the_fulfillment_callback_url_to_the_payload()
     {
         $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
 
-        $this->assertSame("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/fulfillment", $logisticsOrder->getCallbacks()->getFulfillmentCallback());
+        $this->assertSame("http://test.com/wp/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/fulfillment", $logisticsOrder->getCallbacks()->getFulfillmentCallback());
     }
 
     public function test_it_adds_the_created_date_to_the_logistics_order()

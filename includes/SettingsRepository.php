@@ -160,6 +160,16 @@ class SettingsRepository
     }
 
     /**
+     * Reads the wordpress home URL from the options.
+     *
+     * @return string|null
+     */
+    public function getHomeUrl(): ?string
+    {
+        return WordPress::getHomeUrl();
+    }
+
+    /**
      * Reads the plugin option with the passed name from the wordpress options
      *
      * @param string     $name The name of the option.

@@ -61,6 +61,16 @@ class WordPress
     }
 
     /**
+     * Reads the wordpress home URL from the options.
+     *
+     * @return string|null
+     */
+    public static function getHomeUrl(): ?string
+    {
+        return \get_home_url();
+    }
+
+    /**
      * Adds a cron interval
      *
      * @param string  $key   Key for the interval.
@@ -131,13 +141,13 @@ class WordPress
         global $wpdb;
 
         $query = "
-            SELECT DISTINCT($wpdb->postmeta.meta_key) 
-            FROM $wpdb->posts 
-            LEFT JOIN $wpdb->postmeta 
-            ON $wpdb->posts.ID = $wpdb->postmeta.post_id 
+            SELECT DISTINCT($wpdb->postmeta.meta_key)
+            FROM $wpdb->posts
+            LEFT JOIN $wpdb->postmeta
+            ON $wpdb->posts.ID = $wpdb->postmeta.post_id
             WHERE $wpdb->posts.post_type = '%s'
             # exclude hidden meta keys
-            AND $wpdb->postmeta.meta_key NOT RegExp '(^[_0-9].+$)' 
+            AND $wpdb->postmeta.meta_key NOT RegExp '(^[_0-9].+$)'
         ";
 
         return $wpdb->get_col($wpdb->prepare($query, $postType));
