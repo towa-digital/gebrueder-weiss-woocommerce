@@ -164,9 +164,9 @@ class SettingsRepository
      *
      * @return string|null
      */
-    public function getHomeUrl(): ?string
+    public function getRestUrl(): ?string
     {
-        return WordPress::getHomeUrl();
+        return WordPress::getRestUrl();
     }
 
     /**

@@ -65,9 +65,9 @@ class WordPress
      *
      * @return string|null
      */
-    public static function getHomeUrl(): ?string
+    public static function getRestUrl(): ?string
     {
-        return \get_home_url();
+        return \get_rest_url();
     }
 
     /**

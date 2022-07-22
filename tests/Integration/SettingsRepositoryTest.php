@@ -101,14 +101,14 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
         $this->assertSame($siteUrl, $settingsRepository->getSiteUrl());
     }
 
-    public function test_it_can_retrieve_the_home_url()
+    public function test_it_can_retrieve_the_rest_url()
     {
         $settingsRepository = new SettingsRepository();
 
-        $homeUrl = "http://test.com/wp";
+        $homeUrl = "http://test.com/wp-json/index.php?rest_route=/";
         update_option('home', $homeUrl);
 
-        $this->assertSame($homeUrl, $settingsRepository->getHomeUrl());
+        $this->assertSame($homeUrl, $settingsRepository->getRestUrl());
     }
 
     public function test_it_can_retrieve_the_customer_id()
