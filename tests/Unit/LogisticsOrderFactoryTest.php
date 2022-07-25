@@ -32,6 +32,7 @@ class LogisticsOrderFactoryTest extends TestCase
         $this->settingsRepository = Mockery::mock(SettingsRepository::class);
         $this->settingsRepository->allows([
             "getSiteUrl" => "http://test.com",
+            "getRestUrl" => "http://test.com/wp-json/",
             "getCustomerId" => 420000,
         ]);
 
