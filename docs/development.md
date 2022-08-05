@@ -25,6 +25,12 @@ The composer dependencies include stubs for WordPress, WordPress Tests and WooCo
 - run `/bin/install-wp-test.sh` like so: [Initialize local testing in wordpress](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/#3-initialize-the-testing-environment-locally) for example:
 `./bin/install-wp-tests.sh wordpress_test root root mysql latest`
 
+### Mock APIs
+
+To be able to work with API data without relying on the Gebrüder Weiss APIs, there are two mock APIs:
+- https://oauth.gebrueder-weiss-woocommerce.towa-online.at: Provides a mock OAuth Server that creates a token for any provided credentials. [Repo](https://bitbucket.org/towa_gmbh/gebrueder-weiss-oauth-mock/src/main/)
+- https://api.gebrueder-weiss-woocommerce.towa-online.at: Mock API for the actual API, it returns dummy data based on the examples defined in the Gebrüder Weiss API Schema. [Repo](https://bitbucket.org/towa_gmbh/gebrueder-weiss-api-mock/src/main/)
+
 ## Wp cli
 
 We rely heavily on wp-cli in our daily work. We do recommend you use it as well.
