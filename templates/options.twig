@@ -1,0 +1,20 @@
+<div class="wrap">
+  <h2>{{ __('Gebrüder Weiss Woocommerce Options') }}</h2>
+  <h2 class="nav-tab-wrapper">
+    {% for tab in tabs %}
+      <a href="{{ tab.link }}" class="nav-tab {{ tab.isActive ? 'nav-tab-active' : ''}}" >{{tab.name}}</a>
+    {% endfor %}
+  </h2>
+  <form method="post" action="options.php">
+  {% for tab in tabs %}
+    {% if tab.isActive %}
+      {{ settings_fields( tab.slug ) }}
+      <table class="form-table">
+      {{ do_settings_fields( tab.slug ) }}
+      </table>
+    {% endif %}
+  {% endfor %}
+
+  {{ submit_button() }}
+  </form>
+</div>

@@ -1,0 +1,85 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ develop, master ]
+  pull_request:
+    branches: [ develop ]
+  workflow_dispatch:
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Install Composer Dependencies
+        run: composer install
+
+      - name: Execute PHPCS
+        run: vendor/bin/phpcs
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php_version: ["7.3", "7.4", "8.0"]
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_USER: user
+          MYSQL_PASSWORD: secret
+          MYSQL_ROOT_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php_version }}
+
+      - name: Install Composer Dependencies
+        run: composer install
+
+      - name: Setup Wordpress Test Database
+        run: bash ./bin/install-wp-tests.sh wordpress_test root secret 127.0.0.1
+
+      - name: Execute PHPUnit
+        run: vendor/bin/phpunit
+  staging_deployment:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    needs: [linting, tests]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Install Composer Dependencies
+        run: composer install
+
+      - name: Setup SSH
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.DEPLOYMENT_SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.STAGING_KNOWN_HOSTS }}
+
+      - name: Deploy Plugin
+        env:
+          HOST: ${{ secrets.STAGING_HOST }}
+          USER: ${{ secrets.STAGING_USER }}
+        run: rsync -zrS --exclude=".*" . $USER@$HOST:/var/www/vhosts/towa-online.at/gebrueder-weiss-woocommerce.towa-online.at/wp-content/plugins/gebrueder-weiss-woocommerce
