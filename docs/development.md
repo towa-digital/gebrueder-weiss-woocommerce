@@ -31,6 +31,13 @@ To be able to work with API data without relying on the Gebrüder Weiss APIs, th
 - https://oauth.gebrueder-weiss-woocommerce.towa-online.at: Provides a mock OAuth Server that creates a token for any provided credentials. [Repo](https://bitbucket.org/towa_gmbh/gebrueder-weiss-oauth-mock/src/main/)
 - https://api.gebrueder-weiss-woocommerce.towa-online.at: Mock API for the actual API, it returns dummy data based on the examples defined in the Gebrüder Weiss API Schema. [Repo](https://bitbucket.org/towa_gmbh/gebrueder-weiss-api-mock/src/main/)
 
+## Sandbox API
+
+Gebrueder Weiss provides a sandbox API for testing and development.
+Credentials for this API can be created via the link stored in the "Gebrüder Weiss API Developer" entry in SEC.
+In the API Credentials tab, there is a section "View Credentials".
+All currently existing apps are listed in this section, and you can also view their credentials.
+
 ## Wp cli
 
 We rely heavily on wp-cli in our daily work. We do recommend you use it as well.
