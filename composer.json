@@ -54,7 +54,6 @@
         "rm -rf ./git/ || true",
         "rm -rf ./bin/ || true",
         "rm -rf tests/ || true",
-        "rm .env.example || true",
         "rm .editorconfig || true",
         "rm .gitignore || true",
         "rm .phpcs.xml || true",
@@ -62,7 +61,8 @@
         "rm package-lock.json || true",
         "rm phpunit.xml.dist || true",
         "rm README.md || true",
-        "rm commitlint.config.js || true"
+        "rm commitlint.config.js || true",
+        "mv .env.example .env"
       ]
     }
 }
