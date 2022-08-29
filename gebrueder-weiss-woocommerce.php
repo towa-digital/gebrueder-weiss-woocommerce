@@ -45,7 +45,7 @@ add_action("init", function () {
 
     $plugin = Plugin::getInstance();
 
-    $apiEndpoint = env('GEBRUEDER_WEISS_API_URL', 'https://my.api.gw-world.com');
+    $apiEndpoint = env('GEBRUEDER_WEISS_API_URL');
     $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://my.api.gw-world.com/token');
 
     $authProvider = new GenericProvider([
