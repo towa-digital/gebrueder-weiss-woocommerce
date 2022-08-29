@@ -61,8 +61,7 @@
         "rm package-lock.json || true",
         "rm phpunit.xml.dist || true",
         "rm README.md || true",
-        "rm commitlint.config.js || true",
-        "mv .env.example .env"
+        "rm commitlint.config.js || true"
       ]
     }
 }
