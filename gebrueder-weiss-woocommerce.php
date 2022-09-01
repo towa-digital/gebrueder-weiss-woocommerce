@@ -46,7 +46,7 @@ add_action("init", function () {
     $plugin = Plugin::getInstance();
 
     $apiEndpoint = env('GEBRUEDER_WEISS_API_URL');
-    $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://test.api.gw-world.com/token');
+    $tokenEndpoint = env('GEBRUEDER_WEISS_OAUTH_TOKEN_URL', 'https://my.api.gw-world.com/token');
 
     $authProvider = new GenericProvider([
         // Has to be set as non-empty string to instantiate provider.

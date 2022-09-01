@@ -47,6 +47,21 @@
     "scripts": {
       "fix-cs": "phpcbf",
       "lint": "phpcs",
-      "test": "phpunit"
+      "test": "phpunit",
+      "create-installable": [
+        "composer install --no-dev --no-interaction --no-suggest --no-progress --optimize-autoloader --prefer-dist",
+        "rm -rf ./husky/ || true",
+        "rm -rf ./git/ || true",
+        "rm -rf ./bin/ || true",
+        "rm -rf tests/ || true",
+        "rm .editorconfig || true",
+        "rm .gitignore || true",
+        "rm .phpcs.xml || true",
+        "rm package.json || true",
+        "rm package-lock.json || true",
+        "rm phpunit.xml.dist || true",
+        "rm README.md || true",
+        "rm commitlint.config.js || true"
+      ]
     }
 }

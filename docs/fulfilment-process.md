@@ -10,7 +10,7 @@ A high-level overview for the combined process of ordering and shipping an item 
    2) If the request fails, a retry flow gets started:
       1) The request gets added to a failed requests queue.
       2) Every five minutes, the requests in this queue get retried.
-      3) If the request is successful, the order state progresses to the fulfillment state, and this subflow ends.
+      3) If the request is successful, this subflow ends.
       4) If a request fails for the third time, a notification is sent to the store owner, and the order state gets set to the error state.
 4) Once the shipping is created, the Gebrüder Weiss triggers a WebHook that calls a REST endpoint provided by the plugin (`{WORDPRESS_REST_API_BASE_URL}/gebrueder-weiss-woocommerce/v1/orders/{WOOCOMMERCE_ORDER_ID}/callbacks/success`).
 5) The plugin attaches the Gebrüder Weiss shipping id to the order.
