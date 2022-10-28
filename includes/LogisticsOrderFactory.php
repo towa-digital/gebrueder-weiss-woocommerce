@@ -102,7 +102,7 @@ class LogisticsOrderFactory
         $address = new Address();
         $address->setName1($wooCommerceOrder->get_shipping_first_name());
         $address->setName2($wooCommerceOrder->get_shipping_last_name());
-        $address->setName3($wooCommerceOrder->get_shipping_company());
+        $address->setName3(!empty($wooCommerceOrder->get_shipping_company()) ? $wooCommerceOrder->get_shipping_company() : null);
         $address->setStreet1($wooCommerceOrder->get_shipping_address_1());
         $address->setStreet2(!empty($wooCommerceOrder->get_shipping_address_2()) ? $wooCommerceOrder->get_shipping_address_2() : null);
         $address->setCity($wooCommerceOrder->get_shipping_city());
