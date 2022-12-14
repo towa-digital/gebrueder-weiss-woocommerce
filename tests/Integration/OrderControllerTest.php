@@ -39,6 +39,7 @@ class OrderControllerTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         self::$settingsRepository = Mockery::mock(SettingsRepository::class);
         self::$request            = Mockery::mock(WP_REST_Request::class);
         self::$orderRepository    = Mockery::mock(OrderRepository::class);
