@@ -34,9 +34,6 @@ To be able to work with API data without relying on the Gebrüder Weiss APIs, th
 ## Sandbox API
 
 Gebrueder Weiss provides a sandbox API for testing and development.
-Credentials for this API can be created via the link stored in the "Gebrüder Weiss API Developer" entry in SEC.
-In the API Credentials tab, there is a section "View Credentials".
-All currently existing apps are listed in this section, and you can also view their credentials.
 
 ## Wp cli
 
