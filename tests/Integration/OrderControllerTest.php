@@ -78,10 +78,9 @@ class OrderControllerTest extends TestCase
                 'getOrderIdFieldName' => 'order_id'
             ]);
 
-        self::$order
-            ->allows('get_status')
-            ->allows('update_meta_data')
-            ->allows('save');
+        self::$order->allows('get_status');
+        self::$order->allows('update_meta_data');
+        self::$order->allows('save');
 
         self::$orderRepository
             ->allows(['findById' => self::$order]);
@@ -101,19 +100,17 @@ class OrderControllerTest extends TestCase
                 'getOrderIdFieldName' => 'order_id'
             ]);
 
-        self::$order
-            ->allows('get_status')
-            ->allows('update_meta_data')
-            ->allows('save');
+        self::$order->allows('get_status');
+        self::$order->allows('update_meta_data');
+        self::$order->allows('save');
 
         self::$orderRepository
             ->allows(['findById' => self::$order]);
 
         self::successCallback();
 
-        self::$order
-            ->shouldHaveReceived('update_meta_data', ['order_id', 1234567890])
-            ->shouldHaveReceived('save');
+        self::$order->shouldHaveReceived('update_meta_data', ['order_id', 1234567890]);
+        self::$order->shouldHaveReceived('save');
     }
 
 
@@ -136,20 +133,18 @@ class OrderControllerTest extends TestCase
                 'getCarrierInformationFieldName' => 'carrier_information'
             ]);
 
-        self::$order
-            ->allows('set_status')
-            ->allows('get_status')
-            ->allows('update_meta_data')
-            ->allows('save');
+        self::$order->allows('set_status');
+        self::$order->allows('get_status');
+        self::$order->allows('update_meta_data');
+        self::$order->allows('save');
 
         self::$orderRepository
             ->allows(['findById' => self::$order]);
 
         self::fulfillmentCallback();
 
-        self::$order
-            ->shouldHaveReceived('set_status', ['wc-fulfilled'])
-            ->shouldHaveReceived('save');
+        self::$order->shouldHaveReceived('set_status', ['wc-fulfilled']);
+        self::$order->shouldHaveReceived('save');
     }
 
     public function test_the_fulfillment_callback_updates_the_order_meta_data(): void
@@ -171,20 +166,18 @@ class OrderControllerTest extends TestCase
                 'getCarrierInformationFieldName' => 'carrier_information'
             ]);
 
-        self::$order
-            ->allows('set_status')
-            ->allows('get_status')
-            ->allows('update_meta_data')
-            ->allows('save');
+        self::$order->allows('set_status');
+        self::$order->allows('get_status');
+        self::$order->allows('update_meta_data');
+        self::$order->allows('save');
 
         self::$orderRepository
             ->allows(['findById' => self::$order]);
 
         self::fulfillmentCallback();
 
-        self::$order
-            ->shouldHaveReceived('update_meta_data', ['tracking_id', 'http://example.com'])
-            ->shouldHaveReceived('update_meta_data', ['carrier_information', 'DHL']);
+        self::$order->shouldHaveReceived('update_meta_data', ['tracking_id', 'http://example.com']);
+        self::$order->shouldHaveReceived('update_meta_data', ['carrier_information', 'DHL']);
     }
 
 
@@ -207,20 +200,18 @@ class OrderControllerTest extends TestCase
                 'getCarrierInformationFieldName' => 'carrier_information'
             ]);
 
-        self::$order
-            ->allows('set_status')
-            ->allows('get_status')
-            ->allows('update_meta_data')
-            ->allows('save');
+            self::$order->allows('set_status');
+            self::$order->allows('get_status');
+            self::$order->allows('update_meta_data');
+            self::$order->allows('save');
 
         self::$orderRepository
             ->allows(['findById' => self::$order]);
 
         self::fulfillmentCallback();
 
-        self::$order
-            ->shouldNotHaveReceived('update_meta_data', ['tracking_id', ''])
-            ->shouldHaveReceived('update_meta_data', ['carrier_information', 'DHL']);
+        self::$order->shouldNotHaveReceived('update_meta_data', ['tracking_id', '']);
+        self::$order->shouldHaveReceived('update_meta_data', ['carrier_information', 'DHL']);
     }
 
 
@@ -243,11 +234,10 @@ class OrderControllerTest extends TestCase
                 'getCarrierInformationFieldName' => 'carrier_information'
             ]);
 
-        self::$order
-            ->allows('set_status')
-            ->allows('get_status')
-            ->allows('update_meta_data')
-            ->allows('save');
+        self::$order->allows('set_status');
+        self::$order->allows('get_status');
+        self::$order->allows('update_meta_data');
+        self::$order->allows('save');
 
         self::$orderRepository
             ->allows(['findById' => self::$order]);
@@ -268,8 +258,7 @@ class OrderControllerTest extends TestCase
                 ])
             );
 
-        self::$orderRepository
-            ->allows(['findById' => null]);
+        self::$orderRepository->allows(['findById' => null]);
 
         $this->assertEquals(404, self::fulfillmentCallback()->get_status());
     }
