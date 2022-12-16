@@ -142,7 +142,7 @@ class SettingsRepository
     /**
      * Reads the custom field name for the tracking link from the plugin settings.
      *
-     * @return integer|null
+     * @return string
      */
     public function getTrackingLinkFieldName(): string
     {
@@ -152,7 +152,7 @@ class SettingsRepository
     /**
      * Reads the custom field name for the carrier information from the plugin settings.
      *
-     * @return integer|null
+     * @return string
      */
     public function getCarrierInformationFieldName(): string
     {

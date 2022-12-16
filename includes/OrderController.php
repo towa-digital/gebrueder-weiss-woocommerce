@@ -68,13 +68,11 @@ class OrderController
      */
     public function handleSuccessCallback(WP_REST_Request $request): WP_REST_Response
     {
-        $id = $request->get_params()['id'];
-        $data = json_decode($request->get_body());
-
-        $order = $this->orderRepository->findById($id);
+        $data  = json_decode($request->get_body());
+        $order = $this->orderRepository->findById($request->get_params()['id']);
 
         if (is_null($order)) {
-            return new WP_REST_Response(null, 404, null);
+            return new WP_REST_Response(null, 404);
         }
 
         if (empty($data)) {
@@ -86,10 +84,9 @@ class OrderController
         }
 
         $order->update_meta_data($this->settings->getOrderIdFieldName(), $data->orderId);
-
         $order->save();
 
-        return new WP_REST_Response(null, 200, null);
+        return new WP_REST_Response();
     }
 
     /**
@@ -100,21 +97,15 @@ class OrderController
      */
     public function handleFulfillmentCallback(WP_REST_Request $request): WP_REST_Response
     {
-        $id = $request->get_params()['id'];
-        $data = json_decode($request->get_body());
-
-        $order = $this->orderRepository->findById($id);
+        $data  = json_decode($request->get_body());
+        $order = $this->orderRepository->findById($request->get_params()['id']);
 
         if (is_null($order)) {
-            return new WP_REST_Response(null, 404, null);
+            return new WP_REST_Response(null, 404);
         }
 
         if (empty($data)) {
             return new WP_REST_Response(['message' => 'Invalid payload'], 422);
-        }
-
-        if (empty($data->trackingUrl)) {
-            return new WP_REST_Response(['message' => 'Missing trackingUrl'], 422);
         }
 
         if (empty($data->transportProduct)) {
@@ -122,11 +113,14 @@ class OrderController
         }
 
         $order->set_status($this->settings->getFulfilledState());
-        $order->update_meta_data($this->settings->getTrackingLinkFieldName(), $data->trackingUrl);
-        $order->update_meta_data($this->settings->getCarrierInformationFieldName(), $data->transportProduct);
 
+        if (!empty($data->trackingUrl)) {
+            $order->update_meta_data($this->settings->getTrackingLinkFieldName(), $data->trackingUrl);
+        }
+
+        $order->update_meta_data($this->settings->getCarrierInformationFieldName(), $data->transportProduct);
         $order->save();
 
-        return new WP_REST_Response(null, 200, null);
+        return new WP_REST_Response();
     }
 }
