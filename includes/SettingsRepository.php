@@ -90,13 +90,13 @@ class SettingsRepository
     }
 
     /**
-     * Reads the pending state from the wordpress options
+     * Reads the pending state from the WordPress options
      *
-     * @return string|null
+     * @return string The stored pending state or "on-hold" if not set.
      */
-    public function getPendingState(): ?string
+    public function getPendingState(): string
     {
-        return $this->getOption("pendingState");
+        return $this->getOption("pendingState") ?? "on-hold";
     }
 
     /**
