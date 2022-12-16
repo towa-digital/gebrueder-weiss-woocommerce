@@ -321,7 +321,8 @@ final class Plugin extends Singleton
         $this->gebruederWeissApiClient->getConfig()->setAccessToken($authToken->getToken());
 
         try {
-            (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->gebruederWeissApiClient))->execute();
+            (new CreateLogisticsOrderCommand($order, $this->logisticsOrderFactory, $this->gebruederWeissApiClient))
+                ->execute($this->settingsRepository->getPendingState());
         } catch (CreateLogisticsOrderConflictException $e) {
             $order->set_status($this->settingsRepository->getFulfillmentErrorState());
             $order->save();
