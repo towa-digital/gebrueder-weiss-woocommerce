@@ -219,31 +219,70 @@ final class Plugin extends Singleton
      */
     public function validateSelectedFulfillmentStates(): void
     {
-        $fulfillmentState = $this->settingsRepository->getFulfillmentState();
-        $fulfilledState = $this->settingsRepository->getFulfilledState();
-        $fulfillmentErrorState = $this->settingsRepository->getFulfillmentErrorState();
+        $states = [
+            'Fulfillment State'       => $this->settingsRepository->getFulfillmentState(),
+            'Pending State'           => $this->settingsRepository->getPendingState(),
+            'Fulfilled State'         => $this->settingsRepository->getFulfilledState(),
+            'Fulfillment Error State' => $this->settingsRepository->getFulfillmentErrorState(),
+        ];
 
-        $this->checkIfFulfillmentSettingExists($fulfillmentState, "Fulfillment State");
-        $this->checkIfFulfillmentSettingExists($fulfilledState, "Fulfilled State");
-        $this->checkIfFulfillmentSettingExists($fulfillmentErrorState, "Fulfillment Error State");
-
-        if ($fulfillmentState === $fulfilledState) {
-            $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfilled State are set to the same state.", self::LANGUAGE_DOMAIN)
-            );
+        foreach ($states as $k => $v) {
+            $this->checkIfFulfillmentSettingExists($v, $k);
         }
 
-        if ($fulfillmentState === $fulfillmentErrorState) {
-            $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfillment State and Fulfillment Error State are set to the same state.", self::LANGUAGE_DOMAIN)
-            );
+        $duplicateStates = $this->keysOfDuplicateValues($states);
+        if ($duplicateStates === null) {
+            $this->showWordpressAdminErrorMessage("keysOfDuplicateValues: provided array must only have strings");
+            return;
         }
 
-        if ($fulfilledState === $fulfillmentErrorState) {
-            $this->showWordpressAdminErrorMessage(
-                __("The Gebrüder Weiss WooCommerce Plugin settings for Fulfilled State and Fulfillment Error State are set to the same state.", self::LANGUAGE_DOMAIN)
-            );
+        if ($duplicateStates === []) {
+            return;
         }
+
+        $message = __("The Gebrüder Weiss WooCommerce Plugin settings have same states for:", self::LANGUAGE_DOMAIN);
+        foreach ($duplicateStates as $v) {
+            $message .= "<br>-" . __($v, self::LANGUAGE_DOMAIN);
+        }
+
+        $this->showWordpressAdminErrorMessage($message);
+    }
+
+    /**
+     * Checks if a string has duplicate values. <code>Null</code> and empty string will be ignored
+     *
+     * @param (string|null)[] $array The array to check.
+     *
+     * @return string[]|null Returns the keys of an array of strings that have same values.
+     *                       Returns null if the provided array has non string and non-null values.
+     */
+    private function keysOfDuplicateValues(array $array): ?array
+    {
+        $grouped = [];
+        foreach ($array as $k => $v) {
+            if ($v === null || $v === "") {
+                continue;
+            }
+
+            if (gettype($v) !== "string") {
+                return null;
+            }
+
+            $grouped[$v][] = $k;
+        }
+
+        $result = [];
+        foreach ($grouped as $v) {
+            if (count($v) < 2) {
+                continue;
+            }
+
+            foreach ($v as $v2) {
+                $result[] = $v2;
+            }
+        }
+
+        return array_unique($result);
     }
 
     /**

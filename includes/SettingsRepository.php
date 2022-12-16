@@ -90,6 +90,16 @@ class SettingsRepository
     }
 
     /**
+     * Reads the pending state from the wordpress options
+     *
+     * @return string|null
+     */
+    public function getPendingState(): ?string
+    {
+        return $this->getOption("pendingState");
+    }
+
+    /**
      * Reads the fulfilled state from the wordpress options
      *
      * @return string|null
