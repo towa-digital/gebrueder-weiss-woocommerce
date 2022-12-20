@@ -236,6 +236,7 @@ final class Plugin extends Singleton
             return;
         }
 
+        // Don't show error message if no duplicates have been found.
         if ($duplicateStates === []) {
             return;
         }
