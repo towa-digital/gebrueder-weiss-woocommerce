@@ -232,7 +232,7 @@ final class Plugin extends Singleton
 
         $duplicateStates = $this->keysOfDuplicateValues($states);
         if ($duplicateStates === null) {
-            $this->showWordpressAdminErrorMessage("keysOfDuplicateValues: provided array must only have strings");
+            $this->showWordpressAdminErrorMessage(__("keysOfDuplicateValues: provided array must only have strings"));
             return;
         }
 
@@ -249,7 +249,7 @@ final class Plugin extends Singleton
     }
 
     /**
-     * Checks if a string has duplicate values. <code>Null</code> and empty string will be ignored
+     * Checks if an array of strings has duplicate values. <code>Null</code> and empty string will be ignored
      *
      * @param (string|null)[] $array The array to check.
      *
