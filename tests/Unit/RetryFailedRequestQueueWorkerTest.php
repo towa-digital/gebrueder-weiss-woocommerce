@@ -24,8 +24,12 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 
+    private const HTTP_STATUS_CONFLICT = 409;
+
     private const STATUS_FAILED  = "wc-failed";
     private const STATUS_PENDING = "on-hold";
+
+    private const TEST_ORDER_ID = 42;
 
     /** @var MockInterface|DefaultApi */
     private $gebruederWeissApi;
@@ -55,7 +59,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $order->allows([
             "set_status" => null,
             "save"       => null,
-            "get_id"     => 42
+            "get_id"     => self::TEST_ORDER_ID
         ]);
 
         $this->orderRepository = Mockery::mock(OrderRepository::class);
@@ -277,7 +281,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 
         /** @var MockInterface|WC_Order $order */
         $order = Mockery::mock(WC_Order::class);
-        $order->allows(["get_id" => 42]);
+        $order->allows(["get_id" => self::TEST_ORDER_ID]);
         $order
             ->shouldReceive("set_status")
             ->once()
@@ -332,7 +336,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
         $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
         $gebruederWeissApi
             ->shouldReceive("logisticsOrderPost")
-            ->andThrow(new ApiException("Conflict", 409));
+            ->andThrow(new ApiException("Conflict", self::HTTP_STATUS_CONFLICT));
 
         /** @var MockInterface $wordpressMock */
         $wordpressMock = Mockery::mock("alias:" . WordPress::class);
@@ -342,7 +346,7 @@ class RetryFailedRequestsQueueWorkerTest extends TestCase
 
         /** @var MockInterface|WC_Order $order */
         $order = Mockery::mock(WC_Order::class);
-        $order->allows(["get_id" => 42]);
+        $order->allows(["get_id" => self::TEST_ORDER_ID]);
         $order
             ->shouldReceive("set_status")
             ->once()

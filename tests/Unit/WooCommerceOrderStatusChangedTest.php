@@ -28,6 +28,10 @@ class WooCommerceOrderStatusChangedTest extends TestCase
     private const STATE_ON_HOLD                       = "on-hold";
     private const STATE_ERROR                         = "wc-error";
 
+    private const ONE_HOUR_IN_SECONDS = 3600;
+
+    private const HTTP_STATUS_CONFLICT = 409;
+
     /** @var Plugin */
     private $plugin;
 
@@ -58,7 +62,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
             "getClientId"         => "id",
             "getClientSecret"     => "secret",
             "setAccessToken"      => null,
-            "getAccessToken"      => new OAuthToken("test", time() + 3600),
+            "getAccessToken"      => new OAuthToken("test", time() + self::ONE_HOUR_IN_SECONDS),
             "getSiteUrl"          => "http://test.com",
         ]);
 
@@ -143,7 +147,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
         $gebruederWeissApi
             ->shouldReceive("logisticsOrderPost")
-            ->andThrow(new ApiException("Conflict", 409));
+            ->andThrow(new ApiException("Conflict", self::HTTP_STATUS_CONFLICT));
 
         $this->plugin->setGebruederWeissApiClient($gebruederWeissApi);
 
@@ -156,7 +160,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
             "getClientId"              => "id",
             "getClientSecret"          => "secret",
             "setAccessToken"           => null,
-            "getAccessToken"           => new OAuthToken("token", time() + 3600),
+            "getAccessToken"           => new OAuthToken("token", time() + self::ONE_HOUR_IN_SECONDS),
             "getSiteUrl"               => "http://test.com",
         ]);
         $this->plugin->setSettingsRepository($settingsRepository);

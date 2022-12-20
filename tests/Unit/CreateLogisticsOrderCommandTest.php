@@ -23,6 +23,8 @@ class CreateLogisticsOrderCommandTest extends TestCase
 
     private const STATUS_ON_HOLD = "on-hold";
 
+    private const HTTP_STATUS_CONFLICT = 409;
+
     /** @var MockInterface|DefaultApi */
     private $gebruederWeissApi;
 
@@ -102,7 +104,7 @@ class CreateLogisticsOrderCommandTest extends TestCase
         $gebruederWeissApi = Mockery::mock(DefaultApi::class);
         $gebruederWeissApi
             ->shouldReceive("logisticsOrderPost")
-            ->andThrow(new ApiException("Conflict", 409));
+            ->andThrow(new ApiException("Conflict", self::HTTP_STATUS_CONFLICT));
 
         (new CreateLogisticsOrderCommand($this->order, $this->logisticsOrderFactory, $gebruederWeissApi))
             ->execute(self::STATUS_ON_HOLD);
