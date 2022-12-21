@@ -110,7 +110,7 @@ class RetryFailedRequestsQueueWorker
                     $order,
                     $this->logisticsOrderFactory,
                     $this->gebruederWeissApi
-                ))->execute();
+                ))->execute($this->settingsRepository->getPendingState());
 
                 $failedRequest->setStatus(FailedRequest::SUCCESS_STATUS);
             } catch (CreateLogisticsOrderConflictException $e) {

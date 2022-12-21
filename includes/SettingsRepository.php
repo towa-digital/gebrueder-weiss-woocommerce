@@ -90,6 +90,16 @@ class SettingsRepository
     }
 
     /**
+     * Reads the pending state from the WordPress options
+     *
+     * @return string The stored pending state or "on-hold" if not set.
+     */
+    public function getPendingState(): string
+    {
+        return $this->getOption("pendingState") ?? "on-hold";
+    }
+
+    /**
      * Reads the fulfilled state from the wordpress options
      *
      * @return string|null
@@ -132,7 +142,7 @@ class SettingsRepository
     /**
      * Reads the custom field name for the tracking link from the plugin settings.
      *
-     * @return integer|null
+     * @return string
      */
     public function getTrackingLinkFieldName(): string
     {
@@ -142,7 +152,7 @@ class SettingsRepository
     /**
      * Reads the custom field name for the carrier information from the plugin settings.
      *
-     * @return integer|null
+     * @return string
      */
     public function getCarrierInformationFieldName(): string
     {

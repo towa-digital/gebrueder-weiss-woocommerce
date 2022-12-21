@@ -15,6 +15,12 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
         Plugin::onActivation();
     }
 
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        Plugin::onUninstall();
+    }
+
     public function test_it_can_create_a_failed_request()
     {
         global $wpdb;
@@ -23,7 +29,7 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
 
         $request = $repository->create(12, FailedRequest::FAILED_STATUS, 2);
 
-        $numberOfRows = $wpdb->get_var("SELECT count(*) FROM {$wpdb->prefix}gbw_request_retry_queue WHERE order_id = {$request->getOrderId()} AND status = \"{$request->getStatus()}\" AND failed_attempts = {$request->getFailedAttempts()}");
+        $numberOfRows = $wpdb->get_var("SELECT count(*) FROM {$wpdb->base_prefix}gbw_request_retry_queue WHERE order_id = {$request->getOrderId()} AND status = \"{$request->getStatus()}\" AND failed_attempts = {$request->getFailedAttempts()}");
         $this->assertSame(1, intval($numberOfRows));
     }
 
@@ -81,7 +87,7 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
     public function test_it_does_not_return_requests_that_have_been_retried_less_then_five_minutes_ago()
     {
         $repository = new FailedRequestRepository();
-        $repository->create(12, FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS - 1, new DateTime());
+        $repository->create(12, FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS - 1);
 
         $request = $repository->findOneToRetry();
 
@@ -102,7 +108,7 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
     {
         global $wpdb;
 
-        $numberOfRows = $wpdb->get_var("SELECT count(*) FROM {$wpdb->prefix}gbw_request_retry_queue");
+        $numberOfRows = $wpdb->get_var("SELECT count(*) FROM {$wpdb->base_prefix}gbw_request_retry_queue");
 
         return intval($numberOfRows);
     }
@@ -111,6 +117,6 @@ class FailedRequestRepositoryTest extends \WP_UnitTestCase
     {
         global $wpdb;
 
-        return $wpdb->get_row("SELECT * FROM {$wpdb->prefix}gbw_request_retry_queue LIMIT 1");
+        return $wpdb->get_row("SELECT * FROM {$wpdb->base_prefix}gbw_request_retry_queue LIMIT 1");
     }
 }

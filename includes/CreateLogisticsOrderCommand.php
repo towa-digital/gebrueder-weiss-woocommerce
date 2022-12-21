@@ -61,17 +61,19 @@ class CreateLogisticsOrderCommand
     /**
      * Executes the command
      *
+     * @param string $pendingState Sets the status of the order to this state.
+     *
      * @return void
      * @throws CreateLogisticsOrderConflictException Thrown if there was a conflict while creating the order.
      * @throws CreateLogisticsOrderFailedException Thrown if something went wrong.
      */
-    public function execute(): void
+    public function execute(string $pendingState): void
     {
         $payload = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->wooCommerceOrder);
 
         try {
             $this->gebruederWeissApi->logisticsOrderPost("en-US", $payload);
-            $this->wooCommerceOrder->set_status("on-hold");
+            $this->wooCommerceOrder->set_status($pendingState);
             $this->wooCommerceOrder->save();
         } catch (ApiException $e) {
             if ($e->getCode() === 409) {

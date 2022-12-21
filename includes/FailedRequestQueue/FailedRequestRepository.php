@@ -26,13 +26,13 @@ class FailedRequestRepository
         global $wpdb;
 
         $statement = $wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}gbw_request_retry_queue
+            "SELECT * FROM {$wpdb->base_prefix}gbw_request_retry_queue
              WHERE
-                status = \"%s\" AND
+                status = '%s' AND
                 failed_attempts < %d AND
-                last_attempt_date < CURRENT_TIME - INTERVAL 5 MINUTE
+                last_attempt_date < ('%s' - INTERVAL 5 MINUTE)
              LIMIT 1",
-            [FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS]
+            [FailedRequest::FAILED_STATUS, FailedRequest::MAX_ATTEMPTS, (new DateTime())->format('Y-m-d H:i:s')]
         );
 
         $row = $wpdb->get_row($statement);
@@ -64,7 +64,7 @@ class FailedRequestRepository
 
         $lastAttemptedDate = $lastAttemptedDate ?? new DateTime();
 
-        $statement = $wpdb->prepare("INSERT INTO {$wpdb->prefix}gbw_request_retry_queue (order_id, status, failed_attempts, last_attempt_date) VALUES (%d, \"%s\", %d, \"%s\")", [$orderId, $status, $failedAttempts, $lastAttemptedDate->format("Y-m-d H:i:s")]);
+        $statement = $wpdb->prepare("INSERT INTO {$wpdb->base_prefix}gbw_request_retry_queue (order_id, status, failed_attempts, last_attempt_date) VALUES (%d, \"%s\", %d, \"%s\")", [$orderId, $status, $failedAttempts, $lastAttemptedDate->format("Y-m-d H:i:s")]);
         $wpdb->query($statement);
 
         $failedRequest = new FailedRequest(
@@ -103,7 +103,7 @@ class FailedRequestRepository
         $whereFormat = [ "%d" ];
 
         $wpdb->update(
-            "{$wpdb->prefix}gbw_request_retry_queue",
+            "{$wpdb->base_prefix}gbw_request_retry_queue",
             $data,
             $where,
             $format,
@@ -122,7 +122,7 @@ class FailedRequestRepository
     {
         global $wpdb;
 
-        $statement = $wpdb->prepare("DELETE FROM {$wpdb->prefix}gbw_request_retry_queue WHERE status = \"%s\" OR failed_attempts >= %d", [FailedRequest::SUCCESS_STATUS, FailedRequest::MAX_ATTEMPTS]);
+        $statement = $wpdb->prepare("DELETE FROM {$wpdb->base_prefix}gbw_request_retry_queue WHERE status = \"%s\" OR failed_attempts >= %d", [FailedRequest::SUCCESS_STATUS, FailedRequest::MAX_ATTEMPTS]);
         $wpdb->get_results($statement);
     }
 }
