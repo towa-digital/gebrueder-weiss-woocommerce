@@ -5,7 +5,7 @@ A high-level overview for the combined process of ordering and shipping an item 
 2) The status for the order gets set to the fulfillment state. This can happen as a result of one of the following two events:
    1) The payment processor receives the payment for the order and updates the order state.
    2) The shop manager updates the status manually.
-3) During the state transition, the WooCommerce Plugin triggers an API Call to the Gebrüder Weiss API to trigger shipping for the order and sets the order state to "on hold". Depending on the success of the API call, the flow is different from here:
+3) During the state transition, the WooCommerce Plugin triggers an API Call to the Gebrüder Weiss API to trigger shipping for the order and sets the order state to pending state. Depending on the success of the API call, the flow is different from here:
    1) If the request is successful, state transition progresses to the fulfillment state, and the flow continues with step 4.
    2) If the request fails, a retry flow gets started:
       1) The request gets added to a failed requests queue.
