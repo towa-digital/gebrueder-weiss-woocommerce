@@ -692,7 +692,7 @@ final class Plugin extends Singleton
 
     public function addCustomFieldsToOrderOptionsDropdowns(){
         // TODO: cache this query via transient && refactor for code quality
-        $orderMetaKeys = Wordpress::getAllMetaKeysForPostType('page');
+        $orderMetaKeys = Wordpress::getAllMetaKeysForPostType('shop_order');
 
         $tabsToAddOptions = array_filter($this->optionsPage->getTabs(), fn($tab) => $tab instanceof OrderOptionsTab);
         foreach ($tabsToAddOptions as $tab) {
