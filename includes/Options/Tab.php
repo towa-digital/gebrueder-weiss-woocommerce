@@ -184,6 +184,13 @@ class Tab implements CanRender
         $this->onTabInitCallbacks[] = function () use ($callbackFunction) {
             $callbackFunction();
         };
+        
+        return $this;
+    }
+
+    public function setOptions(array $options): Tab
+    {
+        $this->options = $options;
 
         return $this;
     }

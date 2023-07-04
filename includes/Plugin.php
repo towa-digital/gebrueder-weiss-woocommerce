@@ -130,8 +130,7 @@ final class Plugin extends Singleton
 
         $optionsPage->addTab($fulfillmentTab);
 
-        $orderMetaKeys = Wordpress::getAllMetaKeysForPostType('shop_order');
-        $optionsPage->addTab(new OrderOptionsTab($orderMetaKeys));
+        $optionsPage->addTab((new OrderOptionsTab())->onTabInit([$this, 'addCustomFieldsToOrderOptionsDropdowns']));
 
         $this->setOptionPage($optionsPage);
     }
@@ -688,6 +687,18 @@ final class Plugin extends Singleton
 
         if (!Wordpress::getOption(Option::OPTIONS_PREFIX . OrderOptionsTab::TRACKING_LINK_FIELD_NAME)) {
             WordPress::updateOption(Option::OPTIONS_PREFIX . OrderOptionsTab::TRACKING_LINK_FIELD_NAME, OrderOptionsTab::TRACKING_LINK_FIELD_DEFAULT_VALUE);
+        }
+    }
+
+    public function addCustomFieldsToOrderOptionsDropdowns(){
+        // TODO: cache this query via transient && refactor for code quality
+        $orderMetaKeys = Wordpress::getAllMetaKeysForPostType('page');
+
+        $tabsToAddOptions = array_filter($this->optionsPage->getTabs(), fn($tab) => $tab instanceof OrderOptionsTab);
+        foreach ($tabsToAddOptions as $tab) {
+            foreach ($tab->options as $optionDropdown) {
+                $optionDropdown->addOptions($tab->createOptionsFromFieldKeys($orderMetaKeys));
+            }
         }
     }
 }
