@@ -9,9 +9,8 @@ This plugin integrates the Gebrüder Weiss Transport API for WooCommerce. With t
 
 ## Installation
 
-Via Composer:
+Via Composer: `composer require towa/gbw-woocommerce-plugin`
 
-`composer require towa/gbw-woocommerce-plugin`
 ## Resources
 
 - [Setup](./setup.md)
