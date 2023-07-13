@@ -1,0 +1,5 @@
+- [Setup](./setup.md)
+- [How the Plugin Works](./how-it-works.md)
+- [Plugin Architecture](./plugin-archtiecture.md)
+- [Development](./development.md)
+- [FAQ](./FAQ.md)
