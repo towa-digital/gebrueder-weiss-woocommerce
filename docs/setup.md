@@ -81,7 +81,7 @@ Contains the credentials to authenticate the plugin and create logistic orders f
 
 *Figure 6: Settings Tab for Account settings in Plugin*
 
-### Settings Tab Fullfillment
+### Settings Tab Fulfillment
 
 Defines the WooCommerce states for which the processing of orders by Gebrüder Weiss is started and which state an order should be set to if the processing was successful or failed. If any of the fields is not defined an error message is shown indicating which field has yet to be defined.
 
@@ -96,7 +96,7 @@ Defines the WooCommerce states for which the processing of orders by Gebrüder W
 
 *Figure 7: Settings Tab for Fullfillment Settings in Plugin. Define which states should be used by the Plugin*
 
-### Setting Tab Order
+### Settings Tab Order
 
 Define the *custom fields* used to hold the order id assigned by Gebrüder Weiss to the order, a tracking link to track delivery progress and information on the used carrier. If any of the fields are not defined an error message is shown indicating which field has yet to be defined.
 
