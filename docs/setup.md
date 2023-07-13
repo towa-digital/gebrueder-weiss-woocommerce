@@ -45,7 +45,12 @@ To install the Gebrüder Weiss Woocommerce Plugin the following steps must be ta
 3. Click on the button Install Now and wait for the installation process to finish. 
 4. Activate the plugin by clicking on Activate Plugin after the installation process has finished or by clicking on Activate in the list of installed plugins. 
 
-More information on the installation process and troubleshooting can be found in the FAQ.
+---
+
+> After activation an error message will be shown that credentials are not set. This is intended - the message will be removed once the credentials are set.
+
+--- 
+More information on the installation process and troubleshooting can be found in the [FAQ](./FAQ.md).
 
 ![installation-process-upload](./assets/images/installation-process-upload.png)
 
@@ -61,6 +66,8 @@ If you have composer set up you can install the plugin with
 ```bash
 composer require towa/gebrueder-weiss-woocommerce
 ```
+
+afterwards you can continue with [Step 4](#manually) of the manual installation process
 
 ## Plugin Configuration
 
