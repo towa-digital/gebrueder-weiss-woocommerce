@@ -5,6 +5,7 @@ node_modules/
 wordpress/
 .phpunit.result.cache
 composer.lock
+docs/.obsidian/
 
 # whitelist
 !.gitignore
