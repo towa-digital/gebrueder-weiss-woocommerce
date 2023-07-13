@@ -1,5 +1,5 @@
 # Create Installable
-To Make an installable package that can be used in Wordpress directly, a composer script was created, that installs all dependencies and deletes all development files from the repository.
+To Make an installable package that can be used in Wordpress directly, a composer script was created, that installs all dependencies and deletes all development files from the repository as well as unnecessary doc files.
 
 ## prerequisits
 
