@@ -54,6 +54,7 @@
         "rm -rf ./git/ || true",
         "rm -rf ./bin/ || true",
         "rm -rf tests/ || true",
+        "rm -rf docs/ || true",
         "rm .editorconfig || true",
         "rm .gitignore || true",
         "rm .phpcs.xml || true",
