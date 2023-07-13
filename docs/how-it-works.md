@@ -1,4 +1,4 @@
-# How the Plugin works
+# How the Gebrüder Weiss Woocommerce Plugin works
 
 ## Overview
 
