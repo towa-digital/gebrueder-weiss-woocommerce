@@ -35,7 +35,7 @@ To be able to work with API data without relying on the Gebrüder Weiss APIs, th
 
 Gebrueder Weiss provides a sandbox API for testing and development.
 
-## Wp cli
+## Wp CLI
 
 We rely heavily on wp-cli in our daily work. We do recommend you use it as well.
 
@@ -44,3 +44,6 @@ We rely heavily on wp-cli in our daily work. We do recommend you use it as well.
 The documentation is done via [docsify](https://docsify.js.org/). To run it locally you have to install it first with
 `npm install`
 Then you can run it with `npx docsify serve docs` from the root of the plugin.
+
+## Create Installable Package
+To create an installable Package to be installed via regular wordpress upload process a composer script was created. Read more about it [here](./createInstallable.md)
