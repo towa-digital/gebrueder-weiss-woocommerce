@@ -90,12 +90,12 @@ Contains the credentials to authenticate the plugin and create logistic orders f
 
 ### Settings Tab Fulfillment
 
-Defines the WooCommerce states for which the processing of orders by Gebrüder Weiss is started and which state an order should be set to if the processing was successful or failed. If any of the fields is not defined an error message is shown indicating which field has yet to be defined.
+Defines the WooCommerce states for which the processing of orders by Gebrüder Weiss is started and which state an order should be set to if the processing was successful or failed. If any of the fields is not defined an error message is shown indicating which field has yet to be defined. If more information is required please refer to the outlined [use cases](./how-it-works.md#use-cases)
 
 | Setting                 | Description                                                                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | Fulfillment State       | Orders in this state are ready to be shipped and start the processing of the Order by Gebrüder Weiss.                                      |
-| Pending State           | Orders in this state are currently being handled by Gebrüder Weiss. This state exists to differentiate between Wocommerce's default on hold state (which is used by payment providers). Defaults to "on-hold". If a custom state should be used, it has to be created. An explanation on how this can be achieved can be found [here](https://woocommerce.com/de-at/document/addmodify-states/):                                                                                                                                           |
+| Pending State           | Orders in this state are currently being handled by Gebrüder Weiss. This state exists to differentiate between Wocommerce's default on hold state (which is also used by payment providers). Defaults to "on-hold". If a custom state should be used, it has to be created. An explanation on how and why can be found [here](./how-it-works.md#use-cases):                                                                                                                                           |
 | Fulfilled State         | Processing of the order has been successful. The state is updated and set to the defined state within WooCommerce.                         |
 | Fulfillment Error State | An error was encountered during processing of the order. The order has been updated and set to the defined error state within WooCommerce. |
 

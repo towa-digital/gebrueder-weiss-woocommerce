@@ -1,5 +1,7 @@
 # How the Plugin works
 
+## Overview
+
 A high-level overview for the combined process of ordering and shipping an item via Gebrüder Weiss looks like this:
 
 1. A customer orders something in the WooCommerce store.
@@ -20,6 +22,63 @@ A high-level overview for the combined process of ordering and shipping an item 
 5. Once the Gebrüder Weiss has shipped the item, they trigger another WebHook that calls a REST endpoint provided by the plugin (`{WORDPRESS_REST_API_BASE_URL}/gebrueder-weiss-woocommerce/v1/orders/{WOOCOMMERCE_ORDER_ID}/callbacks/fulfillment`).
 6. The order state gets updated to the [fulfilled state](./setup.md#settings-tab-fulfillment).
 
+### State Diagram
+
 ![gbw-plugin-status-flow](./assets/images/gbw-plugin-status-flow.png)
 
 *Figure 1: State Diagram of the Gebrüder Weiss Woocommerce Plugin*
+
+## Use Cases
+
+### All Orders fulfilled by Gebrüder Weiss, only automated payment
+
+The Default use case is that Gebrüder Weiss fulfils all orders coming into Woocommerce. There are only automated payment options available. Automated payment options like paypal, apple pay or credit card, will get the **Processing** state automatically, after successful payment. In this case the [Fulfillment Settings](./setup#settings-tab-fulfillment) can be set as follows:
+
+| Setting                | State in Woocommerce |
+| ---------------------- | -------------------- |
+| Fulfillment State      | Processing           |
+| Pending State          | On hold              |
+| Fulfilled State        | Completed            |
+| Fulfilment Error State | Failed               | 
+
+### All Orders fulfilled by Gebrüder Weiss - manual payment options available
+
+If the Shop offers manual payment options, like bank transfer or similar, in most cases the **orders will be set to "On Hold" by the payment provider** until the order is paid. In this case a Woocommerce **Backend user can not differentiate** if the status "On Hold" was set by the payment provider or the Gebrüder Weiss Plugin, if the pending state was set to On Hold, like in the first usecase. Therefore it is a good idea to create a new state within Woocommerce to differentiate the states. To do this the shop owner has to create the new state by them selfes. This can be done via code, documented here: [Woocommerce Add/Modify States](https://woocommerce.com/document/addmodify-states/) 
+
+| Setting                | State in Woocommerce | Comment |
+| ---------------------- | -------------------- | ------- |
+| Fulfillment State      | Processing           |         |
+| Pending State          | Pending Shipment     | custom registered state | 
+| Fulfilled State        | Completed            |         |
+| Fulfilment Error State | Failed               |         |
+
+#### Add custom State to Woocommerce TL;DR
+- Option 1: add this two functions to your `functions.php` file
+
+```php
+/**
+ * Registers custom pending state post status.
+ */
+function register_custom_pending_state() {
+   register_post_status( 'wc-pending-shipment', array(
+       'label'                     => 'Pending Shipment',
+       'public'                    => true,
+       'show_in_admin_status_list' => true,
+       'show_in_admin_all_list'    => true,
+       'exclude_from_search'       => false,
+       'label_count'               => _n_noop( 'Pending Shipment <span class="count">(%s)</span>', 'Pending Shipment <span class="count">(%s)</span>' )
+   ) );
+}
+
+/**
+ * Adds the Pending state to the woocommerce state dropdown.
+ */
+function add_pending_state_to_wc_order_statuses( $order_statuses ) {
+	$order_statuses['wc-pending-shipment'] = 'Pending Shipment';
+	return $new_order_statuses;
+}
+
+add_action( 'init', 'register_custom_pending_state' );
+add_filter( 'wc_order_statuses', 'add_pending_state_to_wc_order_statuses' );
+```
+- Option 2: use a Plugin wich enables custom states like ["Custom Order Status Manager for Woocommerce"](https://wordpress.org/plugins/bp-custom-order-status-for-woocommerce/)
