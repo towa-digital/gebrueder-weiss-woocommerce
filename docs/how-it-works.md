@@ -6,7 +6,7 @@ A high-level overview for the combined process of ordering and shipping an item 
 
 1. A customer orders something in the WooCommerce store.
 2. The status for the order gets set to the [fulfillment state](./setup#settings-tab-fulfillment). This can happen as a result of one of the following two events:
-	1. The payment processor receives the payment for the order and updates the order state. to the fullfillment state *(this would be the default processing state from woocommerce)*
+	1. The payment processor receives the payment for the order and updates the order state to the fullfillment state *(this would be the default processing state from woocommerce)*
 	2. The shop manager updates the status manually. *(this would be done if pay by check or something similar is activated)*
 3. During the state transition, the WooCommerce Plugin triggers an API Call to the Gebrüder Weiss API to trigger shipping for the order and sets the order state to [pending state](./setup.md#settings-tab-fulfillment). Depending on the success of the API call, the flow is different from here:
 	1. If the request is successful, state transition progresses to the [pending state](./setup.md#settings-tab-fulfillment), and the flow continues with step 4.
@@ -43,7 +43,7 @@ The Default use case is that Gebrüder Weiss fulfils all orders coming into Wooc
 
 ### All Orders fulfilled by Gebrüder Weiss - manual payment options available
 
-If the Shop offers manual payment options, like bank transfer or similar, in most cases the **orders will be set to "On Hold" by the payment provider** until the order is paid. In this case a Woocommerce **Backend user can not differentiate** if the status "On Hold" was set by the payment provider or the Gebrüder Weiss Plugin, if the pending state was set to On Hold, like in the first usecase. Therefore it is a good idea to create a new state within Woocommerce to differentiate the states. To do this the shop owner has to create the new state by them selfes. This can be done via code, documented here: [Woocommerce Add/Modify States](https://woocommerce.com/document/addmodify-states/) 
+If the Shop offers manual payment options, like bank transfer or similar, in most cases the **orders will be set to "On Hold" by the payment provider** until the order is paid. In this case a Woocommerce **Backend user can not differentiate** if the status "On Hold" was set by the payment provider or the Gebrüder Weiss Plugin, if the pending state was set to On Hold, like in the first usecase. Therefore it is a good idea to create a new state within Woocommerce to differentiate the states. To do this the shop owner has to create the new state by themselfes. This can be done via code, documented here: [Woocommerce Add/Modify States](https://woocommerce.com/document/addmodify-states/) 
 
 | Setting                | State in Woocommerce | Comment |
 | ---------------------- | -------------------- | ------- |
