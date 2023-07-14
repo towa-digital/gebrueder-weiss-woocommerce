@@ -43,7 +43,12 @@ class OptionDropdown extends Option
         $this->options = $options;
     }
 
-    public function addOptions(array $options)
+    /**
+     * Adds the options given to the Option Dropdown.
+     *
+     * @param array $options Options to add to the dropdown.
+     */
+    public function addOptions(array $options): void
     {
         $this->options = array_merge($options, $this->options);
     }

@@ -139,7 +139,7 @@ class WordPress
     public static function getAllMetaKeysForPostType(string $postType): array
     {
         global $wpdb;
-        
+
         $query = "
             SELECT DISTINCT($wpdb->postmeta.meta_key)
             FROM $wpdb->posts
