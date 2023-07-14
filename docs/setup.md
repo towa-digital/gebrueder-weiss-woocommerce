@@ -106,6 +106,7 @@ Defines the WooCommerce states for which the processing of orders by Gebrüder W
 ### Settings Tab Order
 
 Define the *custom fields* used to hold the order id assigned by Gebrüder Weiss to the order, a tracking link to track delivery progress and information on the used carrier. If any of the fields are not defined an error message is shown indicating which field has yet to be defined.
+Read more about how you can use these custom fields here: [Display custom fields added by Plugin](./how-it-works.md#display-custom-fields-added-by-plugin)
 
 | Setting                   | Description                                                                                       |
 | ------------------------- | ------------------------------------------------------------------------------------------------- |

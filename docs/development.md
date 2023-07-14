@@ -1,6 +1,6 @@
 # Development
 
-## TLDR;
+## TL;DR
 
 - Gitflow is used
 - PHPUnit for testing

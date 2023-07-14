@@ -82,3 +82,58 @@ add_action( 'init', 'register_custom_pending_state' );
 add_filter( 'wc_order_statuses', 'add_pending_state_to_wc_order_statuses' );
 ```
 - Option 2: use a Plugin wich enables custom states like ["Custom Order Status Manager for Woocommerce"](https://wordpress.org/plugins/bp-custom-order-status-for-woocommerce/)
+
+## Display custom fields added by Plugin
+
+The plugin enriches orders with information provided by the Logistics Order API. These are:
+
+- Order Id
+- Tracking Link
+- Carrier Information
+
+As a Shop Owner you might want to display the tracking info on the Order Detail Page, so a client can track the shipment on their own. To display the Tracking info, you can insert the following code in your `functions.php`,  modify to your liking. 
+
+```php
+<?php
+
+// functions.php
+
+add_action('woocommerce_order_details_before_order_table', 'add_tracking_information_to_order_details_page');
+
+/**
+* Adds the tracking information to the top of the details order before the order table
+*/
+function add_tracking_information_to_order_details_page($order) {
+
+// gbw_tracking_link is the default custom field key the data will get saved to.
+// If you use another key, use that one instead.
+$tracking_link = get_post_meta($order->get_id(), 'gbw_tracking_link', true);
+
+// gbw_carrier_info is the default custom field key the data will get saved to.
+// If you use another key, use that one instead.
+$carrier_info = get_post_meta($order->get_id(), 'gbw_carrier_info', true);
+
+if($tracking_link):
+?>
+	<p class="gbw__tracking-link">
+	<?php echo sprintf(
+			__(
+				'This order is currently being shipped. <a target="__blank" href="%s">Track my shipment status</a>',
+				'your-textdomain'
+			),
+			$tracking_link);
+	?>
+	</p>
+<?php
+endif;
+
+if($carrier_info):
+?>
+	<p class="gbw__tracking-link">
+		<?php echo sprintf(__('This order is fulfilled by <b>%s</b>', 'your-textdomain' ), $carrier_info);?>
+	</p>
+<?php
+endif;
+}
+?>
+```
