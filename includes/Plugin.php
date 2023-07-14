@@ -17,6 +17,7 @@ use Towa\GebruederWeissWooCommerce\Options\FulfillmentOptionsTab;
 use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 use Towa\GebruederWeissWooCommerce\Options\Tab;
+use Towa\GebruederWeissWooCommerce\Support\Transient;
 use Towa\GebruederWeissWooCommerce\Support\Singleton;
 use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
@@ -122,6 +123,7 @@ final class Plugin extends Singleton
             ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::LANGUAGE_DOMAIN), 'account', 'integer'))
             ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::LANGUAGE_DOMAIN), 'account', 'string'))
             ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::LANGUAGE_DOMAIN), 'account', 'string'));
+
         $optionsPage->addTab($accountTab);
 
         $orderStatuses = $this->orderStateRepository->getAllOrderStates();
@@ -389,6 +391,7 @@ final class Plugin extends Singleton
     {
         self::removePluginOptions();
         self::removeRequestQueueTable();
+        self::removeTransients();
 
         WordPress::clearScheduledHook(self::RETRY_REQUESTS_CRON_JOB);
     }
@@ -671,6 +674,14 @@ final class Plugin extends Singleton
     }
 
     /**
+     * Removes all Transients associated with the plugin.
+     */
+    private static function removeTransients(): void
+    {
+        Transient::deleteTransient(Transient::META_KEYS);
+    }
+
+    /**
      * Sets the default values for the order options.
      *
      * @return void
@@ -690,9 +701,17 @@ final class Plugin extends Singleton
         }
     }
 
-    public function addCustomFieldsToOrderOptionsDropdowns(){
-        // TODO: cache this query via transient && refactor for code quality
-        $orderMetaKeys = Wordpress::getAllMetaKeysForPostType('shop_order');
+    /**
+     * Adds the custom fields to the order options dropdowns.
+     * This is done to make it load only when needed, and not on every page load.
+     */
+    public function addCustomFieldsToOrderOptionsDropdowns()
+    {
+        $orderMetaKeys = Transient::getTransient(
+            Transient::META_KEYS,
+            WordPress::getAllMetaKeysForPostType('shop_order'),
+            Transient::META_KEY_TIME_IN_SECONDS
+        );
 
         $tabsToAddOptions = array_filter($this->optionsPage->getTabs(), fn($tab) => $tab instanceof OrderOptionsTab);
         foreach ($tabsToAddOptions as $tab) {
