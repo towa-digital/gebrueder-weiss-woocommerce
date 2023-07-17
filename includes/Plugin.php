@@ -714,7 +714,11 @@ final class Plugin extends Singleton
             Transient::META_KEY_TIME_IN_SECONDS
         );
 
-        $tabsToAddOptions = array_filter($this->optionsPage->getTabs(), fn($tab) => $tab instanceof OrderOptionsTab);
+        $isOrderOptionsTab = function ($tab) {
+            return $tab instanceof OrderOptionsTab;
+        };
+
+        $tabsToAddOptions = array_filter($this->optionsPage->getTabs(), $isOrderOptionsTab);
         foreach ($tabsToAddOptions as $tab) {
             foreach ($tab->options as $optionDropdown) {
                 $optionDropdown->addOptions($tab->createOptionsFromFieldKeys($orderMetaKeys));
