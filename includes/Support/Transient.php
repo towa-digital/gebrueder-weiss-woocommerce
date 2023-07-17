@@ -27,8 +27,10 @@ class Transient
      * @param callable $callback The callback to be called if the transient does not exist.
      * @param mixed    $callbackArgs The callback Args that should be passed to the callback function.
      * @param int      $timeInSeconds The time in seconds the transient should be valid.
+     *
+     * @return mixed
      */
-    public static function getTransient(string $transientKey, callable $callback, $callbackArgs, int $timeInSeconds): mixed
+    public static function getTransient(string $transientKey, callable $callback, $callbackArgs, int $timeInSeconds)
     {
         $transientValue = get_transient(esc_sql($transientKey));
 
