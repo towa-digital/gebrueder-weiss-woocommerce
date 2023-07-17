@@ -709,7 +709,8 @@ final class Plugin extends Singleton
     {
         $orderMetaKeys = Transient::getTransient(
             Transient::META_KEYS,
-            WordPress::getAllMetaKeysForPostType('shop_order'),
+            [WordPress::class, 'getAllMetaKeysForPostType'],
+            'shop_order',
             Transient::META_KEY_TIME_IN_SECONDS
         );
 
