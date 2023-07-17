@@ -187,16 +187,4 @@ class Tab implements CanRender
 
         return $this;
     }
-
-    /**
-     * Set Options for Tab.
-     *
-     * @param array $options Options to be set.
-     */
-    public function setOptions(array $options): Tab
-    {
-        $this->options = $options;
-
-        return $this;
-    }
 }
