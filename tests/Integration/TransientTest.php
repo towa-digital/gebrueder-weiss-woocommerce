@@ -27,6 +27,7 @@ class TransientTest extends \WP_UnitTestCase
 
         $savedValue = get_transient($transientKey);
 
-        $this->assertSame($transientValue, $savedValue, $initialReturnValue);
+        $this->assertSame($transientValue, $savedValue);
+        $this->assertSame($transientValue, $initialReturnValue);
     }
 }
