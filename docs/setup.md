@@ -22,18 +22,18 @@ The **Customer Id** is a unique identifier of your shop set by Gebrüder Weiss a
 
 The **Consumer Key** and **Consumer Secret** are required to authenticate requests made using the logistics-order-API, which is used to send orders made within WooCommerce to Gebrüder Weiss. To obtain these credentials follow the steps below:
 
-1. Navigate to [https://developer.test.gw.connext.com/devportal/apis](https://developer.test.gw.connext.com/devportal/apis) and log in using the credentials found in the communication sent to you by Gebrüder Weiss.
+1. Navigate to [https://developer.test.gw.connext.com/devportal/apis](https://developer.test.gw.connext.com/devportal/apis) and log in "Sign In With My Connext Account" using the credentials found in the communication sent to you by Gebrüder Weiss.
 2. Select **logistics-order-API** and navigate to the Tab labelled **Credentials.**
-3. Select the desired Application and click on **SANDBOX KEYS** or **PROD KEYS** to view the sandbox or production credentials.
+3. Select the desired Application and click on **SANDBOX KEYS** or **PROD KEYS** to view the sandbox or production credentials.(Sandbox keys are for testing purposes, Prod keys for Production/Live websites)
 4. Copy the **Consumer Key** and **Consumer Secret.**
 
 ![logistics-order-api-portal](./assets/images/logistics-order-api-portal.jpg) ![logistics-order-api-portal-menu](./assets/images/logistics-order-api-portal-menu.jpg)
 
-*Figure 4: The tile within the API-Portal corresponding to the logistics-order-api and the sidebar with the Tab __credentials__* 
+*Figure 1: The tile within the API-Portal corresponding to the logistics-order-api and the sidebar with the Tab __credentials__* 
 
 ![logistics-order-api-plugin-credentials](./assets/images/logistics-order-api-plugin-credentials.jpg)
 
-*Figure 5: The fields for Consumer Key and Secret within the Tab **Credentials** for the logistics-order-api*
+*Figure 2: The fields for Consumer Key and Secret within the Tab **Credentials** for the logistics-order-api*
 
 ## Wordpress Installation Process
 
@@ -42,8 +42,8 @@ To install the Gebrüder Weiss Woocommerce Plugin the following steps must be ta
 
 1. Ensure that the WordPress-site fulfils the requirements listed above.
 2. Click on Upload Plugin and select the zip-file of the plugin sent via E-Mail to upload the plugin to WordPress. 
-3. Click on the button Install Now and wait for the installation process to finish. 
-4. Activate the plugin by clicking on Activate Plugin after the installation process has finished or by clicking on Activate in the list of installed plugins. 
+3. Click on the button "Install Now" and wait for the installation process to finish. 
+4. Activate the plugin by clicking on "Activate Plugin" after the installation process has finished or by clicking on Activate in the list of installed plugins. 
 
 ---
 
@@ -54,11 +54,11 @@ More information on the installation process and troubleshooting can be found in
 
 ![installation-process-upload](./assets/images/installation-process-upload.png)
 
-*Figure 2: The screen shown when the button Upload Plugin in Step 2 was clicked on. Clicking on Install Now will start the installation process for the plugin provided as zip-file.*
+*Figure 3: The screen shown when the button Upload Plugin in Step 2 was clicked on. Clicking on Install Now will start the installation process for the plugin provided as zip-file.*
 
 ![installation-process-activation](./assets/images/installation-process-activation.png)
 
-*Figure 3: The list entry for the Gebrüder Weiss Woocommerce Plugin within wordpress. Pressing on Activate allows the activation of the plugin.*
+*Figure 4: The list entry for the Gebrüder Weiss Woocommerce Plugin within wordpress. Pressing on Activate allows the activation of the plugin.*
 
 ### Via Composer
 The plugin is also available via [packagist](https://packagist.org/packages/towa/gebrueder-weiss-woocommerce), if you prefer an installation via composer.
@@ -71,7 +71,11 @@ afterwards you can continue with [Step 4](#manually) of the manual installation 
 
 ## Plugin Configuration
 
-To configure the plugin for use, navigate to Tab **Settings** **à** **Gebrüder Weiss WooCommerce.**
+To configure the plugin for use, navigate to Tab **Settings Gebrüder Weiss WooCommerce.**
+
+![Sidebar menu Plugin](./assets/images/gbw-plugin-wordpress-sidebar.png ':size=300')
+
+*Figure 5: Gebrüder Weiss Woocommerce Plugin Settings in Wordpress Sidebar*
 
 There are three groups of settings that need to be configured to use the plugin:
 
@@ -90,14 +94,15 @@ Contains the credentials to authenticate the plugin and create logistic orders f
 
 ### Settings Tab Fulfillment
 
-Defines the WooCommerce states for which the processing of orders by Gebrüder Weiss is started and which state an order should be set to if the processing was successful or failed. If any of the fields is not defined an error message is shown indicating which field has yet to be defined. If more information is required please refer to the outlined [use cases](./how-it-works.md#use-cases)
+Defines the WooCommerce states that should be used by Gebrüder Weiss, for the processing and fulfillment, and which state should be used if the order was successful or failed.
+If any of the fields is not defined an error message is shown indicating which field has yet to be defined. If more information is required please refer to the outlined [use cases](./how-it-works.md#use-cases)
 
-| Setting                 | Description                                                                                                                                |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Fulfillment State       | Orders in this state are ready to be shipped and start the processing of the Order by Gebrüder Weiss.                                      |
-| Pending State           | Orders in this state are currently being handled by Gebrüder Weiss. This state exists to differentiate between Wocommerce's default on hold state (which is also used by payment providers). Defaults to "on-hold". If a custom state should be used, it has to be created. An explanation on how and why can be found [here](./how-it-works.md#use-cases):                                                                                                                                           |
-| Fulfilled State         | Processing of the order has been successful. The state is updated and set to the defined state within WooCommerce.                         |
-| Fulfillment Error State | An error was encountered during processing of the order. The order has been updated and set to the defined error state within WooCommerce. |
+| Setting                 | Description                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fulfillment State       | Orders in this state are ready to be shipped and start the processing of the Order by Gebrüder Weiss.                                                                                                                                                                                                                                                           |
+| Pending State           | Orders in this state are currently being handled by Gebrüder Weiss. This state exists to differentiate between Wocommerce's default on hold state (which is also used by payment providers). Default would be "on-hold". If a custom state should be used, it has to be created. An explanation on how and why can be found [here](./how-it-works.md#use-cases) |
+| Fulfilled State         | The order was successfully shipped.                                                                                                                                                                                                                                                                                                                             |
+| Fulfillment Error State | An error was encountered during processing of the order, or during shipment.                                                                                                                                                                                                                                                                                                        |
 
 ![gbw-plugin-settings-fullfillment](./assets/images/gbw-plugin-settings-fullfillment.png ':size=400')
 
