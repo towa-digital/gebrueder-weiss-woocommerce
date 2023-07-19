@@ -1,6 +1,8 @@
-# Development
+# Plugin Development
 
-## TLDR;
+This Section is for People developing the Plugin itself, or want to participate by creating Pull Request.
+
+## TL;DR
 
 - Gitflow is used
 - PHPUnit for testing
@@ -17,7 +19,9 @@ The Project contains automated tests which can be run locally with `phpunit` fro
 
 ### Important Note
 
-The composer dependencies include stubs for WordPress, WordPress Tests and WooCommerce. You might have to instruct the language server to include the stubs for analysis. There is also one more caveat with `intelephense` for VSCode the stubs for WordPress are rather large. Hence you have to increase the maximum file size for indexing. Otherwise the plugin will skip indexing the subs. You have to set `intelephense.files.maxSize` to at least `5000000` since the stub file has around 4.4mb at the time of writing this.
+The composer dependencies include stubs for WordPress, WordPress Tests and WooCommerce. You might have to instruct the language server to include the stubs for analysis. 
+
+For VSCode users there is also one more caveat with `intelephense` the stubs for WordPress are rather large. Hence you have to increase the maximum file size for indexing. Otherwise the plugin will skip indexing the subs. You have to set `intelephense.files.maxSize` to at least `5000000` since the stub file has around 4.4mb at the time of writing this.
 
 ### Setup
 

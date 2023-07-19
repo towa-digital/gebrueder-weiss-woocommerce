@@ -5,7 +5,7 @@
 What should I do if I am asked to enter ftp-credentials for the webserver during the installation process?
 </summary>
 
-**FTP-credentials** are another security layer to prevent unauthorized users from installing plugins. Please **contact your IT Department** or the host of your website to solve this issue.
+**FTP-credentials** are another security layer to prevent unauthorized users from installing plugins. Please **contact your IT Department** or the hosting partner of your website to solve this issue.
 </details>
 
 <details>
@@ -29,7 +29,7 @@ If an error occurs during processing of an order, an e-mail is sent to the admin
 Why can’t I see custom fields for my order?
 </summary>
 
-The option to display custom fields within the wordpress-backend must be toggled on. This can be done by opening an order, clicking on the **Screen Options** Button, and toggling the option **Custom Fields.**
+The option to display custom fields within the wordpress-backend must be toggled on. This can be done by opening an order, clicking on the **Screen Options** Button, and toggling the option **Custom Fields.** If you are using the ACF (Advanced custom fields plugin) you might need to add the following code snippet to your `functions.php` file.
 
 ```php
 add_filter('acf/settings/remove_wp_meta_box', '__return_false');
