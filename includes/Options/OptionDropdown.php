@@ -42,4 +42,14 @@ class OptionDropdown extends Option
         parent::__construct($name, $slug, $description, $group, 'dropdown', $sanitizeCallback, $default);
         $this->options = $options;
     }
+
+    /**
+     * Adds the options given to the Option Dropdown.
+     *
+     * @param array $options Options to add to the dropdown.
+     */
+    public function addOptions(array $options): void
+    {
+        $this->options = array_merge($options, $this->options);
+    }
 }

@@ -26,14 +26,12 @@ class OrderOptionsTab extends Tab
 
     /**
      * Creates the order options tab
-     *
-     * @param array $orderCustomFields Custom fields available for orders.
      */
-    public function __construct($orderCustomFields)
+    public function __construct()
     {
         parent::__construct(__('Order', Plugin::LANGUAGE_DOMAIN), self::TAB_SLUG);
 
-        $options = $this->createOptionsFromFieldKeys($orderCustomFields);
+        $options = [];
         $orderIdOptions = $this->addDefaultValueToOptions($options, self::ORDER_ID_FIELD_DEFAULT_VALUE);
         $trackingLinkOptions = $this->addDefaultValueToOptions($options, self::TRACKING_LINK_FIELD_DEFAULT_VALUE);
         $carrierInformationOptions = $this->addDefaultValueToOptions($options, self::CARRIER_INFORMATION_FIELD_DEFAULT_VALUE);
@@ -50,7 +48,7 @@ class OrderOptionsTab extends Tab
      * @param array $orderCustomFields Custom fields available for orders.
      * @return array
      */
-    private function createOptionsFromFieldKeys(array $orderCustomFields): array
+    public function createOptionsFromFieldKeys(array $orderCustomFields): array
     {
         $options = [];
         foreach ($orderCustomFields as $orderCustomField) {
