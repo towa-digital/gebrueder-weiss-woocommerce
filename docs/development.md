@@ -31,7 +31,7 @@ For VSCode users there is also one more caveat with `intelephense` the stubs for
 
 ### Mock APIs
 
-How to mock the API can be found here  [Towa internal confluence link](https://towa-digital.atlassian.net/wiki/spaces/GWAC/pages/450592804/Development) (link only available for TOWA team members)
+Information about the TOWA-internal Mock API can be found here [Towa internal confluence link](https://towa-digital.atlassian.net/wiki/spaces/GWAC/pages/450592804/Development) (link only available for TOWA team members)
 
 ## Sandbox API
 
