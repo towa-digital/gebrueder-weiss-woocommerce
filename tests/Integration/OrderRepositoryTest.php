@@ -1,29 +1,24 @@
 <?php
 
-namespace Tests\Integration;
-
+uses(\WP_UnitTestCase::class);
 use Towa\GebruederWeissWooCommerce\OrderRepository;
 
-class OrderRepositoryTest extends \WP_UnitTestCase
-{
-    public function test_it_can_find_an_order()
-    {
-        $repository = new OrderRepository();
 
-        $order = new \WC_Order();
-        $order->save();
+test('it can find an order', function () {
+    $repository = new OrderRepository();
 
-        $order = $repository->findById($order->get_id());
+    $order = new \WC_Order();
+    $order->save();
 
-        $this->assertNotNull($order);
-    }
+    $order = $repository->findById($order->get_id());
 
-    public function test_it_returns_null_if_the_order_was_not_found()
-    {
-        $repository = new OrderRepository();
+    expect($order)->not->toBeNull();
+});
 
-        $order = $repository->findById(42);
+test('it returns null if the order was not found', function () {
+    $repository = new OrderRepository();
 
-        $this->assertNull($order);
-    }
-}
+    $order = $repository->findById(42);
+
+    expect($order)->toBeNull();
+});

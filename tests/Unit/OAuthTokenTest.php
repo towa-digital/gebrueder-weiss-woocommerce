@@ -1,49 +1,40 @@
 <?php
 
-namespace Tests\Unit;
-
-use PHPUnit\Framework\TestCase;
+uses(\WP_UnitTestCase::class);
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 
-class OAuthTokenTest extends TestCase
-{
-    public function test_it_can_get_the_access_token()
-    {
-        $token = new OAuthToken("test", time() + 3600);
 
-        $this->assertSame("test", $token->getToken());
-    }
+test('it can get the access token', function () {
+    $token = new OAuthToken("test", time() + 3600);
 
-    public function test_it_can_retrieve_the_expires_in_time()
-    {
-        $token = new OAuthToken("test", time() + 3600);
+    expect($token->getToken())->toBe("test");
+});
 
-        $this->assertSame(3600, $token->getExpiresIn());
-    }
+test('it can retrieve the expires in time', function () {
+    $token = new OAuthToken("test", time() + 3600);
 
-    public function test_it_can_determine_if_the_token_is_valid()
-    {
-        $token = new OAuthToken("test", time() + 3600);
+    expect($token->getExpiresIn())->toBe(3600);
+});
 
-        $this->assertTrue($token->isValid());
-    }
+test('it can determine if the token is valid', function () {
+    $token = new OAuthToken("test", time() + 3600);
 
-    public function test_it_can_determine_if_the_token_is_invalid()
-    {
-        $token = new OAuthToken("test", time() - 3600);
+    expect($token->isValid())->toBeTrue();
+});
 
-        $this->assertFalse($token->isValid());
-    }
+test('it can determine if the token is invalid', function () {
+    $token = new OAuthToken("test", time() - 3600);
 
-    public function test_it_can_serialize_and_unserialize_the_token()
-    {
-        $token = new OAuthToken("test-1", 1628168570);
-        $serialized = $token->serialize();
-        $newToken = new OAuthToken("", 0);
+    expect($token->isValid())->toBeFalse();
+});
 
-        $newToken->unserialize($serialized);
+test('it can serialize and unserialize the token', function () {
+    $token = new OAuthToken("test-1", 1628168570);
+    $serialized = $token->serialize();
+    $newToken = new OAuthToken("", 0);
 
-        $this->assertSame("test-1", $newToken->getToken());
-        $this->assertSame(1628168570 - time(), $newToken->getExpiresIn());
-    }
-}
+    $newToken->unserialize($serialized);
+
+    expect($newToken->getToken())->toBe("test-1");
+    expect($newToken->getExpiresIn())->toBe(1628168570 - time());
+});

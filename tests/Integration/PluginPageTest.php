@@ -1,74 +1,67 @@
 <?php
 
-namespace Tests\Integration;
-
+uses(\WP_UnitTestCase::class);
 use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 
-class PluginPageTest extends \WP_UnitTestCase
-{
-    public function test_if_option_registration_registers_settings()
-    {
-        global $wp_settings_fields;
 
-        $option = (new Option('testname', 'testslug', 'testdescription', 'testgroup', 'string', null));
-        $option->registerOption();
+test('if option registration registers settings', function () {
+    global $wp_settings_fields;
 
-        $this->assertArrayHasKey("gbw-woocommerce", $wp_settings_fields);
-        $this->assertArrayHasKey("testgroup", $wp_settings_fields['gbw-woocommerce']);
+    $option = (new Option('testname', 'testslug', 'testdescription', 'testgroup', 'string', null));
+    $option->registerOption();
 
-        // all options will be prefixed with 'gbw_'
-        $this->assertArrayHasKey("gbw_testslug", $wp_settings_fields['gbw-woocommerce']["testgroup"]);
+    expect($wp_settings_fields)->toHaveKey("gbw-woocommerce");
+    expect($wp_settings_fields['gbw-woocommerce'])->toHaveKey("testgroup");
 
-        $setOption = $wp_settings_fields['gbw-woocommerce']["testgroup"]["gbw_testslug"];
-        $this->assertEquals("gbw_testslug", $setOption["id"]);
-        $this->assertEquals("testname", $setOption["title"]);
-    }
+    // all options will be prefixed with 'gbw_'
+    expect($wp_settings_fields['gbw-woocommerce']["testgroup"])->toHaveKey("gbw_testslug");
 
-    public function test_if_settings_can_be_set()
-    {
-        $slug = 'customer_id';
-        $slug2 = 'client_secret';
+    $setOption = $wp_settings_fields['gbw-woocommerce']["testgroup"]["gbw_testslug"];
+    expect($setOption["id"])->toEqual("gbw_testslug");
+    expect($setOption["title"])->toEqual("testname");
+});
 
-        update_option(Option::OPTIONS_PREFIX . $slug, 12345);
-        update_option(Option::OPTIONS_PREFIX . $slug2, 'test');
+test('if settings can be set', function () {
+    $slug = 'customer_id';
+    $slug2 = 'client_secret';
 
-        $option = new Option('client Secret', $slug, 'testdescription', 'testgroup', 'number');
-        $option2 = new Option('client Secret', $slug2, 'testdescription', 'testgroup', 'string');
+    update_option(Option::OPTIONS_PREFIX . $slug, 12345);
+    update_option(Option::OPTIONS_PREFIX . $slug2, 'test');
 
-        $this->assertEquals(12345, $option->getValue());
-        $this->assertEquals('test', $option2->getValue());
-    }
+    $option = new Option('client Secret', $slug, 'testdescription', 'testgroup', 'number');
+    $option2 = new Option('client Secret', $slug2, 'testdescription', 'testgroup', 'string');
 
-    public function test_if_page_renders()
-    {
-        $optionsPage = (new OptionPage('test', Plugin::OPTION_PAGE_SLUG));
+    expect($option->getValue())->toEqual(12345);
+    expect($option2->getValue())->toEqual('test');
+});
 
-        \ob_start();
-        $optionsPage->render();
-        $html = \ob_get_clean();
+test('if page renders', function () {
+    $optionsPage = (new OptionPage('test', Plugin::OPTION_PAGE_SLUG));
 
-        $this->assertStringContainsString('<form method="post" action="options.php"', $html);
-        $this->assertStringContainsString('<input type="submit"', $html);
-    }
+    \ob_start();
+    $optionsPage->render();
+    $html = \ob_get_clean();
 
-    public function test_if_option_renders()
-    {
-        $slug = 'testslug';
-        $valueToTest = '12345';
+    $this->assertStringContainsString('<form method="post" action="options.php"', $html);
+    $this->assertStringContainsString('<input type="submit"', $html);
+});
 
-        // set testvalue
-        update_option(Option::OPTIONS_PREFIX . $slug, $valueToTest);
+test('if option renders', function () {
+    $slug = 'testslug';
+    $valueToTest = '12345';
 
-        $option = new Option('testname', $slug, 'description', 'testgroup', 'string');
+    // set testvalue
+    update_option(Option::OPTIONS_PREFIX . $slug, $valueToTest);
 
-        \ob_start();
-        $option->render();
-        $html = \ob_get_clean();
+    $option = new Option('testname', $slug, 'description', 'testgroup', 'string');
 
-        $this->assertStringContainsString('<input type="text"', $html);
-        $this->assertStringContainsString('name="' . Option::OPTIONS_PREFIX . $slug . '"', $html);
-        $this->assertStringContainsString('value="' . $valueToTest . '"', $html);
-    }
-}
+    \ob_start();
+    $option->render();
+    $html = \ob_get_clean();
+
+    $this->assertStringContainsString('<input type="text"', $html);
+    $this->assertStringContainsString('name="' . Option::OPTIONS_PREFIX . $slug . '"', $html);
+    $this->assertStringContainsString('value="' . $valueToTest . '"', $html);
+});

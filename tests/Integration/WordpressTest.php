@@ -1,79 +1,69 @@
 <?php
 
-namespace Tests\Integration;
-
+uses(\WP_UnitTestCase::class);
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
-class WordPressTest extends \WP_UnitTestCase
-{
-    public function test_it_can_send_error_notifications_to_the_admin()
-    {
-        global $phpmailer;
 
-        \update_option("admin_email", "admin@test.com");
+test('it can send error notifications to the admin', function () {
+    global $phpmailer;
 
-        WordPress::sendMailToAdmin("subject", "message");
+    \update_option("admin_email", "admin@test.com");
 
-        // updating the admin email triggers a email, hence we need the second email
-        $this->assertNotNull($phpmailer->mock_sent[1]);
-        $mail = $phpmailer->mock_sent[1];
-        $this->assertStringContainsString("message", $mail["body"]);
-        $this->assertSame("subject", $mail["subject"]);
-        $this->assertSame("admin@test.com", $mail["to"][0][0]);
-    }
+    WordPress::sendMailToAdmin("subject", "message");
 
-    public function test_it_can_add_a_cron_interval()
-    {
-        WordPress::addCronInterval("key", 5, "Display Name");
+    // updating the admin email triggers a email, hence we need the second email
+    expect($phpmailer->mock_sent[1])->not->toBeNull();
+    $mail = $phpmailer->mock_sent[1];
+    $this->assertStringContainsString("message", $mail["body"]);
+    expect($mail["subject"])->toBe("subject");
+    expect($mail["to"][0][0])->toBe("admin@test.com");
+});
 
-        $schedules = \wp_get_schedules();
-        $this->assertNotNull($schedules["key"]);
-        $schedule = $schedules["key"];
-        $this->assertSame(5, $schedule["interval"]);
-        $this->assertSame("Display Name", $schedule["display"]);
-    }
+test('it can add a cron interval', function () {
+    WordPress::addCronInterval("key", 5, "Display Name");
 
-    public function test_it_can_schedule_a_cron_job()
-    {
-        WordPress::scheduleCronjob("hook", strtotime("now"), "hourly");
+    $schedules = \wp_get_schedules();
+    expect($schedules["key"])->not->toBeNull();
+    $schedule = $schedules["key"];
+    expect($schedule["interval"])->toBe(5);
+    expect($schedule["display"])->toBe("Display Name");
+});
 
-        $event = \wp_get_schedule("hook");
-        $this->assertSame("hourly", $event);
-    }
+test('it can schedule a cron job', function () {
+    WordPress::scheduleCronjob("hook", strtotime("now"), "hourly");
 
-    public function test_it_does_not_schedule_cron_events_multiple_times()
-    {
-        WordPress::scheduleCronjob("hook", strtotime("now"), "hourly");
-        WordPress::scheduleCronjob("hook", time() + 3600, "daily");
+    $event = \wp_get_schedule("hook");
+    expect($event)->toBe("hourly");
+});
 
-        $event = \wp_get_schedule("hook");
-        $this->assertSame("hourly", $event);
-    }
+test('it does not schedule cron events multiple times', function () {
+    WordPress::scheduleCronjob("hook", strtotime("now"), "hourly");
+    WordPress::scheduleCronjob("hook", time() + 3600, "daily");
 
-    public function test_it_can_add_an_action_for_a_cronjob()
-    {
-        global $wp_filter;
+    $event = \wp_get_schedule("hook");
+    expect($event)->toBe("hourly");
+});
 
-        WordPress::addCronjobAction("hook", function () {
-        });
+test('it can add an action for a cronjob', function () {
+    global $wp_filter;
 
-        $this->assertCount(1, $wp_filter["hook"][10]);
-    }
+    WordPress::addCronjobAction("hook", function () {
+    });
 
-    public function test_it_can_remove_a_cron_event()
-    {
-        WordPress::scheduleCronjob("hook", strtotime("now"), "hourly");
+    expect($wp_filter["hook"][10])->toHaveCount(1);
+});
 
-        WordPress::clearScheduledHook("hook");
+test('it can remove a cron event', function () {
+    WordPress::scheduleCronjob("hook", strtotime("now"), "hourly");
 
-        $this->assertFalse(\wp_get_schedule("hook"));
-    }
+    WordPress::clearScheduledHook("hook");
 
-    public function test_it_can_retrieve_all_meta_keys_for_a_post_type()
-    {
-        $postId = $this->factory()->post->create(["post_type" => "post"]);
-        \update_post_meta($postId, "key1", "value1");
+    expect(\wp_get_schedule("hook"))->toBeFalse();
+});
 
-        $this->assertCount(1, WordPress::getAllMetaKeysForPostType("post"));
-    }
-}
+test('it can retrieve all meta keys for a post type', function () {
+    $postId = $this->factory()->post->create(["post_type" => "post"]);
+    \update_post_meta($postId, "key1", "value1");
+
+    expect(WordPress::getAllMetaKeysForPostType("post"))->toHaveCount(1);
+});

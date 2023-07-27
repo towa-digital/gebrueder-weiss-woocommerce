@@ -1,75 +1,65 @@
 <?php
 
-namespace Tests\Integration;
-
+uses(\WP_UnitTestCase::class);
 use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\OrderStateRepository;
-use Mockery;
 use Mockery\MockInterface;
 use Towa\GebruederWeissWooCommerce\OrderRepository;
 
-class PluginInitializationTest extends \WP_UnitTestCase
-{
-    public function test_it_registers_an_init_hook()
-    {
-        global $wp_filter;
-        $numberOfInitFiltersBeforeRegistration = count($wp_filter['init'][10]);
-        include(dirname(__FILE__) . "/../../gebrueder-weiss-woocommerce.php");
-        $numberOfInitFiltersAfterRegistration = count($wp_filter['init'][10]);
 
-        $this->assertSame(1, $numberOfInitFiltersAfterRegistration - $numberOfInitFiltersBeforeRegistration);
-    }
+test('it registers an init hook', function () {
+    global $wp_filter;
+    $numberOfInitFiltersBeforeRegistration = count($wp_filter['init'][10]);
+    include(dirname(__FILE__) . "/../../gebrueder-weiss-woocommerce.php");
+    $numberOfInitFiltersAfterRegistration = count($wp_filter['init'][10]);
 
-    public function test_it_adds_an_admin_notice_if_woocommerce_is_not_installed()
-    {
-        global $wp_filter;
-        $numberOfInitFiltersBeforeCheck = count($wp_filter['admin_notices'][10]);
-        Plugin::checkPluginCompatabilityAndPrintErrorMessages();
-        $numberOfInitFiltersAfterCheck = count($wp_filter['admin_notices'][10]);
+    expect($numberOfInitFiltersAfterRegistration - $numberOfInitFiltersBeforeRegistration)->toBe(1);
+});
 
-        $this->assertSame(1, $numberOfInitFiltersAfterCheck - $numberOfInitFiltersBeforeCheck);
-    }
+test('it adds an admin notice if woocommerce is not installed', function () {
+    global $wp_filter;
+    $numberOfInitFiltersBeforeCheck = count($wp_filter['admin_notices'][10]);
+    Plugin::checkPluginCompatabilityAndPrintErrorMessages();
+    $numberOfInitFiltersAfterCheck = count($wp_filter['admin_notices'][10]);
 
-    public function test_it_does_not_pass_compatibility_check_without_woocommerce_active()
-    {
-        $this->assertFalse(Plugin::checkPluginCompatabilityAndPrintErrorMessages());
-    }
+    expect($numberOfInitFiltersAfterCheck - $numberOfInitFiltersBeforeCheck)->toBe(1);
+});
 
-    public function test_it_does_pass_the_compatibility_check_with_woocommerce_active()
-    {
-        update_option("active_plugins", ["woocommerce/woocommerce.php"]);
-        $this->assertTrue(Plugin::checkPluginCompatabilityAndPrintErrorMessages());
-    }
+test('it does not pass compatibility check without woocommerce active', function () {
+    expect(Plugin::checkPluginCompatabilityAndPrintErrorMessages())->toBeFalse();
+});
 
-    public function test_it_registers_an_action_for_woocommerce_order_status()
-    {
-        global $wp_filter;
+test('it does pass the compatibility check with woocommerce active', function () {
+    update_option("active_plugins", ["woocommerce/woocommerce.php"]);
+    expect(Plugin::checkPluginCompatabilityAndPrintErrorMessages())->toBeTrue();
+});
 
-        /** @var MockInterface|OrderStateRepository */
-        $orderStateRepository = Mockery::mock(OrderStateRepository::class);
-        $orderStateRepository->shouldReceive("getAllOrderStates")->andReturn([]);
+test('it registers an action for woocommerce order status', function () {
+    global $wp_filter;
 
-        /** @var MockInterface|OrderRepository */
-        $orderRepository = Mockery::mock(OrderRepository::class);
+    /** @var MockInterface|OrderStateRepository */
+    $orderStateRepository = Mockery::mock(OrderStateRepository::class);
+    $orderStateRepository->shouldReceive("getAllOrderStates")->andReturn([]);
 
-        /** @var Plugin */
-        $plugin = Plugin::getInstance();
-        $plugin->setOrderStateRepository($orderStateRepository);
-        $plugin->setOrderRepository($orderRepository);
-        $plugin->initialize();
+    /** @var MockInterface|OrderRepository */
+    $orderRepository = Mockery::mock(OrderRepository::class);
 
-        $numberOfInitFiltersAfterCheck = count($wp_filter['woocommerce_order_status_changed'][10]);
-        $this->assertSame(1, $numberOfInitFiltersAfterCheck);
-    }
+    /** @var Plugin */
+    $plugin = Plugin::getInstance();
+    $plugin->setOrderStateRepository($orderStateRepository);
+    $plugin->setOrderRepository($orderRepository);
+    $plugin->initialize();
 
-    public function test_it_registers_an_action_for_the_retry_requests_cron_job()
-    {
-        global $wp_filter;
+    $numberOfInitFiltersAfterCheck = count($wp_filter['woocommerce_order_status_changed'][10]);
+    expect($numberOfInitFiltersAfterCheck)->toBe(1);
+});
 
-        /** @var Plugin */
-        $plugin = Plugin::getInstance();
-        $plugin->initialize();
+test('it registers an action for the retry requests cron job', function () {
+    global $wp_filter;
 
-        $this->assertSame(1, count($wp_filter[Plugin::RETRY_REQUESTS_CRON_JOB][10]));
-    }
-}
+    /** @var Plugin */
+    $plugin = Plugin::getInstance();
+    $plugin->initialize();
+
+    expect(count($wp_filter[Plugin::RETRY_REQUESTS_CRON_JOB][10]))->toBe(1);
+});

@@ -1,172 +1,151 @@
 <?php
 
-namespace Tests\Integration;
-
+uses(\WP_UnitTestCase::class);
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\Options\OrderOptionsTab;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
-class SettingsRepositoryTest extends \WP_UnitTestCase
-{
-    public function test_it_can_retrieve_the_client_id()
-    {
-        update_option("gbw_client_id", "test");
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the client id', function () {
+    update_option("gbw_client_id", "test");
 
-        $this->assertSame("test", $settingsRepository->getClientId());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_can_retrieve_the_client_secret()
-    {
-        update_option("gbw_client_secret", "test");
+    expect($settingsRepository->getClientId())->toBe("test");
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the client secret', function () {
+    update_option("gbw_client_secret", "test");
 
-        $this->assertSame("test", $settingsRepository->getClientSecret());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_can_retrieve_the_access_token()
-    {
-        $token = new OAuthToken("test", time());
-        update_option("gbw_accessToken", $token);
+    expect($settingsRepository->getClientSecret())->toBe("test");
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the access token', function () {
+    $token = new OAuthToken("test", time());
+    update_option("gbw_accessToken", $token);
 
-        $this->assertSame($token->getToken(), $settingsRepository->getAccessToken()->getToken());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_returns_null_if_deserializing_the_token_fails()
-    {
-        update_option("gbw_accessToken", "not-a-serialized-token");
+    expect($settingsRepository->getAccessToken()->getToken())->toBe($token->getToken());
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it returns null if deserializing the token fails', function () {
+    update_option("gbw_accessToken", "not-a-serialized-token");
 
-        $this->assertNull($settingsRepository->getAccessToken());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_returns_null_if_the_deserialized_class_is_not_a_token()
-    {
-        update_option("gbw_accessToken", serialize(["not", "a", "token"]));
+    expect($settingsRepository->getAccessToken())->toBeNull();
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it returns null if the deserialized class is not a token', function () {
+    update_option("gbw_accessToken", serialize(["not", "a", "token"]));
 
-        $this->assertNull($settingsRepository->getAccessToken());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_can_retrieve_the_fulfillment_state()
-    {
-        update_option("gbw_fulfillmentState", "test");
+    expect($settingsRepository->getAccessToken())->toBeNull();
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the fulfillment state', function () {
+    update_option("gbw_fulfillmentState", "test");
 
-        $this->assertSame("test", $settingsRepository->getFulfillmentState());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_can_retrieve_the_fulfilled_state()
-    {
-        update_option("gbw_fulfilledState", "test");
+    expect($settingsRepository->getFulfillmentState())->toBe("test");
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the fulfilled state', function () {
+    update_option("gbw_fulfilledState", "test");
 
-        $this->assertSame("test", $settingsRepository->getFulfilledState());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_can_retrieve_the_fulfillment_error_state()
-    {
-        update_option("gbw_fulfillmentErrorState", "test");
+    expect($settingsRepository->getFulfilledState())->toBe("test");
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the fulfillment error state', function () {
+    update_option("gbw_fulfillmentErrorState", "test");
 
-        $this->assertSame("test", $settingsRepository->getFulfillmentErrorState());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_can_set_the_auth_token()
-    {
-        $settingsRepository = new SettingsRepository();
+    expect($settingsRepository->getFulfillmentErrorState())->toBe("test");
+});
 
-        $token = new OAuthToken("token", time());
-        $settingsRepository->setAccessToken($token);
+test('it can set the auth token', function () {
+    $settingsRepository = new SettingsRepository();
 
-        $this->assertSame(serialize($token), get_option("gbw_accessToken"));
-    }
+    $token = new OAuthToken("token", time());
+    $settingsRepository->setAccessToken($token);
 
-    public function test_it_can_retrieve_the_site_url()
-    {
-        $settingsRepository = new SettingsRepository();
+    expect(get_option("gbw_accessToken"))->toBe(serialize($token));
+});
 
-        $siteUrl = "http://test.com";
-        update_option('siteurl', $siteUrl);
+test('it can retrieve the site url', function () {
+    $settingsRepository = new SettingsRepository();
 
-        $this->assertSame($siteUrl, $settingsRepository->getSiteUrl());
-    }
+    $siteUrl = "http://test.com";
+    update_option('siteurl', $siteUrl);
 
-    public function test_it_can_retrieve_the_rest_url()
-    {
-        $settingsRepository = new SettingsRepository();
+    expect($settingsRepository->getSiteUrl())->toBe($siteUrl);
+});
 
-        $homeUrl = "http://test.com";
-        $restUrlToTest = $homeUrl . "/wp-json/";
-        update_option('home', $homeUrl);
-        update_option('permalink_structure', '/%postname%/');
+test('it can retrieve the rest url', function () {
+    $settingsRepository = new SettingsRepository();
 
-        $this->assertSame($restUrlToTest, $settingsRepository->getRestUrl());
-    }
+    $homeUrl = "http://test.com";
+    $restUrlToTest = $homeUrl . "/wp-json/";
+    update_option('home', $homeUrl);
+    update_option('permalink_structure', '/%postname%/');
 
-    public function test_it_can_retrieve_the_customer_id()
-    {
-        update_option("gbw_customer_id", 42);
+    expect($settingsRepository->getRestUrl())->toBe($restUrlToTest);
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the customer id', function () {
+    update_option("gbw_customer_id", 42);
 
-        $this->assertSame(42, $settingsRepository->getCustomerId());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_can_retrieve_the_order_id_field()
-    {
-        update_option("gbw_order_id_field", "asdf");
+    expect($settingsRepository->getCustomerId())->toBe(42);
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the order id field', function () {
+    update_option("gbw_order_id_field", "asdf");
 
-        $this->assertSame("asdf", $settingsRepository->getOrderIdFieldName());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_retrieves_a_default_order_id_field_name()
-    {
-        $settingsRepository = new SettingsRepository();
+    expect($settingsRepository->getOrderIdFieldName())->toBe("asdf");
+});
 
-        $this->assertSame(OrderOptionsTab::ORDER_ID_FIELD_DEFAULT_VALUE, $settingsRepository->getOrderIdFieldName());
-    }
+test('it retrieves a default order id field name', function () {
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_can_retrieve_the_tracking_link_field()
-    {
-        update_option("gbw_tracking_link_field", "tracking_link");
+    expect($settingsRepository->getOrderIdFieldName())->toBe(OrderOptionsTab::ORDER_ID_FIELD_DEFAULT_VALUE);
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the tracking link field', function () {
+    update_option("gbw_tracking_link_field", "tracking_link");
 
-        $this->assertSame("tracking_link", $settingsRepository->getTrackingLinkFieldName());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_retrieves_a_default_tracking_link_field_name()
-    {
-        $settingsRepository = new SettingsRepository();
+    expect($settingsRepository->getTrackingLinkFieldName())->toBe("tracking_link");
+});
 
-        $this->assertSame(OrderOptionsTab::TRACKING_LINK_FIELD_DEFAULT_VALUE, $settingsRepository->getTrackingLinkFieldName());
-    }
+test('it retrieves a default tracking link field name', function () {
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_can_retrieve_the_carrier_information()
-    {
-        update_option("gbw_carrier_information_field", "carrier_information");
+    expect($settingsRepository->getTrackingLinkFieldName())->toBe(OrderOptionsTab::TRACKING_LINK_FIELD_DEFAULT_VALUE);
+});
 
-        $settingsRepository = new SettingsRepository();
+test('it can retrieve the carrier information', function () {
+    update_option("gbw_carrier_information_field", "carrier_information");
 
-        $this->assertSame("carrier_information", $settingsRepository->getCarrierInformationFieldName());
-    }
+    $settingsRepository = new SettingsRepository();
 
-    public function test_it_retrieves_a_default_carrier_information_field_name()
-    {
-        $settingsRepository = new SettingsRepository();
+    expect($settingsRepository->getCarrierInformationFieldName())->toBe("carrier_information");
+});
 
-        $this->assertSame(OrderOptionsTab::CARRIER_INFORMATION_FIELD_DEFAULT_VALUE, $settingsRepository->getCarrierInformationFieldName());
-    }
-}
+test('it retrieves a default carrier information field name', function () {
+    $settingsRepository = new SettingsRepository();
+
+    expect($settingsRepository->getCarrierInformationFieldName())->toBe(OrderOptionsTab::CARRIER_INFORMATION_FIELD_DEFAULT_VALUE);
+});

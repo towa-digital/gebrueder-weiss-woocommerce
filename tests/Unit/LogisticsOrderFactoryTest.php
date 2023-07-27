@@ -1,264 +1,224 @@
 <?php
 
-namespace Tests\Unit;
-
-use DateTimeInterface;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
-use PHPUnit\Framework\TestCase;
-use Mockery;
-use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
 
-class LogisticsOrderFactoryTest extends TestCase
-{
-    use MockeryPHPUnitIntegration;
 
+uses(\Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration::class);
+
+beforeEach(function () {
     /** @var MockInterface|SettingsRepository */
-    private $settingsRepository;
+    $this->settingsRepository = Mockery::mock(SettingsRepository::class);
+    $this->settingsRepository->allows([
+        "getSiteUrl" => "http://test.com",
+        "getRestUrl" => "http://test.com/wp-json/",
+        "getCustomerId" => 420000,
+    ]);
 
-    /** @var LogisticsOrderFactory */
-    private $logisticsOrderFactory;
+    $this->logisticsOrderFactory = new LogisticsOrderFactory($this->settingsRepository);
 
-    /** @var array */
-    private $wooCommerceOrderMockMethods;
+    /** @var MockInterface|stdClass */
+    $product = Mockery::mock("WC_Product");
+    $product->allows([
+        "get_sku" => "234",
+    ]);
 
-    /** @var array */
-    private $wooCommerceMockOrderItems;
+    $orderItemMethods = [
+        "get_id" => 123,
+        "get_product" => $product,
+        "get_quantity" => 4,
+    ];
 
-    public function setUp(): void
-    {
-        /** @var MockInterface|SettingsRepository */
-        $this->settingsRepository = Mockery::mock(SettingsRepository::class);
-        $this->settingsRepository->allows([
-            "getSiteUrl" => "http://test.com",
-            "getRestUrl" => "http://test.com/wp-json/",
-            "getCustomerId" => 420000,
-        ]);
+    /** @var MockInterface|stdClass */
+    $orderItem1 = Mockery::mock("WC_Order_Item_Product");
+    $orderItem1->allows($orderItemMethods);
 
-        $this->logisticsOrderFactory = new LogisticsOrderFactory($this->settingsRepository);
+    /** @var MockInterface|stdClass */
+    $orderItem2 = Mockery::mock("WC_Order_Item_Product");
+    $orderItem2->allows($orderItemMethods);
 
-        /** @var MockInterface|stdClass */
-        $product = Mockery::mock("WC_Product");
-        $product->allows([
-            "get_sku" => "234",
-        ]);
+    // WooCommerce returns the order items as array<string, WC_Order_Item>
+    $this->wooCommerceMockOrderItems = [
+        "1" => $orderItem1,
+        "3" => $orderItem2
+    ];
 
-        $orderItemMethods = [
-            "get_id" => 123,
-            "get_product" => $product,
-            "get_quantity" => 4,
-        ];
+    $this->wooCommerceOrderMockMethods = [
+        "get_id" => 12,
+        "get_date_created" => new \WC_DateTime("2021-07-29T14:53:52+00:00"),
+        "get_shipping_first_name" => "first-name",
+        "get_shipping_last_name" => "last-name",
+        "get_shipping_company" => "company",
+        "get_shipping_address_1" => "address-1",
+        "get_shipping_address_2" => "address-2",
+        "get_shipping_city" => "city",
+        "get_shipping_postcode" => "zip-code",
+        "get_shipping_country" => "country",
+        "get_shipping_state" => "state",
+        "get_billing_email" => "test@company.com",
+        "get_billing_phone" => "123456789",
+        "get_items" => $this->wooCommerceMockOrderItems,
+        "get_customer_note" => "note",
+    ];
+});
 
-        /** @var MockInterface|stdClass */
-        $orderItem1 = Mockery::mock("WC_Order_Item_Product");
-        $orderItem1->allows($orderItemMethods);
+test('it adds the customer order to the payload', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder());
 
-        /** @var MockInterface|stdClass */
-        $orderItem2 = Mockery::mock("WC_Order_Item_Product");
-        $orderItem2->allows($orderItemMethods);
+    expect($logisticsOrder->getLogisticsOrder()->getCustomerOrder())->toBe("12");
+});
 
-        // WooCommerce returns the order items as array<string, WC_Order_Item>
-        $this->wooCommerceMockOrderItems = [
-            "1" => $orderItem1,
-            "3" => $orderItem2
-        ];
+test('it adds the success callback url to the payload', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder());
 
-        $this->wooCommerceOrderMockMethods = [
-            "get_id" => 12,
-            "get_date_created" => new \WC_DateTime("2021-07-29T14:53:52+00:00"),
-            "get_shipping_first_name" => "first-name",
-            "get_shipping_last_name" => "last-name",
-            "get_shipping_company" => "company",
-            "get_shipping_address_1" => "address-1",
-            "get_shipping_address_2" => "address-2",
-            "get_shipping_city" => "city",
-            "get_shipping_postcode" => "zip-code",
-            "get_shipping_country" => "country",
-            "get_shipping_state" => "state",
-            "get_billing_email" => "test@company.com",
-            "get_billing_phone" => "123456789",
-            "get_items" => $this->wooCommerceMockOrderItems,
-            "get_customer_note" => "note",
-        ];
-    }
+    expect($logisticsOrder->getCallbacks()->getSuccessCallback())->toBe("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/success");
+});
 
-    public function test_it_adds_the_customer_order_to_the_payload()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+test('it adds the fulfillment callback url to the payload', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder());
 
-        $this->assertSame("12", $logisticsOrder->getLogisticsOrder()->getCustomerOrder());
-    }
+    expect($logisticsOrder->getCallbacks()->getFulfillmentCallback())->toBe("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/fulfillment");
+});
 
+test('it adds the created date to the logistics order', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
 
-    public function test_it_adds_the_success_callback_url_to_the_payload()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+    expect($logisticsOrder->getCreationDateTime()->format(DateTimeInterface::RFC3339))->toBe("2021-07-29T14:53:52+00:00");
+});
 
-        $this->assertSame("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/success", $logisticsOrder->getCallbacks()->getSuccessCallback());
-    }
+test('it adds the owner id to the logistics order', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
 
-    public function test_it_adds_the_fulfillment_callback_url_to_the_payload()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder());
+    expect($logisticsOrder->getCustomerId())->toBe(420000);
+});
 
-        $this->assertSame("http://test.com/wp-json/gebrueder-weiss-woocommerce/v1/orders/12/callbacks/fulfillment", $logisticsOrder->getCallbacks()->getFulfillmentCallback());
-    }
+test('it correctly adds the consignee address', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
 
-    public function test_it_adds_the_created_date_to_the_logistics_order()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+    $logisticsOrder->getLogisticsAddresses();
+    $address = $logisticsOrder->getLogisticsAddresses()[0];
 
-        $this->assertSame("2021-07-29T14:53:52+00:00", $logisticsOrder->getCreationDateTime()->format(DateTimeInterface::RFC3339));
-    }
+    expect($address->getAddressType())->toBe("CONSIGNEE");
+    expect($address->getAddress()->getName1())->toBe("first-name");
+    expect($address->getAddress()->getName2())->toBe("last-name");
+    expect($address->getAddress()->getName3())->toBe("company");
+    expect($address->getAddress()->getStreet1())->toBe("address-1");
+    expect($address->getAddress()->getStreet2())->toBe("address-2");
+    expect($address->getAddress()->getCity())->toBe("city");
+    expect($address->getAddress()->getZipCode())->toBe("zip-code");
+    expect($address->getAddress()->getCountryCode())->toBe("country");
+    expect($address->getAddress()->getState())->toBe("state");
+});
 
-    public function test_it_adds_the_owner_id_to_the_logistics_order()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+test('it correctly adds the consignee contact', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
 
-        $this->assertSame(420000, $logisticsOrder->getCustomerId());
-    }
+    $logisticsOrder->getLogisticsAddresses();
+    $address = $logisticsOrder->getLogisticsAddresses()[0];
 
-    public function test_it_correctly_adds_the_consignee_address()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+    expect($address->getContact()->getName())->toBe("first-name last-name");
+    expect($address->getContact()->getEmail())->toBe("test@company.com");
+    expect($address->getContact()->getPhone())->toBe("123456789");
+});
 
-        $logisticsOrder->getLogisticsAddresses();
-        $address = $logisticsOrder->getLogisticsAddresses()[0];
+test('it correctly creates the consignee contact name if only one name is available', function () {
+    $orderMethods = $this->wooCommerceOrderMockMethods;
+    $orderMethods["get_shipping_first_name"] = null;
 
-        $this->assertSame("CONSIGNEE", $address->getAddressType());
-        $this->assertSame("first-name", $address->getAddress()->getName1());
-        $this->assertSame("last-name", $address->getAddress()->getName2());
-        $this->assertSame("company", $address->getAddress()->getName3());
-        $this->assertSame("address-1", $address->getAddress()->getStreet1());
-        $this->assertSame("address-2", $address->getAddress()->getStreet2());
-        $this->assertSame("city", $address->getAddress()->getCity());
-        $this->assertSame("zip-code", $address->getAddress()->getZipCode());
-        $this->assertSame("country", $address->getAddress()->getCountryCode());
-        $this->assertSame("state", $address->getAddress()->getState());
-    }
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder($orderMethods))->getLogisticsOrder();
 
-    public function test_it_correctly_adds_the_consignee_contact()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+    $logisticsOrder->getLogisticsAddresses();
+    $address = $logisticsOrder->getLogisticsAddresses()[0];
 
-        $logisticsOrder->getLogisticsAddresses();
-        $address = $logisticsOrder->getLogisticsAddresses()[0];
+    expect($address->getContact()->getName())->toBe("last-name");
+});
 
-        $this->assertSame("first-name last-name", $address->getContact()->getName());
-        $this->assertSame("test@company.com", $address->getContact()->getEmail());
-        $this->assertSame("123456789", $address->getContact()->getPhone());
-    }
+test('it correctly adds the orderby address', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
 
-    public function test_it_correctly_creates_the_consignee_contact_name_if_only_one_name_is_available()
-    {
-        $orderMethods = $this->wooCommerceOrderMockMethods;
-        $orderMethods["get_shipping_first_name"] = null;
+    $logisticsOrder->getLogisticsAddresses();
+    $address = $logisticsOrder->getLogisticsAddresses()[1];
 
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder($orderMethods))->getLogisticsOrder();
+    expect($address->getAddressType())->toBe("ORDERBY");
+});
 
-        $logisticsOrder->getLogisticsAddresses();
-        $address = $logisticsOrder->getLogisticsAddresses()[0];
+test('it adds the correct qualifier to the orderby address', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
 
-        $this->assertSame("last-name", $address->getContact()->getName());
-    }
+    $logisticsOrder->getLogisticsAddresses();
+    $address = $logisticsOrder->getLogisticsAddresses()[1];
 
-    public function test_it_correctly_adds_the_orderby_address()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+    expect($address->getAddressReferences()[0]->getReference())->toBe("420000");
+});
 
-        $logisticsOrder->getLogisticsAddresses();
-        $address = $logisticsOrder->getLogisticsAddresses()[1];
+test('it adds the custom id to the orderby address', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
 
-        $this->assertSame("ORDERBY", $address->getAddressType());
-    }
+    $logisticsOrder->getLogisticsAddresses();
+    $address = $logisticsOrder->getLogisticsAddresses()[1];
 
-    public function test_it_adds_the_correct_qualifier_to_the_orderby_address()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+    expect($address->getAddressReferences()[0]->getQualifier())->toBe("CUSTOMER_ID");
+});
 
-        $logisticsOrder->getLogisticsAddresses();
-        $address = $logisticsOrder->getLogisticsAddresses()[1];
+test('it builds an order line for each article', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
 
-        $this->assertSame("420000", $address->getAddressReferences()[0]->getReference());
-    }
+    expect($logisticsOrder->getOrderLines())->toHaveCount(2);
+});
 
-    public function test_it_adds_the_custom_id_to_the_orderby_address()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+test('it ensures that the order line array has proper keys', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
 
-        $logisticsOrder->getLogisticsAddresses();
-        $address = $logisticsOrder->getLogisticsAddresses()[1];
+    expect($logisticsOrder->getOrderLines())->toHaveKey(0);
+    expect($logisticsOrder->getOrderLines())->toHaveKey(1);
+});
 
-        $this->assertSame("CUSTOMER_ID", $address->getAddressReferences()[0]->getQualifier());
-    }
+test('it converts woocommerce order items into articles', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
+    $orderLine = $logisticsOrder->getOrderLines()[0];
 
-    public function test_it_builds_an_order_line_for_each_article()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+    expect($orderLine->getArticleId())->toBe("234");
+    expect($orderLine->getLineItemNumber())->toBe(123);
+    expect($orderLine->getQuantity())->toBe(4);
+});
 
-        $this->assertCount(2, $logisticsOrder->getOrderLines());
-    }
+test('it adds one delivery note to the article', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
+    $article = $logisticsOrder->getOrderLines()[0];
 
-    public function test_it_ensures_that_the_order_line_array_has_proper_keys()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
+    expect($article->getNotes())->toHaveCount(1);
+    expect($article->getNotes()[0]->getNoteType())->toBe("DELIVERYNOTE");
+});
 
-        $this->assertArrayHasKey(0, $logisticsOrder->getOrderLines());
-        $this->assertArrayHasKey(1, $logisticsOrder->getOrderLines());
-    }
+test('it adds the customer message to the delivery note', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
+    $article = $logisticsOrder->getOrderLines()[0];
 
-    public function test_it_converts_woocommerce_order_items_into_articles()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
-        $orderLine = $logisticsOrder->getOrderLines()[0];
+    expect($article->getNotes()[0]->getNoteText()->getLanguage())->toBe("en-US");
+    expect($article->getNotes()[0]->getNoteText()->getText())->toBe("note");
+});
 
-        $this->assertSame("234", $orderLine->getArticleId());
-        $this->assertSame(123, $orderLine->getLineItemNumber());
-        $this->assertSame(4, $orderLine->getQuantity());
-    }
+test('it adds logistics requirements', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
+    $logisticsRequirement = $logisticsOrder->getLogisticsRequirements();
 
-    public function test_it_adds_one_delivery_note_to_the_article()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
-        $article = $logisticsOrder->getOrderLines()[0];
+    expect($logisticsRequirement->getLogisticsProduct())->not->toBeNull();
+});
 
-        $this->assertCount(1, $article->getNotes());
-        $this->assertSame("DELIVERYNOTE", $article->getNotes()[0]->getNoteType());
-    }
+test('it adds a logistics product', function () {
+    $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder(createMockOrder())->getLogisticsOrder();
+    $product = $logisticsOrder->getLogisticsRequirements()->getLogisticsProduct();
 
-    public function test_it_adds_the_customer_message_to_the_delivery_note()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
-        $article = $logisticsOrder->getOrderLines()[0];
+    expect($product->getProduct())->toBe("OUTBOUND_DELIVERY");
+    expect($product->getProductServiceLevel())->toBe("STANDARD");
+});
 
-        $this->assertSame("en-US", $article->getNotes()[0]->getNoteText()->getLanguage());
-        $this->assertSame("note", $article->getNotes()[0]->getNoteText()->getText());
-    }
+function createMockOrder(?array $mockMethods = null)
+{
+    /** @var MockInterface|stdClass */
+    $order = Mockery::mock("WC_Order");
+    $order->allows($mockMethods ?? $this->wooCommerceOrderMockMethods);
 
-    public function test_it_adds_logistics_requirements()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
-        $logisticsRequirement = $logisticsOrder->getLogisticsRequirements();
-
-        $this->assertNotNull($logisticsRequirement->getLogisticsProduct());
-    }
-
-    public function test_it_adds_a_logistics_product()
-    {
-        $logisticsOrder = $this->logisticsOrderFactory->buildFromWooCommerceOrder($this->createMockOrder())->getLogisticsOrder();
-        $product = $logisticsOrder->getLogisticsRequirements()->getLogisticsProduct();
-
-        $this->assertSame("OUTBOUND_DELIVERY", $product->getProduct());
-        $this->assertSame("STANDARD", $product->getProductServiceLevel());
-    }
-
-    private function createMockOrder(?array $mockMethods = null)
-    {
-        /** @var MockInterface|stdClass */
-        $order = Mockery::mock("WC_Order");
-        $order->allows($mockMethods ?? $this->wooCommerceOrderMockMethods);
-
-        return $order;
-    }
+    return $order;
 }

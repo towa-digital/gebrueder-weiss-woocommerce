@@ -1,15 +1,10 @@
 <?php
 
-namespace Tests\Unit;
-
 use Towa\GebruederWeissWooCommerce\FailedRequestQueue\FailedRequestRepository;
 use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\LogisticsOrderFactory;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
-use PHPUnit\Framework\TestCase;
-use Mockery;
-use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
 use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissSDK\ApiException;
@@ -17,165 +12,145 @@ use Towa\GebruederWeissSDK\Configuration;
 use Towa\GebruederWeissSDK\Model\InlineObject as CreateLogisticsOrderPayload;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
-use WC_Order;
 
-class WooCommerceOrderStatusChangedTest extends TestCase
-{
-    use MockeryPHPUnitIntegration;
+uses(\Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration::class);
 
-    private const STATE_SELECTED_FULFILLMENT          = "selected-state";
-    private const STATE_PREFIXED_SELECTED_FULFILLMENT = "wc-selected-state";
-    private const STATE_ON_HOLD                       = "on-hold";
-    private const STATE_ERROR                         = "wc-error";
+private const STATE_SELECTED_FULFILLMENT          = "selected-state";
 
-    private const ONE_HOUR_IN_SECONDS = 3600;
+private const STATE_PREFIXED_SELECTED_FULFILLMENT = "wc-selected-state";
 
-    private const HTTP_STATUS_CONFLICT = 409;
+private const STATE_ON_HOLD                       = "on-hold";
 
-    /** @var Plugin */
-    private $plugin;
+private const STATE_ERROR                         = "wc-error";
 
-    /** @var MockInterface|DefaultApi */
-    private $gebruederWeissApi;
+private const ONE_HOUR_IN_SECONDS = 3600;
 
-    /** @var MockInterface|FailedRequestRepository */
-    private $failedRequestRepository;
+private const HTTP_STATUS_CONFLICT = 409;
 
-    /** @var MockInterface|object */
-    private $order;
+beforeEach(function () {
+    $this->plugin = Plugin::getInstance();
 
-    public function setUp(): void
-    {
-        parent::setUp();
+    $this->gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $this->gebruederWeissApi->allows("logisticsOrderPost");
+    $this->gebruederWeissApi->allows(["getConfig" => new Configuration()]);
 
-        $this->plugin = Plugin::getInstance();
+    /** @var MockInterface|SettingsRepository $settingsRepository */
+    $settingsRepository = Mockery::mock(SettingsRepository::class);
+    $settingsRepository->allows([
+        "getFulfillmentState" => self::STATE_PREFIXED_SELECTED_FULFILLMENT,
+        "getPendingState"     => self::STATE_ON_HOLD,
+        "getClientId"         => "id",
+        "getClientSecret"     => "secret",
+        "setAccessToken"      => null,
+        "getAccessToken"      => new OAuthToken("test", time() + self::ONE_HOUR_IN_SECONDS),
+        "getSiteUrl"          => "http://test.com",
+    ]);
 
-        $this->gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $this->gebruederWeissApi->allows("logisticsOrderPost");
-        $this->gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+    /** @var MockInterface|LogisticsOrderFactory $logisticsOrderFactory */
+    $logisticsOrderFactory = Mockery::mock(LogisticsOrderFactory::class);
+    $logisticsOrderFactory->allows([
+        "buildFromWooCommerceOrder" => new CreateLogisticsOrderPayload(),
+    ]);
 
-        /** @var MockInterface|SettingsRepository $settingsRepository */
-        $settingsRepository = Mockery::mock(SettingsRepository::class);
-        $settingsRepository->allows([
-            "getFulfillmentState" => self::STATE_PREFIXED_SELECTED_FULFILLMENT,
-            "getPendingState"     => self::STATE_ON_HOLD,
-            "getClientId"         => "id",
-            "getClientSecret"     => "secret",
-            "setAccessToken"      => null,
-            "getAccessToken"      => new OAuthToken("test", time() + self::ONE_HOUR_IN_SECONDS),
-            "getSiteUrl"          => "http://test.com",
-        ]);
+    /** @var MockInterface|OAuthAuthenticator $authenticator */
+    $authenticator = Mockery::mock(OAuthAuthenticator::class);
+    $authenticator->allows("updateAuthTokenIfNecessary");
 
-        /** @var MockInterface|LogisticsOrderFactory $logisticsOrderFactory */
-        $logisticsOrderFactory = Mockery::mock(LogisticsOrderFactory::class);
-        $logisticsOrderFactory->allows([
-            "buildFromWooCommerceOrder" => new CreateLogisticsOrderPayload(),
-        ]);
+    $this->failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $this->failedRequestRepository->allows("create");
 
-        /** @var MockInterface|OAuthAuthenticator $authenticator */
-        $authenticator = Mockery::mock(OAuthAuthenticator::class);
-        $authenticator->allows("updateAuthTokenIfNecessary");
+    $this->plugin->setGebruederWeissApiClient($this->gebruederWeissApi);
+    $this->plugin->setSettingsRepository($settingsRepository);
+    $this->plugin->setAuthenticationClient($authenticator);
+    $this->plugin->setLogisticsOrderFactory($logisticsOrderFactory);
+    $this->plugin->setFailedRequestRepository($this->failedRequestRepository);
 
-        $this->failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $this->failedRequestRepository->allows("create");
+    $this->order = Mockery::mock(WC_Order::class);
+});
 
-        $this->plugin->setGebruederWeissApiClient($this->gebruederWeissApi);
-        $this->plugin->setSettingsRepository($settingsRepository);
-        $this->plugin->setAuthenticationClient($authenticator);
-        $this->plugin->setLogisticsOrderFactory($logisticsOrderFactory);
-        $this->plugin->setFailedRequestRepository($this->failedRequestRepository);
+test('it does not call the api if fulfillment state does not match the selection', function () {
+    $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", "some-state", (object)[]);
 
-        $this->order = Mockery::mock(WC_Order::class);
-    }
+    $this->gebruederWeissApi->shouldNotHaveBeenCalled(["logisticsOrderPost"]);
+});
 
-    public function test_it_does_not_call_the_api_if_fulfillment_state_does_not_match_the_selection()
-    {
-        $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", "some-state", (object)[]);
+test('it calls the api if the fulfillment state matches the selection', function () {
+    $this->order->allows("set_status");
+    $this->order->allows("save");
 
-        $this->gebruederWeissApi->shouldNotHaveBeenCalled(["logisticsOrderPost"]);
-    }
+    $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::STATE_SELECTED_FULFILLMENT, $this->order);
 
-    public function test_it_calls_the_api_if_the_fulfillment_state_matches_the_selection()
-    {
-        $this->order->allows("set_status");
-        $this->order->allows("save");
+    $this->gebruederWeissApi->shouldHaveReceived("logisticsOrderPost", ["en-US", CreateLogisticsOrderPayload::class]);
+});
 
-        $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::STATE_SELECTED_FULFILLMENT, $this->order);
+test('it creates a failed request if the command fails', function () {
+    /** @var MockInterface|DefaultApi $gebruederWeissApi */
+    $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+    $gebruederWeissApi
+        ->shouldReceive("logisticsOrderPost")
+        ->andThrow(new ApiException("Unauthenticated", 401));
 
-        $this->gebruederWeissApi->shouldHaveReceived("logisticsOrderPost", ["en-US", CreateLogisticsOrderPayload::class]);
-    }
+    $this->plugin->setGebruederWeissApiClient($gebruederWeissApi);
 
-    public function test_it_creates_a_failed_request_if_the_command_fails()
-    {
-        /** @var MockInterface|DefaultApi $gebruederWeissApi */
-        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
-        $gebruederWeissApi
-            ->shouldReceive("logisticsOrderPost")
-            ->andThrow(new ApiException("Unauthenticated", 401));
+    $this->order->allows([
+        "set_status" => null,
+        "save"       => null,
+        "get_id"     => 42
+    ]);
 
-        $this->plugin->setGebruederWeissApiClient($gebruederWeissApi);
+    $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::STATE_SELECTED_FULFILLMENT, $this->order);
 
-        $this->order->allows([
-            "set_status" => null,
-            "save"       => null,
-            "get_id"     => 42
-        ]);
+    $this->failedRequestRepository->shouldHaveReceived("create");
+});
 
-        $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::STATE_SELECTED_FULFILLMENT, $this->order);
+/**
+ * We need to isolate this test to be able to alias mock the
+ * WordPress class with our helper functions.
+ *
+ * @runInSeparateProcess
+ * @preserveGlobalState disabled
+ */
+test('it handles conflict errors', function () {
+    /** @var MockInterface $wordpressMock */
+    $wordpressMock = Mockery::mock("alias:" . WordPress::class);
+    $wordpressMock
+        ->shouldReceive("sendMailToAdmin")
+        ->once();
 
-        $this->failedRequestRepository->shouldHaveReceived("create");
-    }
+    /** @var MockInterface|DefaultApi $gebruederWeissApi */
+    $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+    $gebruederWeissApi
+        ->shouldReceive("logisticsOrderPost")
+        ->andThrow(new ApiException("Conflict", self::HTTP_STATUS_CONFLICT));
 
-    /**
-     * We need to isolate this test to be able to alias mock the
-     * WordPress class with our helper functions.
-     *
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
-    public function test_it_handles_conflict_errors()
-    {
-        /** @var MockInterface $wordpressMock */
-        $wordpressMock = Mockery::mock("alias:" . WordPress::class);
-        $wordpressMock
-            ->shouldReceive("sendMailToAdmin")
-            ->once();
+    $this->plugin->setGebruederWeissApiClient($gebruederWeissApi);
 
-        /** @var MockInterface|DefaultApi $gebruederWeissApi */
-        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
-        $gebruederWeissApi
-            ->shouldReceive("logisticsOrderPost")
-            ->andThrow(new ApiException("Conflict", self::HTTP_STATUS_CONFLICT));
+    /** @var MockInterface|SettingsRepository $settingsRepository */
+    $settingsRepository = Mockery::mock(SettingsRepository::class);
+    $settingsRepository->allows([
+        "getFulfillmentState"      => self::STATE_PREFIXED_SELECTED_FULFILLMENT,
+        "getFulfillmentErrorState" => self::STATE_ERROR,
+        "getPendingState"          => self::STATE_ON_HOLD,
+        "getClientId"              => "id",
+        "getClientSecret"          => "secret",
+        "setAccessToken"           => null,
+        "getAccessToken"           => new OAuthToken("token", time() + self::ONE_HOUR_IN_SECONDS),
+        "getSiteUrl"               => "http://test.com",
+    ]);
+    $this->plugin->setSettingsRepository($settingsRepository);
 
-        $this->plugin->setGebruederWeissApiClient($gebruederWeissApi);
+    $this->order->allows(["get_id" => 42]);
+    $this->order
+        ->shouldReceive("set_status")
+        ->once()
+        ->withArgs(["wc-error"]);
+    $this->order
+        ->shouldReceive("save")
+        ->once();
 
-        /** @var MockInterface|SettingsRepository $settingsRepository */
-        $settingsRepository = Mockery::mock(SettingsRepository::class);
-        $settingsRepository->allows([
-            "getFulfillmentState"      => self::STATE_PREFIXED_SELECTED_FULFILLMENT,
-            "getFulfillmentErrorState" => self::STATE_ERROR,
-            "getPendingState"          => self::STATE_ON_HOLD,
-            "getClientId"              => "id",
-            "getClientSecret"          => "secret",
-            "setAccessToken"           => null,
-            "getAccessToken"           => new OAuthToken("token", time() + self::ONE_HOUR_IN_SECONDS),
-            "getSiteUrl"               => "http://test.com",
-        ]);
-        $this->plugin->setSettingsRepository($settingsRepository);
+    $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::STATE_SELECTED_FULFILLMENT, $this->order);
 
-        $this->order->allows(["get_id" => 42]);
-        $this->order
-            ->shouldReceive("set_status")
-            ->once()
-            ->withArgs(["wc-error"]);
-        $this->order
-            ->shouldReceive("save")
-            ->once();
-
-        $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::STATE_SELECTED_FULFILLMENT, $this->order);
-
-        $this->failedRequestRepository->shouldNotHaveReceived("create");
-    }
-}
+    $this->failedRequestRepository->shouldNotHaveReceived("create");
+});

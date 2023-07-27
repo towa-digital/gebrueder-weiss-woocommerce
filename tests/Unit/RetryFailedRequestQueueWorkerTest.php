@@ -1,11 +1,6 @@
 <?php
 
-namespace Tests\Unit;
-
-use Mockery;
-use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
-use PHPUnit\Framework\TestCase;
 use Towa\GebruederWeissSDK\ApiException;
 use Towa\GebruederWeissSDK\Configuration;
 use Towa\GebruederWeissSDK\Api\DefaultApi;
@@ -18,420 +13,393 @@ use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\OrderRepository;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
-use WC_Order;
 
-class RetryFailedRequestsQueueWorkerTest extends TestCase
-{
-    use MockeryPHPUnitIntegration;
+uses(\Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration::class);
 
-    private const HTTP_STATUS_CONFLICT = 409;
+private const HTTP_STATUS_CONFLICT = 409;
 
-    private const STATUS_FAILED  = "wc-failed";
-    private const STATUS_PENDING = "on-hold";
+private const STATUS_FAILED  = "wc-failed";
 
-    private const TEST_ORDER_ID = 42;
+private const STATUS_PENDING = "on-hold";
 
-    /** @var MockInterface|DefaultApi */
-    private $gebruederWeissApi;
+private const TEST_ORDER_ID = 42;
 
-    /** @var MockInterface|LogisticsOrderFactory */
-    private $logisticsOrderFactory;
+beforeEach(function () {
+    $this->gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $this->gebruederWeissApi->allows("logisticsOrderPost");
+    $this->gebruederWeissApi->allows(["getConfig" => new Configuration()]);
 
-    /** @var MockInterface|OrderRepository */
-    private $orderRepository;
+    $this->logisticsOrderFactory = Mockery::mock(LogisticsOrderFactory::class);
+    $this->logisticsOrderFactory->allows(["buildFromWooCommerceOrder" => new CreateLogisticsOrderPayload()]);
 
-    /** @var MockInterface|SettingsRepository */
-    private $settingsRepository;
+    /** @var MockInterface|WC_Order $order */
+    $order = Mockery::mock(WC_Order::class);
+    $order->allows([
+        "set_status" => null,
+        "save"       => null,
+        "get_id"     => self::TEST_ORDER_ID
+    ]);
 
-    public function setUp(): void
-    {
-        parent::setUp();
+    $this->orderRepository = Mockery::mock(OrderRepository::class);
+    $this->orderRepository->allows(["findById" => $order]);
 
-        $this->gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $this->gebruederWeissApi->allows("logisticsOrderPost");
-        $this->gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+    $this->settingsRepository = Mockery::mock(SettingsRepository::class);
+    $this->settingsRepository->allows([
+        'getFulfillmentErrorState' => self::STATUS_FAILED,
+        "getAccessToken"           => new OAuthToken("token", time() + 3600),
+        "getPendingState"          => self::STATUS_PENDING
+    ]);
+});
 
-        $this->logisticsOrderFactory = Mockery::mock(LogisticsOrderFactory::class);
-        $this->logisticsOrderFactory->allows(["buildFromWooCommerceOrder" => new CreateLogisticsOrderPayload()]);
+test('it processes all requests that need a retry', function () {
+    $failedRequest = new FailedRequest(2, 4);
 
-        /** @var MockInterface|WC_Order $order */
-        $order = Mockery::mock(WC_Order::class);
-        $order->allows([
-            "set_status" => null,
-            "save"       => null,
-            "get_id"     => self::TEST_ORDER_ID
-        ]);
+    /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
+    $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $failedRequestRepository->allows("update");
+    $failedRequestRepository
+        ->shouldReceive("findOneToRetry")
+        ->times(2)
+        ->andReturn($failedRequest, null);
 
-        $this->orderRepository = Mockery::mock(OrderRepository::class);
-        $this->orderRepository->allows(["findById" => $order]);
+    (new RetryFailedRequestsQueueWorker(
+        $failedRequestRepository,
+        $this->logisticsOrderFactory,
+        $this->gebruederWeissApi,
+        $this->orderRepository,
+        $this->settingsRepository
+    ))->start();
+});
 
-        $this->settingsRepository = Mockery::mock(SettingsRepository::class);
-        $this->settingsRepository->allows([
-            'getFulfillmentErrorState' => self::STATUS_FAILED,
-            "getAccessToken"           => new OAuthToken("token", time() + 3600),
-            "getPendingState"          => self::STATUS_PENDING
-        ]);
-    }
+test('it retries the api call for each failed request', function () {
+    $failedRequest1 = new FailedRequest(2, 4);
+    $failedRequest2 = new FailedRequest(3, 5);
 
-    public function test_it_processes_all_requests_that_need_a_retry()
-    {
-        $failedRequest = new FailedRequest(2, 4);
+    /** @var MockInterface|DefaultApi $gebruederWeissApi */
+    $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+    $gebruederWeissApi
+        ->shouldReceive("logisticsOrderPost")
+        ->times(2);
 
-        /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
-        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository->allows("update");
-        $failedRequestRepository
-            ->shouldReceive("findOneToRetry")
-            ->times(2)
-            ->andReturn($failedRequest, null);
+    /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
+    $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $failedRequestRepository->allows("update");
+    $failedRequestRepository
+        ->shouldReceive("findOneToRetry")
+        ->andReturn($failedRequest1, $failedRequest2, null);
 
-        (new RetryFailedRequestsQueueWorker(
-            $failedRequestRepository,
-            $this->logisticsOrderFactory,
-            $this->gebruederWeissApi,
-            $this->orderRepository,
-            $this->settingsRepository
-        ))->start();
-    }
+    (new RetryFailedRequestsQueueWorker(
+        $failedRequestRepository,
+        $this->logisticsOrderFactory,
+        $gebruederWeissApi,
+        $this->orderRepository,
+        $this->settingsRepository
+    ))->start();
+});
 
-    public function test_it_retries_the_api_call_for_each_failed_request()
-    {
-        $failedRequest1 = new FailedRequest(2, 4);
-        $failedRequest2 = new FailedRequest(3, 5);
+test('it marks requests as successful if they were successful', function () {
+    /** @var FailedRequest|MockInterface $failedRequest */
+    $failedRequest = Mockery::mock(FailedRequest::class);
+    $failedRequest->allows([
+        "getOrderId"        => 4,
+        "setStatus"         => null,
+        "getFailedAttempts" => 1
+    ]);
 
-        /** @var MockInterface|DefaultApi $gebruederWeissApi */
-        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
-        $gebruederWeissApi
-            ->shouldReceive("logisticsOrderPost")
-            ->times(2);
+    /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
+    $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $failedRequestRepository
+        ->shouldReceive("update")
+        ->once();
+    $failedRequestRepository
+        ->shouldReceive("findOneToRetry")
+        ->andReturn($failedRequest, null);
 
-        /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
-        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository->allows("update");
-        $failedRequestRepository
-            ->shouldReceive("findOneToRetry")
-            ->andReturn($failedRequest1, $failedRequest2, null);
+    (new RetryFailedRequestsQueueWorker(
+        $failedRequestRepository,
+        $this->logisticsOrderFactory,
+        $this->gebruederWeissApi,
+        $this->orderRepository,
+        $this->settingsRepository
+    ))->start();
 
-        (new RetryFailedRequestsQueueWorker(
-            $failedRequestRepository,
-            $this->logisticsOrderFactory,
-            $gebruederWeissApi,
-            $this->orderRepository,
-            $this->settingsRepository
-        ))->start();
-    }
+    $failedRequest->shouldHaveReceived("setStatus", [FailedRequest::SUCCESS_STATUS]);
+});
 
-    public function test_it_marks_requests_as_successful_if_they_were_successful()
-    {
-        /** @var FailedRequest|MockInterface $failedRequest */
-        $failedRequest = Mockery::mock(FailedRequest::class);
-        $failedRequest->allows([
-            "getOrderId"        => 4,
-            "setStatus"         => null,
-            "getFailedAttempts" => 1
-        ]);
+test('it increases the failed attempt counter on failures', function () {
+    /** @var FailedRequest|MockInterface $failedRequest */
+    $failedRequest = Mockery::mock(FailedRequest::class);
+    $failedRequest->allows([
+        "getOrderId"        => 4,
+        "setStatus"         => null,
+        "getFailedAttempts" => 1
+    ]);
+    $failedRequest
+        ->shouldReceive("incrementFailedAttempts")
+        ->once();
 
-        /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
-        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository
-            ->shouldReceive("update")
-            ->once();
-        $failedRequestRepository
-            ->shouldReceive("findOneToRetry")
-            ->andReturn($failedRequest, null);
+    /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
+    $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $failedRequestRepository
+        ->shouldReceive("update")
+        ->once();
+    $failedRequestRepository
+        ->shouldReceive("findOneToRetry")
+        ->andReturn($failedRequest, null);
 
-        (new RetryFailedRequestsQueueWorker(
-            $failedRequestRepository,
-            $this->logisticsOrderFactory,
-            $this->gebruederWeissApi,
-            $this->orderRepository,
-            $this->settingsRepository
-        ))->start();
+    /** @var MockInterface|DefaultApi $gebruederWeissApi */
+    $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+    $gebruederWeissApi
+        ->shouldReceive("logisticsOrderPost")
+        ->andThrow(new ApiException("ups"));
 
-        $failedRequest->shouldHaveReceived("setStatus", [FailedRequest::SUCCESS_STATUS]);
-    }
+    (new RetryFailedRequestsQueueWorker(
+        $failedRequestRepository,
+        $this->logisticsOrderFactory,
+        $gebruederWeissApi,
+        $this->orderRepository,
+        $this->settingsRepository
+    ))->start();
+});
 
-    public function test_it_increases_the_failed_attempt_counter_on_failures()
-    {
-        /** @var FailedRequest|MockInterface $failedRequest */
-        $failedRequest = Mockery::mock(FailedRequest::class);
-        $failedRequest->allows([
-            "getOrderId"        => 4,
-            "setStatus"         => null,
-            "getFailedAttempts" => 1
-        ]);
-        $failedRequest
-            ->shouldReceive("incrementFailedAttempts")
-            ->once();
+/**
+ * We need to isolate this test to able to alias mock the
+ * WordPress class with our helper functions.
+ *
+ * @runInSeparateProcess
+ * @preserveGlobalState disabled
+ */
+test('it sends a mail if the request failed for the third time', function () {
+    /** @var FailedRequest|MockInterface $failedRequest */
+    $failedRequest = Mockery::mock(FailedRequest::class);
+    $failedRequest->allows([
+        "getOrderId"              => 4,
+        "setStatus"               => null,
+        "incrementFailedAttempts" => null
+    ]);
+    $failedRequest
+        ->shouldReceive("getFailedAttempts")
+        ->once()
+        ->andReturn(3);
 
-        /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
-        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository
-            ->shouldReceive("update")
-            ->once();
-        $failedRequestRepository
-            ->shouldReceive("findOneToRetry")
-            ->andReturn($failedRequest, null);
+    /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
+    $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $failedRequestRepository->shouldReceive("update");
+    $failedRequestRepository
+        ->shouldReceive("findOneToRetry")
+        ->andReturn($failedRequest, null);
 
-        /** @var MockInterface|DefaultApi $gebruederWeissApi */
-        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
-        $gebruederWeissApi
-            ->shouldReceive("logisticsOrderPost")
-            ->andThrow(new ApiException("ups"));
+    /** @var MockInterface|DefaultApi $gebruederWeissApi */
+    $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+    $gebruederWeissApi
+        ->shouldReceive("logisticsOrderPost")
+        ->andThrow(new ApiException("ups"));
 
-        (new RetryFailedRequestsQueueWorker(
-            $failedRequestRepository,
-            $this->logisticsOrderFactory,
-            $gebruederWeissApi,
-            $this->orderRepository,
-            $this->settingsRepository
-        ))->start();
-    }
+    /** @var MockInterface $wordpressMock */
+    $wordpressMock = Mockery::mock("alias:" . WordPress::class);
+    $wordpressMock
+        ->shouldReceive("sendMailToAdmin")
+        ->once();
 
-    /**
-     * We need to isolate this test to able to alias mock the
-     * WordPress class with our helper functions.
-     *
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
-    public function test_it_sends_a_mail_if_the_request_failed_for_the_third_time()
-    {
-        /** @var FailedRequest|MockInterface $failedRequest */
-        $failedRequest = Mockery::mock(FailedRequest::class);
-        $failedRequest->allows([
-            "getOrderId"              => 4,
-            "setStatus"               => null,
-            "incrementFailedAttempts" => null
-        ]);
-        $failedRequest
-            ->shouldReceive("getFailedAttempts")
-            ->once()
-            ->andReturn(3);
+    (new RetryFailedRequestsQueueWorker(
+        $failedRequestRepository,
+        $this->logisticsOrderFactory,
+        $gebruederWeissApi,
+        $this->orderRepository,
+        $this->settingsRepository
+    ))->start();
+});
 
-        /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
-        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository->shouldReceive("update");
-        $failedRequestRepository
-            ->shouldReceive("findOneToRetry")
-            ->andReturn($failedRequest, null);
+/**
+ * We need to isolate this test to able to alias mock the
+ * WordPress class with our helper functions.
+ *
+ * @runInSeparateProcess
+ * @preserveGlobalState disabled
+ */
+test('it sets the order state to fulfillment error after the third failed try', function () {
+    /** @var FailedRequest|MockInterface $failedRequest */
+    $failedRequest = Mockery::mock(FailedRequest::class);
+    $failedRequest->allows([
+        "getOrderId"              => 4,
+        "setStatus"               => null,
+        "incrementFailedAttempts" => null
+    ]);
+    $failedRequest
+        ->shouldReceive("getFailedAttempts")
+        ->once()
+        ->andReturn(3);
 
-        /** @var MockInterface|DefaultApi $gebruederWeissApi */
-        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
-        $gebruederWeissApi
-            ->shouldReceive("logisticsOrderPost")
-            ->andThrow(new ApiException("ups"));
+    /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
+    $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $failedRequestRepository->shouldReceive("update");
+    $failedRequestRepository
+        ->shouldReceive("findOneToRetry")
+        ->andReturn($failedRequest, null);
 
-        /** @var MockInterface $wordpressMock */
-        $wordpressMock = Mockery::mock("alias:" . WordPress::class);
-        $wordpressMock
-            ->shouldReceive("sendMailToAdmin")
-            ->once();
+    /** @var MockInterface|DefaultApi $gebruederWeissApi */
+    $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+    $gebruederWeissApi
+        ->shouldReceive("logisticsOrderPost")
+        ->andThrow(new ApiException("ups"));
 
-        (new RetryFailedRequestsQueueWorker(
-            $failedRequestRepository,
-            $this->logisticsOrderFactory,
-            $gebruederWeissApi,
-            $this->orderRepository,
-            $this->settingsRepository
-        ))->start();
-    }
+    /** @var MockInterface $wordpressMock */
+    $wordpressMock = Mockery::mock("alias:" . WordPress::class);
+    $wordpressMock->shouldReceive("sendMailToAdmin");
 
-    /**
-     * We need to isolate this test to able to alias mock the
-     * WordPress class with our helper functions.
-     *
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
-    public function test_it_sets_the_order_state_to_fulfillment_error_after_the_third_failed_try()
-    {
-        /** @var FailedRequest|MockInterface $failedRequest */
-        $failedRequest = Mockery::mock(FailedRequest::class);
-        $failedRequest->allows([
-            "getOrderId"              => 4,
-            "setStatus"               => null,
-            "incrementFailedAttempts" => null
-        ]);
-        $failedRequest
-            ->shouldReceive("getFailedAttempts")
-            ->once()
-            ->andReturn(3);
+    /** @var MockInterface|WC_Order $order */
+    $order = Mockery::mock(WC_Order::class);
+    $order->allows(["get_id" => self::TEST_ORDER_ID]);
+    $order
+        ->shouldReceive("set_status")
+        ->once()
+        ->andReturn(null);
+    $order
+        ->shouldReceive("save")
+        ->once();
 
-        /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
-        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository->shouldReceive("update");
-        $failedRequestRepository
-            ->shouldReceive("findOneToRetry")
-            ->andReturn($failedRequest, null);
+    /** @var MockInterface|OrderRepository $orderRepository */
+    $orderRepository = Mockery::mock(OrderRepository::class);
+    $orderRepository->allows(["findById" => $order]);
 
-        /** @var MockInterface|DefaultApi $gebruederWeissApi */
-        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
-        $gebruederWeissApi
-            ->shouldReceive("logisticsOrderPost")
-            ->andThrow(new ApiException("ups"));
+    (new RetryFailedRequestsQueueWorker(
+        $failedRequestRepository,
+        $this->logisticsOrderFactory,
+        $gebruederWeissApi,
+        $orderRepository,
+        $this->settingsRepository
+    ))->start();
 
-        /** @var MockInterface $wordpressMock */
-        $wordpressMock = Mockery::mock("alias:" . WordPress::class);
-        $wordpressMock->shouldReceive("sendMailToAdmin");
+    $order->shouldHaveReceived("set_status", [self::STATUS_FAILED]);
+});
 
-        /** @var MockInterface|WC_Order $order */
-        $order = Mockery::mock(WC_Order::class);
-        $order->allows(["get_id" => self::TEST_ORDER_ID]);
-        $order
-            ->shouldReceive("set_status")
-            ->once()
-            ->andReturn(null);
-        $order
-            ->shouldReceive("save")
-            ->once();
+/**
+ * We need to isolate this test to able to alias mock the
+ * WordPress class with our helper functions.
+ *
+ * @runInSeparateProcess
+ * @preserveGlobalState disabled
+ */
+test('it does not queue a request for retry again if there was a conflict error', function () {
+    /** @var FailedRequest|MockInterface $failedRequest */
+    $failedRequest = Mockery::mock(FailedRequest::class);
+    $failedRequest->allows([
+        "getOrderId"        => 4,
+        "getFailedAttempts" => 1
+    ]);
+    $failedRequest
+        ->shouldReceive("doNotRetry")
+        ->times(1);
 
-        /** @var MockInterface|OrderRepository $orderRepository */
-        $orderRepository = Mockery::mock(OrderRepository::class);
-        $orderRepository->allows(["findById" => $order]);
+    /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
+    $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $failedRequestRepository->shouldReceive("update");
+    $failedRequestRepository
+        ->shouldReceive("findOneToRetry")
+        ->andReturn($failedRequest, null);
 
-        (new RetryFailedRequestsQueueWorker(
-            $failedRequestRepository,
-            $this->logisticsOrderFactory,
-            $gebruederWeissApi,
-            $orderRepository,
-            $this->settingsRepository
-        ))->start();
+    /** @var MockInterface|DefaultApi $gebruederWeissApi */
+    $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
+    $gebruederWeissApi
+        ->shouldReceive("logisticsOrderPost")
+        ->andThrow(new ApiException("Conflict", self::HTTP_STATUS_CONFLICT));
 
-        $order->shouldHaveReceived("set_status", [self::STATUS_FAILED]);
-    }
+    /** @var MockInterface $wordpressMock */
+    $wordpressMock = Mockery::mock("alias:" . WordPress::class);
+    $wordpressMock
+        ->shouldReceive("sendMailToAdmin")
+        ->once();
 
-    /**
-     * We need to isolate this test to able to alias mock the
-     * WordPress class with our helper functions.
-     *
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
-    public function test_it_does_not_queue_a_request_for_retry_again_if_there_was_a_conflict_error()
-    {
-        /** @var FailedRequest|MockInterface $failedRequest */
-        $failedRequest = Mockery::mock(FailedRequest::class);
-        $failedRequest->allows([
-            "getOrderId"        => 4,
-            "getFailedAttempts" => 1
-        ]);
-        $failedRequest
-            ->shouldReceive("doNotRetry")
-            ->times(1);
+    /** @var MockInterface|WC_Order $order */
+    $order = Mockery::mock(WC_Order::class);
+    $order->allows(["get_id" => self::TEST_ORDER_ID]);
+    $order
+        ->shouldReceive("set_status")
+        ->once()
+        ->andReturn(null);
+    $order
+        ->shouldReceive("save")
+        ->once();
 
-        /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
-        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository->shouldReceive("update");
-        $failedRequestRepository
-            ->shouldReceive("findOneToRetry")
-            ->andReturn($failedRequest, null);
+    /** @var MockInterface|OrderRepository $orderRepository */
+    $orderRepository = Mockery::mock(OrderRepository::class);
+    $orderRepository->allows(["findById" => $order]);
 
-        /** @var MockInterface|DefaultApi $gebruederWeissApi */
-        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $gebruederWeissApi->allows(["getConfig" => new Configuration()]);
-        $gebruederWeissApi
-            ->shouldReceive("logisticsOrderPost")
-            ->andThrow(new ApiException("Conflict", self::HTTP_STATUS_CONFLICT));
+    (new RetryFailedRequestsQueueWorker(
+        $failedRequestRepository,
+        $this->logisticsOrderFactory,
+        $gebruederWeissApi,
+        $orderRepository,
+        $this->settingsRepository
+    ))->start();
 
-        /** @var MockInterface $wordpressMock */
-        $wordpressMock = Mockery::mock("alias:" . WordPress::class);
-        $wordpressMock
-            ->shouldReceive("sendMailToAdmin")
-            ->once();
+    $order->shouldHaveReceived("set_status", [self::STATUS_FAILED]);
+});
 
-        /** @var MockInterface|WC_Order $order */
-        $order = Mockery::mock(WC_Order::class);
-        $order->allows(["get_id" => self::TEST_ORDER_ID]);
-        $order
-            ->shouldReceive("set_status")
-            ->once()
-            ->andReturn(null);
-        $order
-            ->shouldReceive("save")
-            ->once();
+test('it ensures that the requests are authenticated', function () {
+    /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
+    $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $failedRequestRepository->allows(["findOneToRetry" => null]);
 
-        /** @var MockInterface|OrderRepository $orderRepository */
-        $orderRepository = Mockery::mock(OrderRepository::class);
-        $orderRepository->allows(["findById" => $order]);
+    /** @var MockInterface|Configuration $configuration */
+    $configuration = Mockery::mock(Configuration::class);
+    $configuration
+        ->shouldReceive("setAccessToken")
+        ->once()
+        ->withArgs(["token"]);
 
-        (new RetryFailedRequestsQueueWorker(
-            $failedRequestRepository,
-            $this->logisticsOrderFactory,
-            $gebruederWeissApi,
-            $orderRepository,
-            $this->settingsRepository
-        ))->start();
+    /** @var MockInterface|DefaultApi $gebruederWeissApi */
+    $gebruederWeissApi = Mockery::mock(DefaultApi::class);
+    $gebruederWeissApi
+        ->shouldReceive("getConfig")
+        ->once()
+        ->andReturn($configuration);
 
-        $order->shouldHaveReceived("set_status", [self::STATUS_FAILED]);
-    }
+    (new RetryFailedRequestsQueueWorker(
+        $failedRequestRepository,
+        $this->logisticsOrderFactory,
+        $gebruederWeissApi,
+        $this->orderRepository,
+        $this->settingsRepository
+    ))->start();
+});
 
-    public function test_it_ensures_that_the_requests_are_authenticated()
-    {
-        /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
-        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository->allows(["findOneToRetry" => null]);
+test('it marks the failed request as successful if the order cannot be found', function () {
+    /** @var FailedRequest|MockInterface $failedRequest */
+    $failedRequest = Mockery::mock(FailedRequest::class);
+    $failedRequest->allows([
+        "getOrderId"        => 4,
+        "setStatus"         => null,
+        "getFailedAttempts" => 1
+    ]);
 
-        /** @var MockInterface|Configuration $configuration */
-        $configuration = Mockery::mock(Configuration::class);
-        $configuration
-            ->shouldReceive("setAccessToken")
-            ->once()
-            ->withArgs(["token"]);
+    /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
+    $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
+    $failedRequestRepository
+        ->shouldReceive("update")
+        ->once();
+    $failedRequestRepository
+        ->shouldReceive("findOneToRetry")
+        ->andReturn($failedRequest, null);
 
-        /** @var MockInterface|DefaultApi $gebruederWeissApi */
-        $gebruederWeissApi = Mockery::mock(DefaultApi::class);
-        $gebruederWeissApi
-            ->shouldReceive("getConfig")
-            ->once()
-            ->andReturn($configuration);
+    /** @var MockInterface|OrderRepository $orderRepository */
+    $orderRepository = Mockery::mock(OrderRepository::class);
+    $orderRepository->allows(["findById" => null]);
 
-        (new RetryFailedRequestsQueueWorker(
-            $failedRequestRepository,
-            $this->logisticsOrderFactory,
-            $gebruederWeissApi,
-            $this->orderRepository,
-            $this->settingsRepository
-        ))->start();
-    }
+    (new RetryFailedRequestsQueueWorker(
+        $failedRequestRepository,
+        $this->logisticsOrderFactory,
+        $this->gebruederWeissApi,
+        $orderRepository,
+        $this->settingsRepository
+    ))->start();
 
-    public function test_it_marks_the_failed_request_as_successful_if_the_order_cannot_be_found()
-    {
-        /** @var FailedRequest|MockInterface $failedRequest */
-        $failedRequest = Mockery::mock(FailedRequest::class);
-        $failedRequest->allows([
-            "getOrderId"        => 4,
-            "setStatus"         => null,
-            "getFailedAttempts" => 1
-        ]);
+    $failedRequest->shouldHaveReceived("setStatus", [FailedRequest::SUCCESS_STATUS]);
 
-        /** @var FailedRequestRepository|MockInterface $failedRequestRepository */
-        $failedRequestRepository = Mockery::mock(FailedRequestRepository::class);
-        $failedRequestRepository
-            ->shouldReceive("update")
-            ->once();
-        $failedRequestRepository
-            ->shouldReceive("findOneToRetry")
-            ->andReturn($failedRequest, null);
-
-        /** @var MockInterface|OrderRepository $orderRepository */
-        $orderRepository = Mockery::mock(OrderRepository::class);
-        $orderRepository->allows(["findById" => null]);
-
-        (new RetryFailedRequestsQueueWorker(
-            $failedRequestRepository,
-            $this->logisticsOrderFactory,
-            $this->gebruederWeissApi,
-            $orderRepository,
-            $this->settingsRepository
-        ))->start();
-
-        $failedRequest->shouldHaveReceived("setStatus", [FailedRequest::SUCCESS_STATUS]);
-
-        $failedRequestRepository->shouldHaveReceived("update", [$failedRequest]);
-    }
-}
+    $failedRequestRepository->shouldHaveReceived("update", [$failedRequest]);
+});

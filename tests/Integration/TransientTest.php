@@ -1,33 +1,28 @@
 <?php
 
-namespace Tests\Integration;
-
+uses(\WP_UnitTestCase::class);
 use Towa\GebruederWeissWooCommerce\Support\Transient;
 
-class TransientTest extends \WP_UnitTestCase
-{
-    public function test_it_can_delete_transients()
-    {
-        set_transient('test', 'test', 60);
-        Transient::deleteTransient("test");
-        $test = get_transient('test');
-        $this->assertFalse($test);
-    }
 
-    public function test_it_sets_transients_automatically_with_callback()
-    {
-        $transientKey = 'test_key';
-        $transientValue = 'test_value';
+test('it can delete transients', function () {
+    set_transient('test', 'test', 60);
+    Transient::deleteTransient("test");
+    $test = get_transient('test');
+    expect($test)->toBeFalse();
+});
 
-        $callback = function ($test) {
-            return $test;
-        };
+test('it sets transients automatically with callback', function () {
+    $transientKey = 'test_key';
+    $transientValue = 'test_value';
 
-        $initialReturnValue = Transient::getTransient($transientKey, $callback, $transientValue, 60);
+    $callback = function ($test) {
+        return $test;
+    };
 
-        $savedValue = get_transient($transientKey);
+    $initialReturnValue = Transient::getTransient($transientKey, $callback, $transientValue, 60);
 
-        $this->assertSame($transientValue, $savedValue);
-        $this->assertSame($transientValue, $initialReturnValue);
-    }
-}
+    $savedValue = get_transient($transientKey);
+
+    expect($savedValue)->toBe($transientValue);
+    expect($initialReturnValue)->toBe($transientValue);
+});
