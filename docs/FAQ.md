@@ -44,3 +44,21 @@ I have been contacted by Gebrüder Weiss regarding errors with one of my orders.
 During processing of the order, the order is **validated** by different departments of Gebrüder Weiss. During these validations it is possible that missing or conflicting information or other errors with the order arise that were not found during the initial validation. If that is the case Gebrüder Weiss might reach out to you, to resolve these problems.
 </details>
 
+<details>
+<summary>
+What does the plugin do and what user problems does it solve?
+</summary>
+
+The plugin automates the process of transferring shipping information from the WooCommerce store to Gebrüder Weiss. Furthermore, the plugin allows the user to choose between predifined states for Ful 
+
+</details>
+
+<details>
+<summary>
+What are the limitations of the plugin?
+</summary>
+
+1. The plugin is designed for Gebrüder Weiss customers. 
+2. 
+
+</details>
