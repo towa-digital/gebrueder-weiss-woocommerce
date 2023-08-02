@@ -1,5 +1,31 @@
 # FAQ
 
+
+<details>
+<summary>
+What does the plugin do and what user problems does it solve?
+</summary>
+
+The plugin **facilitates the process of transferring shipping information** by providing a direct link between the WooCommerce store and Gebrüder Weiss. This allows the user to **save time and effort**. Furthermore, the plugin provides predefined states for processing and shippment of orders, which are **additional security measures** to ensure that the shipping data will be processed correctly. 
+
+</details>
+
+<details>
+<summary>
+What are the limitations of the plugin?
+</summary>
+
+The plugin has the following limitations:
+
+1. Usage is restricted to Gebrüder Weiss customers
+2. Gebrüder Weiss is the only possible carrier
+3. Fulfillment and order states are limited to the predefined states
+4. Non automated payment options, such as bank transfer are not processed automatically, but rather but on hold until the order is payed. 
+
+</details>
+
+
+
 <details>
 <summary>
 What should I do if I am asked to enter ftp-credentials for the webserver during the installation process?
@@ -44,21 +70,3 @@ I have been contacted by Gebrüder Weiss regarding errors with one of my orders.
 During processing of the order, the order is **validated** by different departments of Gebrüder Weiss. During these validations it is possible that missing or conflicting information or other errors with the order arise that were not found during the initial validation. If that is the case Gebrüder Weiss might reach out to you, to resolve these problems.
 </details>
 
-<details>
-<summary>
-What does the plugin do and what user problems does it solve?
-</summary>
-
-The plugin automates the process of transferring shipping information from the WooCommerce store to Gebrüder Weiss. Furthermore, the plugin allows the user to choose between predifined states for Ful 
-
-</details>
-
-<details>
-<summary>
-What are the limitations of the plugin?
-</summary>
-
-1. The plugin is designed for Gebrüder Weiss customers. 
-2. 
-
-</details>

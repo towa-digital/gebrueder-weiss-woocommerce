@@ -2,6 +2,8 @@
 
 The Gebrüder Weiss Woocommerce Plugin allows the management and creation of logistic orders for WooCommerce, which are sent to Gebrüder Weiss via the logistics Order API.
 
+The plugin **facilitates the process of transferring shipping information** by providing a direct link between the WooCommerce store and Gebrüder Weiss. This allows the user to **save time and effort**. Furthermore, the plugin provides predefined states for processing and shippment of orders, which are **additional security measures** to ensure that the shipping data will be processed correctly. 
+
 ## Process Diagram
 ![process-diagram](./assets/images/installation-process.png)
 
