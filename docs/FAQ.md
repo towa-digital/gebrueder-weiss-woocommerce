@@ -1,5 +1,31 @@
 # FAQ
 
+
+<details>
+<summary>
+What does the plugin do and what user problems does it solve?
+</summary>
+
+The plugin **facilitates the process of transferring shipping information** by providing a direct link between the WooCommerce store and Gebrüder Weiss. This allows the user to **save time and effort**. Furthermore, the plugin provides predefined states for processing and shippment of orders, which simplifies the shipping process by automatically sending the information directly from the WooCommerce store. 
+
+</details>
+
+<details>
+<summary>
+What are the limitations of the plugin?
+</summary>
+
+The plugin has the following limitations:
+
+1. Usage is restricted to Gebrüder Weiss customers
+2. Gebrüder Weiss is the only possible carrier
+3. Fulfillment and order states are limited to the predefined states
+4. Non automated payment options, such as bank transfer are not processed automatically, but rather but on hold until the order is payed. 
+
+</details>
+
+
+
 <details>
 <summary>
 What should I do if I am asked to enter ftp-credentials for the webserver during the installation process?
