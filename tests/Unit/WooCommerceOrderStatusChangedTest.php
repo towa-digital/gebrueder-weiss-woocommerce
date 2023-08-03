@@ -186,7 +186,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         $this->order->shouldReceive("has_shipping_method")->andReturn(false);
 
         $this->plugin->setSettingsRepository(Mockery::mock(SettingsRepository::class)->allows([
-            'getFulfillmentState' => 'wc-'.self::STATE_SELECTED_FULFILLMENT,
+            'getFulfillmentState' => 'wc-' . self::STATE_SELECTED_FULFILLMENT,
             'getUseGBWShippingZones' => true,
         ]));
 

@@ -745,6 +745,8 @@ final class Plugin extends Singleton
 
     /**
      * Adds the GBW shipping method to the list of shipping methods, of WooCommerce.
+     *
+     * @param array $methods The list of shipping methods.
      */
     public function addGbwShippingMethod(array $methods): array
     {

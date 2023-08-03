@@ -8,7 +8,6 @@ use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
 class SendOrderActionTest extends TestCase
 {
-
     /** @doesNotPerformAssertions */
     public function test_it_sets_the_order_state_to_the_fullfillment_state()
     {

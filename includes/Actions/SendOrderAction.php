@@ -1,10 +1,18 @@
 <?php
+/**
+ * Sender Order Action
+ *
+ * @package Plugin
+ */
 
 namespace Towa\GebruederWeissWooCommerce\Actions;
 
 use Towa\GebruederWeissWooCommerce\Plugin;
 use Towa\GebruederWeissWooCommerce\SettingsRepository;
 
+/**
+ * Sender Order Action
+ */
 class SendOrderAction
 {
     const ACTION_KEY = "send_to_gbw";
@@ -19,7 +27,7 @@ class SendOrderAction
     /**
      * Constructor
      *
-     * @param SettingsRepository $settingsRepository
+     * @param SettingsRepository $settingsRepository An instance of the settings repository.
      */
     public function __construct(SettingsRepository $settingsRepository)
     {
@@ -44,6 +52,9 @@ class SendOrderAction
         $order->save();
     }
 
+    /**
+     * Adds Callbacks to woocommerce order Actions.
+     */
     public function addActions()
     {
         \add_action('woocommerce_order_actions', [$this, 'addSendToGbwActionToOrderAction']);
@@ -52,6 +63,8 @@ class SendOrderAction
 
     /**
      * Adds the "send to GBW" action to the order actions.
+     *
+     * @param array $actions The order actions.
      */
     public function addSendToGbwActionToOrderAction(array $actions): array
     {

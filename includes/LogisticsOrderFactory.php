@@ -186,7 +186,7 @@ class LogisticsOrderFactory
      * @param object $order The Woocommerce Order (WC_Order).
      * @return string|null
      */
-    private function getWareHouseIdFromOrder(\WC_Order $order): ?string
+    private function getWareHouseIdFromOrder(object $order): ?string
     {
         if (!$order->has_shipping_method(GBWShippingMethod::getShippingMethodId())) {
             return null;

@@ -98,7 +98,6 @@ class LogisticsOrderFactoryTest extends TestCase
             'get_method_id' => 'gbw_shipping',
             'get_instance_id' => $this->woocommerceShippingMethodInstanceID,
         ]);
-
     }
 
     public function test_it_adds_the_customer_order_to_the_payload()

@@ -76,6 +76,7 @@ class GBWShippingMethod extends \WC_Shipping_Method
         );
     }
 
+    //phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     /**
      * Calculate the shipping rate.
      *
@@ -89,21 +90,25 @@ class GBWShippingMethod extends \WC_Shipping_Method
             'calc_tax' => 'per_item'
         );
 
-        // allow shop owners to cusomize the rate
-        $rate = \apply_filters( self::SHIPPING_RATE_FILTER_NAME, $rate );
+        // allow shop owners to cusomize the rate.
+        $rate = \apply_filters(self::SHIPPING_RATE_FILTER_NAME, $rate);
 
         // Register the rate.
         $this->add_rate($rate);
     }
+    //phpcs:enable
 
     /**
-     * Return the warehouse id, set on the instance
+     * Return the warehouse id, set on the instance.
      */
     public function getWareHouseID(): ?string
     {
         return $this->get_option(self::WAREHOUSE_ID_KEY);
     }
 
+    /**
+     * Return the shipping method id.
+     */
     public static function getShippingMethodId(): string
     {
         return self::SHIPPING_METHOD_ID;
