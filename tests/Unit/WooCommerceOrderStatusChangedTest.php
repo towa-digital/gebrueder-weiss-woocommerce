@@ -64,6 +64,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
             "setAccessToken"      => null,
             "getAccessToken"      => new OAuthToken("test", time() + self::ONE_HOUR_IN_SECONDS),
             "getSiteUrl"          => "http://test.com",
+            "getUseGBWShippingZones" => false,
         ]);
 
         /** @var MockInterface|LogisticsOrderFactory $logisticsOrderFactory */
@@ -162,6 +163,7 @@ class WooCommerceOrderStatusChangedTest extends TestCase
             "setAccessToken"           => null,
             "getAccessToken"           => new OAuthToken("token", time() + self::ONE_HOUR_IN_SECONDS),
             "getSiteUrl"               => "http://test.com",
+            "getUseGBWShippingZones"   => false,
         ]);
         $this->plugin->setSettingsRepository($settingsRepository);
 
@@ -177,5 +179,19 @@ class WooCommerceOrderStatusChangedTest extends TestCase
         $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::STATE_SELECTED_FULFILLMENT, $this->order);
 
         $this->failedRequestRepository->shouldNotHaveReceived("create");
+    }
+
+    public function test_it_should_do_nothing_if_gbw_shipping_zones_are_active_but_the_order_has_no_shipping_zone()
+    {
+        $this->order->shouldReceive("has_shipping_method")->andReturn(false);
+
+        $this->plugin->setSettingsRepository(Mockery::mock(SettingsRepository::class)->allows([
+            'getFulfillmentState' => 'wc-'.self::STATE_SELECTED_FULFILLMENT,
+            'getUseGBWShippingZones' => true,
+        ]));
+
+        $this->plugin->wooCommerceOrderStatusChanged(21, "from-state", self::STATE_SELECTED_FULFILLMENT, $this->order);
+
+        $this->gebruederWeissApi->shouldNotHaveReceived("logisticsOrderPost");
     }
 }

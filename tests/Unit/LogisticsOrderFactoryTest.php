@@ -26,6 +26,12 @@ class LogisticsOrderFactoryTest extends TestCase
     /** @var array */
     private $wooCommerceMockOrderItems;
 
+    /** @var MockInterface|stdClass */
+    private $woocommerceShippingMethodMock;
+
+    /** @var int */
+    private $woocommerceShippingMethodInstanceID;
+
     public function setUp(): void
     {
         /** @var MockInterface|SettingsRepository */
@@ -80,7 +86,19 @@ class LogisticsOrderFactoryTest extends TestCase
             "get_billing_phone" => "123456789",
             "get_items" => $this->wooCommerceMockOrderItems,
             "get_customer_note" => "note",
+            "has_shipping_method" => false,
         ];
+
+        /** @var MockInterface|stdClass */
+        $this->woocommerceShippingMethodMock = Mockery::mock("WC_Shipping_Method");
+
+        // random number
+        $this->woocommerceShippingMethodInstanceID = 12;
+        $this->woocommerceShippingMethodMock->allows([
+            'get_method_id' => 'gbw_shipping',
+            'get_instance_id' => $this->woocommerceShippingMethodInstanceID,
+        ]);
+
     }
 
     public function test_it_adds_the_customer_order_to_the_payload()
@@ -251,6 +269,33 @@ class LogisticsOrderFactoryTest extends TestCase
 
         $this->assertSame("OUTBOUND_DELIVERY", $product->getProduct());
         $this->assertSame("STANDARD", $product->getProductServiceLevel());
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test_it_adds_the_warehouse_id_if_a_gbw_shipping_method_is_used()
+    {
+        // warehouse id has to be between 10 and 12 characters
+        $warehouseID = rand_str(11);
+
+        $gbwShippingMethodMock = Mockery::mock('overload:Towa\GebruederWeissWooCommerce\ShippingMethods\GBWShippingMethod');
+        $gbwShippingMethodMock->allows([
+            'getWareHouseID' => $warehouseID,
+            'getShippingMethodId' => 'gbw_shipping',
+        ]);
+
+        $logisticsOrder = $this->logisticsOrderFactory
+            ->buildFromWooCommerceOrder($this->createMockOrder(
+                array_merge($this->wooCommerceOrderMockMethods, [
+                    "has_shipping_method" => true,
+                    "get_shipping_methods" => [$this->woocommerceShippingMethodMock],
+                ])
+            ))
+            ->getLogisticsOrder();
+
+        $this->assertEquals($warehouseID, $logisticsOrder->getWarehouseId());
     }
 
     private function createMockOrder(?array $mockMethods = null)
