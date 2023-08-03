@@ -12,6 +12,7 @@ namespace Towa\GebruederWeissWooCommerce;
 defined('ABSPATH') || exit;
 
 use Towa\GebruederWeissWooCommerce\Actions\SendOrderAction;
+use Towa\GebruederWeissWooCommerce\Options\ShippingDetailsOptionsTab;
 use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\Options\FulfillmentOptionsTab;
@@ -134,6 +135,8 @@ final class Plugin extends Singleton
         $optionsPage->addTab($fulfillmentTab);
 
         $optionsPage->addTab((new OrderOptionsTab())->onTabInit([$this, 'addCustomFieldsToOrderOptionsDropdowns']));
+
+        $optionsPage->addTab(new ShippingDetailsOptionsTab());
 
         $this->setOptionPage($optionsPage);
     }
