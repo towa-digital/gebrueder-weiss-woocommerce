@@ -18,6 +18,8 @@ class GBWShippingMethod extends \WC_Shipping_Method
 
     const WAREHOUSE_ID_KEY = 'gbwWarehouseID';
 
+    const SHIPPING_RATE_FILTER_NAME = 'gbw_shipping_rate';
+
     /**
      * Constructor for your shipping class
      *
@@ -86,6 +88,9 @@ class GBWShippingMethod extends \WC_Shipping_Method
             'cost' => '0',
             'calc_tax' => 'per_item'
         );
+
+        // allow shop owners to cusomize the rate
+        $rate = \apply_filters( self::SHIPPING_RATE_FILTER_NAME, $rate );
 
         // Register the rate.
         $this->add_rate($rate);
