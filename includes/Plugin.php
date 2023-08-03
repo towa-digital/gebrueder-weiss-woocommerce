@@ -11,6 +11,7 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
+use Towa\GebruederWeissWooCommerce\Actions\SendOrderAction;
 use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\Options\FulfillmentOptionsTab;
@@ -147,6 +148,7 @@ final class Plugin extends Singleton
         \add_action('admin_init', [$this, 'validateSelectedFulfillmentStates']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
         \add_action('woocommerce_order_status_changed', [$this, "wooCommerceOrderStatusChanged"], 10, 4);
+        (new SendOrderAction($this->settingsRepository))->addActions();
     }
 
     /**
