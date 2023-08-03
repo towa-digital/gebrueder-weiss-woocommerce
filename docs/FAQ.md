@@ -6,7 +6,7 @@
 What does the plugin do and what user problems does it solve?
 </summary>
 
-The plugin **facilitates the process of transferring shipping information** by providing a direct link between the WooCommerce store and Gebrüder Weiss. This allows the user to **save time and effort**. Furthermore, the plugin provides predefined states for processing and shippment of orders, which are **additional security measures** to ensure that the shipping data will be processed correctly. 
+The plugin **facilitates the process of transferring shipping information** by providing a direct link between the WooCommerce store and Gebrüder Weiss. This allows the user to **save time and effort**. Furthermore, the plugin provides predefined states for processing and shippment of orders, which simplifies the shipping process by automatically sending the information directly from the WooCommerce store. 
 
 </details>
 
