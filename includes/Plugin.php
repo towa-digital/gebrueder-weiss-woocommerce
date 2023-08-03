@@ -19,6 +19,7 @@ use Towa\GebruederWeissWooCommerce\Options\FulfillmentOptionsTab;
 use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 use Towa\GebruederWeissWooCommerce\Options\Tab;
+use Towa\GebruederWeissWooCommerce\ShippingMethods\GBWShippingMethod;
 use Towa\GebruederWeissWooCommerce\Support\Transient;
 use Towa\GebruederWeissWooCommerce\Support\Singleton;
 use Towa\GebruederWeissSDK\Api\DefaultApi;
@@ -151,6 +152,7 @@ final class Plugin extends Singleton
         \add_action('admin_init', [$this, 'validateSelectedFulfillmentStates']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
         \add_action('woocommerce_order_status_changed', [$this, "wooCommerceOrderStatusChanged"], 10, 4);
+        \add_filter('woocommerce_shipping_methods', [$this, 'addGbwShippingMethod']);
         (new SendOrderAction($this->settingsRepository))->addActions();
     }
 
@@ -226,9 +228,9 @@ final class Plugin extends Singleton
     public function validateSelectedFulfillmentStates(): void
     {
         $states = [
-            'Fulfillment State'       => $this->settingsRepository->getFulfillmentState(),
-            'Pending State'           => $this->settingsRepository->getPendingState(),
-            'Fulfilled State'         => $this->settingsRepository->getFulfilledState(),
+            'Fulfillment State' => $this->settingsRepository->getFulfillmentState(),
+            'Pending State' => $this->settingsRepository->getPendingState(),
+            'Fulfilled State' => $this->settingsRepository->getFulfilledState(),
             'Fulfillment Error State' => $this->settingsRepository->getFulfillmentErrorState(),
         ];
 
@@ -295,20 +297,30 @@ final class Plugin extends Singleton
     /**
      * The action that should be executed when an WooCommerce Order status changes.
      *
-     * @param integer $orderId  Id for the affected order.
-     * @param string  $from      Original state.
-     * @param string  $to        New state.
-     * @param object  $order     Order object.
+     * @param integer $orderId Id for the affected order.
+     * @param string  $from Original state.
+     * @param string  $to New state.
+     * @param object  $order Order object.
      * @return void
      */
     public function wooCommerceOrderStatusChanged(int $orderId, string $from, string $to, object $order)
     {
         $fulfillmentState = $this->settingsRepository->getFulfillmentState();
 
-        // The WooCommerce order states need to have a wc- prefix. The prefix is missing when it gets passed to this function.
+        // The WooCommerce order states need to have a wc- prefix.
+        // The prefix is missing when it gets passed to this function.
         $prefixedTargetState = "wc-" . $to;
 
         if (is_null($fulfillmentState) || $fulfillmentState !== $prefixedTargetState) {
+            return;
+        }
+
+        // If the shop owner wants to use gbw shipping zones,
+        // and the order does not have the gbw shipping method, do nothing.
+        if (
+            $this->settingsRepository->getUseGBWShippingZones()
+            && !$order->has_shipping_method(GBWShippingMethod::SHIPPING_METHOD_ID)
+        ) {
             return;
         }
 
@@ -729,5 +741,14 @@ final class Plugin extends Singleton
                 $optionDropdown->addOptions($tab->createOptionsFromFieldKeys($orderMetaKeys));
             }
         }
+    }
+
+    /**
+     * Adds the GBW shipping method to the list of shipping methods, of WooCommerce.
+     */
+    public function addGbwShippingMethod(array $methods): array
+    {
+        $methods['gbw_shipping'] = GBWShippingMethod::class;
+        return $methods;
     }
 }

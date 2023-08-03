@@ -21,6 +21,7 @@ use Towa\GebruederWeissSDK\Model\LogisticsProduct;
 use Towa\GebruederWeissSDK\Model\LogisticsRequirements;
 use Towa\GebruederWeissSDK\Model\OrderLine;
 use Towa\GebruederWeissSDK\Model\OrderLineNote;
+use Towa\GebruederWeissWooCommerce\ShippingMethods\GBWShippingMethod;
 
 /**
  * Factory for creating Logistics Orders
@@ -57,6 +58,7 @@ class LogisticsOrderFactory
         $logisticsOrder = new LogisticsOrder();
         $logisticsOrder->setCreationDateTime($wooCommerceOrder->get_date_created());
         $logisticsOrder->setCustomerId($this->settingsRepository->getCustomerId());
+        $logisticsOrder->setWarehouseId($this->getWareHouseIdFromOrder($wooCommerceOrder));
 
         $logisticsOrder->setLogisticsAddresses([
             $this->createConsigneeAddress($wooCommerceOrder),
@@ -147,7 +149,7 @@ class LogisticsOrderFactory
     /**
      * Creates order lines based on a WooCommerce order.
      *
-     * @param object $wooCommerceOrder The WooCommerce order.
+     * @param object $wooCommerceOrder The WooCommerce order (WC_Order).
      * @return array
      */
     private function createOrderLines(object $wooCommerceOrder): array
@@ -176,5 +178,27 @@ class LogisticsOrderFactory
              * Not removing them will cause PHP to serialize the array as an object.
              */
         }, array_values($wooCommerceOrder->get_items("line_item")));
+    }
+
+    /**
+     * Returns the Warehouse ID from the order.
+     *
+     * @param object $order The Woocommerce Order (WC_Order).
+     * @return string|null
+     */
+    private function getWareHouseIdFromOrder(\WC_Order $order): ?string
+    {
+        if (!$order->has_shipping_method(GBWShippingMethod::getShippingMethodId())) {
+            return null;
+        }
+
+        foreach ($order->get_shipping_methods() as $shipping_method) {
+            if ($shipping_method->get_method_id() === GBWShippingMethod::getShippingMethodId()) {
+                return (new GBWShippingMethod($shipping_method->get_instance_id()))
+                    ->getWarehouseID();
+            }
+        }
+
+        return null;
     }
 }
