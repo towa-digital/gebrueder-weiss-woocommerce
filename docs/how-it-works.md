@@ -99,8 +99,6 @@ As a Shop Owner you might want to display the tracking info on the Order Detail 
 To display the Tracking info, you can insert the following code in your `functions.php`,  modify to your liking. 
 
 ```php
-<?php
-
 // functions.php
 
 add_action('woocommerce_order_details_before_order_table', 'add_tracking_information_to_order_details_page');
