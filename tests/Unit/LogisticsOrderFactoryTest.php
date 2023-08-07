@@ -277,7 +277,7 @@ class LogisticsOrderFactoryTest extends TestCase
     public function test_it_adds_the_warehouse_id_if_a_gbw_shipping_method_is_used()
     {
         // warehouse id has to be between 10 and 12 characters
-        $warehouseID = rand_str(11);
+        $warehouseID = '12345678910';
 
         $gbwShippingMethodMock = Mockery::mock('overload:Towa\GebruederWeissWooCommerce\ShippingMethods\GBWShippingMethod');
         $gbwShippingMethodMock->allows([
