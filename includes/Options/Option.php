@@ -211,7 +211,7 @@ class Option implements CanRender
      * @param mixed $value Value to be type casted.
      * @return boolean|integer|float|array|object|string
      */
-    private function typeCast(mixed $value)
+    private function typeCast($value)
     {
         switch ($this->type) {
             case 'boolean':
