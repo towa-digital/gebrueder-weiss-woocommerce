@@ -35,6 +35,15 @@ class SendOrderAction
     }
 
     /**
+     * Adds Callbacks to woocommerce order Actions.
+     */
+    public function addActions()
+    {
+        \add_action('woocommerce_order_actions', [$this, 'addSendToGbwActionToOrderAction']);
+        \add_action('woocommerce_order_action_' . self::ACTION_KEY, [$this, 'sendOrderToGbw']);
+    }
+
+    /**
      * Sets the OrderStatus to the fulfillment state.
      * This will trigger the order to be sent to GBW.
      *
@@ -50,15 +59,6 @@ class SendOrderAction
             true
         );
         $order->save();
-    }
-
-    /**
-     * Adds Callbacks to woocommerce order Actions.
-     */
-    public function addActions()
-    {
-        \add_action('woocommerce_order_actions', [$this, 'addSendToGbwActionToOrderAction']);
-        \add_action('woocommerce_order_action_' . self::ACTION_KEY, [$this, 'sendOrderToGbw']);
     }
 
     /**
