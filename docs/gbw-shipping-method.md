@@ -23,7 +23,7 @@ Once you have added the shipping Method, you can configure this method by clicki
 *Figure 2 & 3: Edit GBW Shipping Method and add Gebrüder Weiss Warehouse ID*
 
 In the overlay you can add a specific Gebrüder Weiss Warehouse ID. This is only relevant if you are a customer who has stock in different warehouses from Gebrüder Weiss. You can configure your shipping zones to use the nearest Warehouse by supplying the nearest warehouse id within the shipping zone. 
-If no Warehouse ID is supplied, the default of your account will be used. Please Contact Gebrüder Weiss Support if you have further Questions about this. 
+If no Warehouse ID is supplied, the default of your account will be used. Please contact Gebrüder Weiss Support if you have further Questions about this. 
 
 ## Shipping Rate
 
