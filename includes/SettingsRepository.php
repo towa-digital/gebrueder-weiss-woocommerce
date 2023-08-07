@@ -165,7 +165,7 @@ class SettingsRepository
      */
     public function getUseGBWShippingZones(): bool
     {
-        return $this->getOption(ShippingDetailsOptionsTab::USE_GBW_SHIPPING_ZONES_KEY, false);
+        return (bool) $this->getOption(ShippingDetailsOptionsTab::USE_GBW_SHIPPING_ZONES_KEY, false);
     }
 
     /**
