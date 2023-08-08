@@ -7,6 +7,7 @@
 
 namespace Towa\GebruederWeissWooCommerce\ShippingMethods;
 
+use Exception;
 use Towa\GebruederWeissWooCommerce\Plugin;
 
 /**
@@ -71,12 +72,37 @@ class GBWShippingMethod extends \WC_Shipping_Method
             self::WAREHOUSE_ID_KEY => array (
                 'title' => __('GBW Warehouse ID', Plugin::LANGUAGE_DOMAIN),
                 'type' => 'text',
-                'description' => __('The GBW Warehouse Id. If not supplied the default will be used, assigned to your account', Plugin::LANGUAGE_DOMAIN),
+                'description' => __('The GBW Warehouse Id. If not supplied the default will be used, assigned to your account.
+                    Must be between 10 and 12 characters long', Plugin::LANGUAGE_DOMAIN),
             )
         );
     }
 
     //phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+
+    /**
+     * Validate the GBW Warehouse Id field.
+     *
+     * @param string $key key of the field.
+     * @param string $value value of the field.
+     *
+     * @throws Exception If the value is not a string or not between 10 and 12 characters long.
+     */
+    public function validate_gbwWarehouseID_field(string $key, string $value): ?string
+    {
+        if (empty($value)) {
+            return $value;
+        }
+
+        if (strlen($value) < 10 || strlen($value) > 12) {
+            throw new Exception(
+                __('The GBW Warehouse Id must be between 10 and 12 characters long', Plugin::LANGUAGE_DOMAIN)
+            );
+        }
+
+        return $value;
+    }
+
     /**
      * Calculate the shipping rate.
      *
@@ -103,7 +129,9 @@ class GBWShippingMethod extends \WC_Shipping_Method
      */
     public function getWareHouseID(): ?string
     {
-        return $this->get_option(self::WAREHOUSE_ID_KEY);
+        return empty($this->get_option(self::WAREHOUSE_ID_KEY, null))
+            ? null
+            : $this->get_option(self::WAREHOUSE_ID_KEY, null);
     }
 
     /**
