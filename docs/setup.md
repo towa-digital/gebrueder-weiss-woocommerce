@@ -124,3 +124,16 @@ Read more about how you can use these custom fields here: [Display custom fields
 ![gbw-plugin-settings-order](./assets/images/gbw-plugin-settings-order.png ':size=400')
 
 *Figure 8: Settings Tab for Order Settings in Plugin. Define in which custom fields the information should be stored.*
+
+### Settings Tab Shipping Details
+
+---
+> This is only relevant if your shop offers multiple shipping zones or multiple shipping methods.
+---
+
+Define if the custom shipping method supplied by the plugin should be used. This is useful if your shop offers different shipping methods or shipping zones. You can also define custom Warehouses for each shipping zone. If enabled only orders with a chosen Gebrüder Weiss shipping method will be sent to Gebrüder Weiss. 
+[Learn more about how you can use the custom shipping method](gbw-shipping-method.md)
+
+![gbw-plugin-settings-shipping-details](./assets/images/gbw-plugin-settings-shipping-details.png ':size=900')
+
+*Figure 9: Settings Tab for Shipping Details in Plugin. Select if you want to use GBW Shipping Zones/Methods*
