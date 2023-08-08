@@ -118,7 +118,7 @@ class Option implements CanRender
         $this->default = $default;
         $this->sanitizeCallback = $sanitizeCallback;
         $this->addActions();
-        $this->value = get_option($this->slug);
+        $this->value = $this->typeCast(get_option($this->slug));
     }
 
     /**
@@ -203,5 +203,29 @@ class Option implements CanRender
             'options/' . $this->type . '.twig',
             $this->getDataToRender()
         );
+    }
+
+    /**
+     * Type Cast Value
+     *
+     * @param mixed $value Value to be type casted.
+     * @return boolean|integer|float|array|object|string
+     */
+    private function typeCast($value)
+    {
+        switch ($this->type) {
+            case 'boolean':
+                return (bool) $value;
+            case 'integer':
+                return (int) $value;
+            case 'number':
+                return (float) $value;
+            case 'array':
+                return (array) $value;
+            case 'object':
+                return (object) $value;
+            default:
+                return $value;
+        }
     }
 }

@@ -1,0 +1,4 @@
+<input type="checkbox" name="{{ option.slug }}" {{ option.value is same as true ? 'checked' : '' }}><br/>
+{% if option.description %}
+    <p>{{ option.description }}</p>
+{% endif %}
