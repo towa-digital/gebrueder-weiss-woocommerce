@@ -1,0 +1,6 @@
+- [Setup](./setup.md)
+- [How the Plugin works](./how-it-works.md)
+- [GBW Shipping Method](./gbw-shipping-method.md)
+- [Plugin Architecture](./plugin-archtiecture.md)
+- [Development](./development.md)
+- [FAQ](./FAQ.md)

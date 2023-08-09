@@ -11,12 +11,16 @@ namespace Towa\GebruederWeissWooCommerce;
 
 defined('ABSPATH') || exit;
 
+use Towa\GebruederWeissWooCommerce\Actions\SendOrderAction;
+use Towa\GebruederWeissWooCommerce\Options\ShippingDetailsOptionsTab;
 use Towa\GebruederWeissWooCommerce\OrderStateRepository;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthAuthenticator;
 use Towa\GebruederWeissWooCommerce\Options\FulfillmentOptionsTab;
 use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Options\OptionPage;
 use Towa\GebruederWeissWooCommerce\Options\Tab;
+use Towa\GebruederWeissWooCommerce\ShippingMethods\GBWShippingMethod;
+use Towa\GebruederWeissWooCommerce\Support\Transient;
 use Towa\GebruederWeissWooCommerce\Support\Singleton;
 use Towa\GebruederWeissSDK\Api\DefaultApi;
 use Towa\GebruederWeissWooCommerce\Exceptions\CreateLogisticsOrderConflictException;
@@ -122,6 +126,7 @@ final class Plugin extends Singleton
             ->addOption(new Option('Customer Id', 'customer_id', __('Customer Id', self::LANGUAGE_DOMAIN), 'account', 'integer'))
             ->addOption(new Option('Client Id', 'client_id', __('Client Id', self::LANGUAGE_DOMAIN), 'account', 'string'))
             ->addOption(new Option('Client Secret', 'client_secret', __('Client Secret', self::LANGUAGE_DOMAIN), 'account', 'string'));
+
         $optionsPage->addTab($accountTab);
 
         $orderStatuses = $this->orderStateRepository->getAllOrderStates();
@@ -130,8 +135,9 @@ final class Plugin extends Singleton
 
         $optionsPage->addTab($fulfillmentTab);
 
-        $orderMetaKeys = Wordpress::getAllMetaKeysForPostType('shop_order');
-        $optionsPage->addTab(new OrderOptionsTab($orderMetaKeys));
+        $optionsPage->addTab((new OrderOptionsTab())->onTabInit([$this, 'addCustomFieldsToOrderOptionsDropdowns']));
+
+        $optionsPage->addTab(new ShippingDetailsOptionsTab());
 
         $this->setOptionPage($optionsPage);
     }
@@ -146,6 +152,8 @@ final class Plugin extends Singleton
         \add_action('admin_init', [$this, 'validateSelectedFulfillmentStates']);
         \add_action('admin_menu', [$this, 'addPluginPageToMenu']);
         \add_action('woocommerce_order_status_changed', [$this, "wooCommerceOrderStatusChanged"], 10, 4);
+        \add_filter('woocommerce_shipping_methods', [$this, 'addGbwShippingMethod']);
+        (new SendOrderAction($this->settingsRepository))->addActions();
     }
 
     /**
@@ -220,9 +228,9 @@ final class Plugin extends Singleton
     public function validateSelectedFulfillmentStates(): void
     {
         $states = [
-            'Fulfillment State'       => $this->settingsRepository->getFulfillmentState(),
-            'Pending State'           => $this->settingsRepository->getPendingState(),
-            'Fulfilled State'         => $this->settingsRepository->getFulfilledState(),
+            'Fulfillment State' => $this->settingsRepository->getFulfillmentState(),
+            'Pending State' => $this->settingsRepository->getPendingState(),
+            'Fulfilled State' => $this->settingsRepository->getFulfilledState(),
             'Fulfillment Error State' => $this->settingsRepository->getFulfillmentErrorState(),
         ];
 
@@ -289,20 +297,30 @@ final class Plugin extends Singleton
     /**
      * The action that should be executed when an WooCommerce Order status changes.
      *
-     * @param integer $orderId  Id for the affected order.
-     * @param string  $from      Original state.
-     * @param string  $to        New state.
-     * @param object  $order     Order object.
+     * @param integer $orderId Id for the affected order.
+     * @param string  $from Original state.
+     * @param string  $to New state.
+     * @param object  $order Order object.
      * @return void
      */
     public function wooCommerceOrderStatusChanged(int $orderId, string $from, string $to, object $order)
     {
         $fulfillmentState = $this->settingsRepository->getFulfillmentState();
 
-        // The WooCommerce order states need to have a wc- prefix. The prefix is missing when it gets passed to this function.
+        // The WooCommerce order states need to have a wc- prefix.
+        // The prefix is missing when it gets passed to this function.
         $prefixedTargetState = "wc-" . $to;
 
         if (is_null($fulfillmentState) || $fulfillmentState !== $prefixedTargetState) {
+            return;
+        }
+
+        // If the shop owner wants to use gbw shipping zones,
+        // and the order does not have the gbw shipping method, do nothing.
+        if (
+            $this->settingsRepository->getUseGBWShippingZones()
+            && !$order->has_shipping_method(GBWShippingMethod::SHIPPING_METHOD_ID)
+        ) {
             return;
         }
 
@@ -390,6 +408,7 @@ final class Plugin extends Singleton
     {
         self::removePluginOptions();
         self::removeRequestQueueTable();
+        self::removeTransients();
 
         WordPress::clearScheduledHook(self::RETRY_REQUESTS_CRON_JOB);
     }
@@ -672,6 +691,14 @@ final class Plugin extends Singleton
     }
 
     /**
+     * Removes all Transients associated with the plugin.
+     */
+    private static function removeTransients(): void
+    {
+        Transient::deleteTransient(Transient::META_KEYS);
+    }
+
+    /**
      * Sets the default values for the order options.
      *
      * @return void
@@ -689,5 +716,41 @@ final class Plugin extends Singleton
         if (!Wordpress::getOption(Option::OPTIONS_PREFIX . OrderOptionsTab::TRACKING_LINK_FIELD_NAME)) {
             WordPress::updateOption(Option::OPTIONS_PREFIX . OrderOptionsTab::TRACKING_LINK_FIELD_NAME, OrderOptionsTab::TRACKING_LINK_FIELD_DEFAULT_VALUE);
         }
+    }
+
+    /**
+     * Adds the custom fields to the order options dropdowns.
+     * This is done to make it load only when needed, and not on every page load.
+     */
+    public function addCustomFieldsToOrderOptionsDropdowns()
+    {
+        $orderMetaKeys = Transient::getTransient(
+            Transient::META_KEYS,
+            [WordPress::class, 'getAllMetaKeysForPostType'],
+            'shop_order',
+            Transient::META_KEY_TIME_IN_SECONDS
+        );
+
+        $isOrderOptionsTab = function ($tab) {
+            return $tab instanceof OrderOptionsTab;
+        };
+
+        $tabsToAddOptions = array_filter($this->optionsPage->getTabs(), $isOrderOptionsTab);
+        foreach ($tabsToAddOptions as $tab) {
+            foreach ($tab->options as $optionDropdown) {
+                $optionDropdown->addOptions($tab->createOptionsFromFieldKeys($orderMetaKeys));
+            }
+        }
+    }
+
+    /**
+     * Adds the GBW shipping method to the list of shipping methods, of WooCommerce.
+     *
+     * @param array $methods The list of shipping methods.
+     */
+    public function addGbwShippingMethod(array $methods): array
+    {
+        $methods['gbw_shipping'] = GBWShippingMethod::class;
+        return $methods;
     }
 }

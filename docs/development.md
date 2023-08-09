@@ -1,6 +1,8 @@
-# Development
+# Plugin Development
 
-## TLDR;
+This Section is for People developing the Plugin itself, or want to participate by creating Pull Request.
+
+## TL;DR
 
 - Gitflow is used
 - PHPUnit for testing
@@ -17,7 +19,9 @@ The Project contains automated tests which can be run locally with `phpunit` fro
 
 ### Important Note
 
-The composer dependencies include stubs for WordPress, WordPress Tests and WooCommerce. You might have to instruct the language server to include the stubs for analysis. There is also one more caveat with `intelephense` for VSCode the stubs for WordPress are rather large. Hence you have to increase the maximum file size for indexing. Otherwise the plugin will skip indexing the subs. You have to set `intelephense.files.maxSize` to at least `5000000` since the stub file has around 4.4mb at the time of writing this.
+The composer dependencies include stubs for WordPress, WordPress Tests and WooCommerce. You might have to instruct the language server to include the stubs for analysis. 
+
+For VSCode users there is also one more caveat with `intelephense` the stubs for WordPress are rather large. Hence you have to increase the maximum file size for indexing. Otherwise the plugin will skip indexing the subs. You have to set `intelephense.files.maxSize` to at least `5000000` since the stub file has around 4.4mb at the time of writing this.
 
 ### Setup
 
@@ -27,14 +31,21 @@ The composer dependencies include stubs for WordPress, WordPress Tests and WooCo
 
 ### Mock APIs
 
-To be able to work with API data without relying on the Gebrüder Weiss APIs, there are two mock APIs:
-- https://oauth.gebrueder-weiss-woocommerce.towa-online.at: Provides a mock OAuth Server that creates a token for any provided credentials. [Repo](https://bitbucket.org/towa_gmbh/gebrueder-weiss-oauth-mock/src/main/)
-- https://api.gebrueder-weiss-woocommerce.towa-online.at: Mock API for the actual API, it returns dummy data based on the examples defined in the Gebrüder Weiss API Schema. [Repo](https://bitbucket.org/towa_gmbh/gebrueder-weiss-api-mock/src/main/)
+Information about the TOWA-internal Mock API can be found here [Towa internal confluence link](https://towa-digital.atlassian.net/wiki/spaces/GWAC/pages/450592804/Development) (link only available for TOWA team members)
 
 ## Sandbox API
 
 Gebrueder Weiss provides a sandbox API for testing and development.
 
-## Wp cli
+## Wp CLI
 
 We rely heavily on wp-cli in our daily work. We do recommend you use it as well.
+
+## Documentation
+
+The documentation is done via [docsify](https://docsify.js.org/). To run it locally you have to install it first with
+`npm install`
+Then you can run it with `npx docsify serve docs` from the root of the plugin.
+
+## Create Installable Package
+To create an installable Package to be installed via regular wordpress upload process a composer script was created. Read more about it [here](./createInstallable.md)

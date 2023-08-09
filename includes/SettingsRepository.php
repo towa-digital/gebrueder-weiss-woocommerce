@@ -2,7 +2,7 @@
 /**
  * Settings Repository
  *
- * Reads plugin options from the wordpress options
+ * Reads plugin options from the WordPress options
  *
  * @package Plugin
  */
@@ -15,17 +15,18 @@ use Exception;
 use Towa\GebruederWeissWooCommerce\OAuth\OAuthToken;
 use Towa\GebruederWeissWooCommerce\Options\Option;
 use Towa\GebruederWeissWooCommerce\Options\OrderOptionsTab;
+use Towa\GebruederWeissWooCommerce\Options\ShippingDetailsOptionsTab;
 use Towa\GebruederWeissWooCommerce\Support\WordPress;
 
 /**
  * Settings Repository
  *
- * Reads plugin options from the wordpress options
+ * Reads plugin options from the WordPress options
  */
 class SettingsRepository
 {
     /**
-     * Reads the client id from the wordpress options
+     * Reads the client id from the WordPress options
      *
      * @return string|null
      */
@@ -35,7 +36,7 @@ class SettingsRepository
     }
 
     /**
-     * Reads the client secret from the wordpress options
+     * Reads the client secret from the WordPress options
      *
      * @return string|null
      */
@@ -45,7 +46,7 @@ class SettingsRepository
     }
 
     /**
-     * Reads the access token form the wordpress options
+     * Reads the access token form the WordPress options
      *
      * @return OAuthToken|null
      */
@@ -69,7 +70,7 @@ class SettingsRepository
     }
 
     /**
-     * Updates the access token in the wordpress options.
+     * Updates the access token in the WordPress options.
      *
      * @param OAuthToken $token The access token.
      * @return void
@@ -80,7 +81,7 @@ class SettingsRepository
     }
 
     /**
-     * Reads the fulfillment state from the wordpress options
+     * Reads the fulfillment state from the WordPress options
      *
      * @return string|null
      */
@@ -100,7 +101,7 @@ class SettingsRepository
     }
 
     /**
-     * Reads the fulfilled state from the wordpress options
+     * Reads the fulfilled state from the WordPress options
      *
      * @return string|null
      */
@@ -110,7 +111,7 @@ class SettingsRepository
     }
 
     /**
-     * Reads the fulfillment error state from the wordpress options
+     * Reads the fulfillment error state from the WordPress options
      *
      * @return string|null
      */
@@ -160,7 +161,15 @@ class SettingsRepository
     }
 
     /**
-     * Reads the wordpress site URL from the options.
+     * Reads the option for the use of GBW shipping zones from the plugin settings.
+     */
+    public function getUseGBWShippingZones(): bool
+    {
+        return (bool) $this->getOption(ShippingDetailsOptionsTab::USE_GBW_SHIPPING_ZONES_KEY, false);
+    }
+
+    /**
+     * Reads the WordPress site URL from the options.
      *
      * @return string|null
      */
@@ -170,7 +179,7 @@ class SettingsRepository
     }
 
     /**
-     * Reads the wordpress home URL from the options.
+     * Reads the WordPress home URL from the options.
      *
      * @return string|null
      */
@@ -180,7 +189,7 @@ class SettingsRepository
     }
 
     /**
-     * Reads the plugin option with the passed name from the wordpress options
+     * Reads the plugin option with the passed name from the WordPress options
      *
      * @param string     $name The name of the option.
      * @param mixed|null $default The default value to return if the option is not set.

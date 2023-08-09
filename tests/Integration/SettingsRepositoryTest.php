@@ -169,4 +169,13 @@ class SettingsRepositoryTest extends \WP_UnitTestCase
 
         $this->assertSame(OrderOptionsTab::CARRIER_INFORMATION_FIELD_DEFAULT_VALUE, $settingsRepository->getCarrierInformationFieldName());
     }
+
+    public function test_it_can_retrieve_the_use_gbw_shipping_zones_option()
+    {
+        update_option("gbw_useGbwShippingZones", true);
+
+        $settingsRepository = new SettingsRepository();
+
+        $this->assertTrue($settingsRepository->getUseGbwShippingZones());
+    }
 }
