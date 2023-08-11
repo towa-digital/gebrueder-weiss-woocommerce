@@ -2,4 +2,5 @@
 - [How the Plugin works](./how-it-works.md)
 - [Plugin Architecture](./plugin-archtiecture.md)
 - [Development](./development.md)
+- [Error Handling](./errors.md)
 - [FAQ](./FAQ.md)
