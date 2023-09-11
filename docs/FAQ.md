@@ -20,11 +20,18 @@ The plugin has the following limitations:
 1. Usage is restricted to Gebrüder Weiss customers
 2. Gebrüder Weiss is the only possible carrier
 3. Fulfillment and order states are limited to the predefined states
-4. Non automated payment options, such as bank transfer are not processed automatically, but rather but on hold until the order is payed. 
+4. Non automated payment options, such as bank transfer are not processed automatically, but rather put on hold until the order is paid. 
 
 </details>
 
+<details>
+<summary>
+What areas can Gebrüder Weiss deliver to?
+</summary>
 
+To find out what areas Gebrüder Weiss is able to deliver to please contact your local branch of Gebrüder Weiss or a sales representative.
+
+</details>
 
 <details>
 <summary>

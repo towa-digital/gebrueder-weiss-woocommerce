@@ -22,20 +22,15 @@ The following information is required to use the plugin and secure the process o
 
 The **Customer Id** is a unique identifier of your shop set by Gebrüder Weiss and is required to attribute orders to your shop. It can be found in the E-Mail sent to you by Gebrüder Weiss.
 
-The **Consumer Key** and **Consumer Secret** are required to authenticate requests made using the logistics-order-API, which is used to send orders made within WooCommerce to Gebrüder Weiss. To obtain these credentials follow the steps below:
+The **Consumer Key** and **Consumer Secret**, often also referred to as **Client Key** and **Client Secret**, are required to authenticate requests made using the logistics-order-API, which is used to send orders made within WooCommerce to Gebrüder Weiss. To obtain these credentials follow the steps below:
 
-1. Navigate to [https://developer.test.gw.connext.com/devportal/apis](https://developer.test.gw.connext.com/devportal/apis) and log in "Sign In With My Connext Account" using the credentials found in the communication sent to you by Gebrüder Weiss.
-2. Select **logistics-order-API** and navigate to the Tab labelled **Credentials.**
-3. Select the desired Application and click on **SANDBOX KEYS** or **PROD KEYS** to view the sandbox or production credentials.(Sandbox keys are for testing purposes, Prod keys for Production/Live websites)
-4. Copy the **Consumer Key** and **Consumer Secret.**
-
-![logistics-order-api-portal](./assets/images/logistics-order-api-portal.jpg) ![logistics-order-api-portal-menu](./assets/images/logistics-order-api-portal-menu.jpg)
-
-*Figure 1: The tile within the API-Portal corresponding to the logistics-order-api and the sidebar with the Tab __credentials__* 
+1. Navigate to [https://developer.my.gw-world.com/home](https://developer.my.gw-world.com/home) and log in with the credentials provided in your communication with Gebrüder Weiss. If you don't have your credentials yet follow the steps under [Register as Customer](./register.md).
+2. Select the tab **Applications**, where you can view your current and generate a new **Consumer Key** and **Consumer Secret.**
+3. Copy the **Consumer Key** and **Consumer Secret** and save them for use during the plugin configuration.
 
 ![logistics-order-api-plugin-credentials](./assets/images/logistics-order-api-plugin-credentials.jpg)
 
-*Figure 2: The fields for Consumer Key and Secret within the Tab **Credentials** for the logistics-order-api*
+*Figure 2: The fields for Consumer Key and Secret within the Tab **Applications** for the logistics-order-api*
 
 ## Wordpress Installation Process
 
